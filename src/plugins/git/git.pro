@@ -61,8 +61,6 @@ FORMS += changeselectiondialog.ui \
     remoteadditiondialog.ui \
     branchadddialog.ui
 
-include(gitorious/gitorious.pri)
-
 RESOURCES += \
     git.qrc
 
