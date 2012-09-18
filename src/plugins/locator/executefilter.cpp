@@ -35,6 +35,10 @@
 
 #include <QMessageBox>
 
+#ifdef Q_OS_WIN
+#include <QTextCodec>
+#endif
+
 using namespace Core;
 using namespace Locator;
 using namespace Locator::Internal;
@@ -138,13 +142,21 @@ void ExecuteFilter::finished(int exitCode, QProcess::ExitStatus status)
 void ExecuteFilter::readStandardOutput()
 {
     QByteArray data = m_process->readAllStandardOutput();
-    ICore::messageManager()->printToOutputPane(QString::fromLocal8Bit(data), true);
+#ifdef Q_OS_WIN
+    ICore::messageManager()->printToOutputPane(QTextCodec::codecForName(QLatin1String("utf-8").latin1())->toUnicode(data), true);
+#else
+     ICore::messageManager()->printToOutputPane(QString::fromLocal8Bit(data), true);
+#endif
 }
 
 void ExecuteFilter::readStandardError()
 {
     QByteArray data = m_process->readAllStandardError();
-    ICore::messageManager()->printToOutputPane(QString::fromLocal8Bit(data), true);
+#ifdef Q_OS_WIN
+    ICore::messageManager()->printToOutputPane(QTextCodec::codecForName(QLatin1String("utf-8").latin1())->toUnicode(data), true);
+#else
+     ICore::messageManager()->printToOutputPane(QString::fromLocal8Bit(data), true);
+#endif
 }
 
 void ExecuteFilter::runHeadCommand()
