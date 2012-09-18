@@ -43,8 +43,6 @@
 #include "resetdialog.h"
 #include "mergetool.h"
 
-#include "gerrit/gerritplugin.h"
-
 #include <coreplugin/icore.h>
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/documentmanager.h>
@@ -616,10 +614,7 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
     m_redoAction = new QAction(tr("&Redo"), this);
     command = Core::ActionManager::registerAction(m_redoAction, Core::Constants::REDO, submitContext);
 
-
-    /* "Gerrit" */
-    Gerrit::Internal::GerritPlugin *gp = new Gerrit::Internal::GerritPlugin(this);
-    return gp->initialize(remoteRepositoryMenu);
+    return true;
 }
 
 GitVersionControl *GitPlugin::gitVersionControl() const
