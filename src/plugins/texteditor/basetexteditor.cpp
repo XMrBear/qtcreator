@@ -5957,6 +5957,8 @@ void BaseTextEditorWidget::circularPaste()
 void BaseTextEditorWidget::switchUtf8bom()
 {
     baseTextDocument()->switchUtf8Bom();
+    if (!document()->isModified())
+        document()->setModified(true);
 }
 
 QMimeData *BaseTextEditorWidget::createMimeDataFromSelection() const
