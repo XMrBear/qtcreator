@@ -42,8 +42,6 @@
 #include "settingspage.h"
 #include "resetdialog.h"
 
-#include <gerritplugin.h>
-
 #include <coreplugin/icore.h>
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/documentmanager.h>
@@ -557,9 +555,7 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
     m_redoAction = new QAction(tr("&Redo"), this);
     command = Core::ActionManager::registerAction(m_redoAction, Core::Constants::REDO, submitContext);
 
-
-    Gerrit::Internal::GerritPlugin *gp = new Gerrit::Internal::GerritPlugin(this);
-    return gp->initialize(gitContainer);
+    return true;
 }
 
 GitVersionControl *GitPlugin::gitVersionControl() const
