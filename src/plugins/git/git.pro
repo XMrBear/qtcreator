@@ -62,4 +62,3 @@ FORMS += settingspage.ui \
 RESOURCES += \
     git.qrc
 
-include(gerrit/gerrit.pri)
