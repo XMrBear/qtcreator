@@ -8,6 +8,5 @@ QTC_PLUGIN_DEPENDS += \
     find \
     locator \
     projectexplorer \
-    qtsupport \
     texteditor \
     cpptools

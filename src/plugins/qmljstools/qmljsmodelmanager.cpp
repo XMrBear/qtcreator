@@ -45,9 +45,6 @@
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/session.h>
 #include <projectexplorer/target.h>
-#include <qtsupport/qtkitinformation.h>
-#include <qtsupport/qmldumptool.h>
-#include <qtsupport/qtsupportconstants.h>
 #include <utils/hostosinfo.h>
 #include <extensionsystem/pluginmanager.h>
 
@@ -581,11 +578,6 @@ void ModelManager::updateProjectInfo(const ProjectInfo &pinfo)
         m_qrcCache.addPath(newQrc);
     foreach (const QString &oldQrc, oldInfo.allResourceFiles)
         m_qrcCache.removePath(oldQrc);
-
-    // dump builtin types if the shipped definitions are probably outdated and the
-    // Qt version ships qmlplugindump
-    if (QtSupport::QtVersionNumber(pinfo.qtVersionString) > QtSupport::QtVersionNumber(4, 8, 5))
-        m_pluginDumper->loadBuiltinTypes(pinfo);
 
     emit projectInfoUpdated(pinfo);
 }
