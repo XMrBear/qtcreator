@@ -29,15 +29,12 @@
 
 #include "valgrindtool.h"
 
-#include <remotelinux/remotelinuxrunconfiguration.h>
-
 #include <projectexplorer/localapplicationrunconfiguration.h>
 #include <projectexplorer/kitinformation.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/target.h>
 
 using namespace ProjectExplorer;
-using namespace RemoteLinux;
 
 namespace Valgrind {
 namespace Internal {
@@ -68,13 +65,6 @@ Analyzer::AnalyzerStartParameters ValgrindTool::createStartParameters(
         sp.debuggeeArgs = rc1->commandLineArguments();
         sp.connParams.host = QLatin1String("localhost");
         sp.connParams.port = rc1->debuggerAspect()->qmlDebugServerPort();
-    } else if (RemoteLinuxRunConfiguration *rc2 =
-               qobject_cast<RemoteLinuxRunConfiguration *>(runConfiguration)) {
-        sp.startMode = Analyzer::StartRemote;
-        sp.debuggee = rc2->remoteExecutableFilePath();
-        sp.connParams = ProjectExplorer::DeviceKitInformation::device(rc2->target()->kit())->sshParameters();
-        sp.analyzerCmdPrefix = rc2->commandPrefix();
-        sp.debuggeeArgs = rc2->arguments();
     } else {
         // Might be S60DeviceRunfiguration, or something else ...
         //sp.startMode = StartRemote;
