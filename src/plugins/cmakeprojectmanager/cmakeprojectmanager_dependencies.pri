@@ -4,7 +4,6 @@ QTC_PLUGIN_DEPENDS += \
     locator \
     projectexplorer \
     cpptools \
-    texteditor \
-    qtsupport
+    texteditor
 QTC_PLUGIN_RECOMMENDS += \
     designer

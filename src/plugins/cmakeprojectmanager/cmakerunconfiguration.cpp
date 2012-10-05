@@ -35,7 +35,6 @@
 
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/helpmanager.h>
-#include <qtsupport/qtkitinformation.h>
 #include <projectexplorer/environmentaspect.h>
 #include <projectexplorer/target.h>
 
@@ -208,12 +207,12 @@ void CMakeRunConfiguration::setCommandLineArguments(const QString &newText)
 
 QString CMakeRunConfiguration::dumperLibrary() const
 {
-    return QtSupport::QtKitInformation::dumperLibrary(target()->kit());
+    return QString();
 }
 
 QStringList CMakeRunConfiguration::dumperLibraryLocations() const
 {
-    return QtSupport::QtKitInformation::dumperLibraryLocations(target()->kit());
+    return QStringList();
 }
 
 void CMakeRunConfiguration::setEnabled(bool b)
