@@ -318,7 +318,6 @@ plugin_qmljstools.subdir = qmljstools
 plugin_qmljstools.depends = plugin_projectexplorer
 plugin_qmljstools.depends += plugin_coreplugin
 plugin_qmljstools.depends += plugin_texteditor
-plugin_qmljstools.depends += plugin_qtsupport
 plugin_qmljstools.depends += plugin_cpptools
 
 plugin_macros.subdir = macros
