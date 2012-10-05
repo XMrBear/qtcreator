@@ -55,11 +55,11 @@ static const bool DEFAULT_ANTIALIAS = true;
     enum { DEFAULT_FONT_SIZE = 12 };
     static const char DEFAULT_FONT_FAMILY[] = "Monaco";
 #elif defined(Q_OS_UNIX)
-    enum { DEFAULT_FONT_SIZE = 9 };
-    static const char DEFAULT_FONT_FAMILY[] = "Monospace";
+    enum { DEFAULT_FONT_SIZE = 11 };
+    static const char *DEFAULT_FONT_FAMILY = "Monaco";
 #else
-    enum { DEFAULT_FONT_SIZE = 10 };
-    static const char DEFAULT_FONT_FAMILY[] = "Courier";
+    enum { DEFAULT_FONT_SIZE = 11 };
+    static const char *DEFAULT_FONT_FAMILY = "Consolas";
 #endif
 } // anonymous namespace
 
