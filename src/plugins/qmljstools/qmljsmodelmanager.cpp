@@ -56,10 +56,6 @@
 #include <projectexplorer/session.h>
 #include <projectexplorer/target.h>
 #include <projectexplorer/toolchain.h>
-#include <qtsupport/baseqtversion.h>
-#include <qtsupport/qtkitinformation.h>
-#include <qtsupport/qmldumptool.h>
-#include <qtsupport/qtsupportconstants.h>
 #include <utils/hostosinfo.h>
 #include <extensionsystem/pluginmanager.h>
 
@@ -472,11 +468,6 @@ void ModelManager::updateProjectInfo(const ProjectInfo &pinfo)
             newFiles += file;
     }
     updateSourceFiles(newFiles, false);
-
-    // dump builtin types if the shipped definitions are probably outdated and the
-    // Qt version ships qmlplugindump
-    if (QtSupport::QtVersionNumber(pinfo.qtVersionString) > QtSupport::QtVersionNumber(4, 8, 5))
-        m_pluginDumper->loadBuiltinTypes(pinfo);
 
     emit projectInfoUpdated(pinfo);
 }
