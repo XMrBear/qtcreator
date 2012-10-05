@@ -39,9 +39,6 @@
 #include <projectexplorer/kitinformation.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/target.h>
-#include <qtsupport/baseqtversion.h>
-#include <qtsupport/qtparser.h>
-#include <qtsupport/qtkitinformation.h>
 #include <utils/qtcassert.h>
 
 #include <QInputDialog>
