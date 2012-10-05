@@ -49,9 +49,6 @@
 #include <projectexplorer/target.h>
 #include <projectexplorer/deployconfiguration.h>
 #include <projectexplorer/projectmacroexpander.h>
-#include <qtsupport/customexecutablerunconfiguration.h>
-#include <qtsupport/baseqtversion.h>
-#include <qtsupport/qtkitinformation.h>
 #include <cpptools/ModelManagerInterface.h>
 #include <extensionsystem/pluginmanager.h>
 #include <utils/qtcassert.h>
@@ -204,11 +201,6 @@ QString CMakeProject::shadowBuildDirectory(const QString &projectFilePath, const
     if (projectFilePath.isEmpty())
         return QString();
     QFileInfo info(projectFilePath);
-
-    QtSupport::BaseQtVersion *version = QtSupport::QtKitInformation::qtVersion(k);
-    if (version && !version->supportsShadowBuilds())
-        return info.absolutePath();
-
     const QString projectName = QFileInfo(info.absolutePath()).fileName();
     ProjectExplorer::ProjectExpander expander(projectFilePath, projectName, k, bcName);
     QDir projectDir = QDir(projectDirectory(projectFilePath));
@@ -741,10 +733,6 @@ void CMakeProject::updateRunConfigurations(Target *t)
     foreach (ProjectExplorer::RunConfiguration *rc, t->runConfigurations()) {
         if (CMakeRunConfiguration* cmakeRC = qobject_cast<CMakeRunConfiguration *>(rc))
             existingRunConfigurations.insert(cmakeRC->title(), cmakeRC);
-        QtSupport::CustomExecutableRunConfiguration *ceRC =
-                qobject_cast<QtSupport::CustomExecutableRunConfiguration *>(rc);
-        if (ceRC && !ceRC->isConfigured())
-            toRemove << rc;
     }
 
     foreach (const CMakeBuildTarget &ct, buildTargets()) {
@@ -787,7 +775,6 @@ void CMakeProject::updateRunConfigurations(Target *t)
     if (t->runConfigurations().isEmpty()) {
         // Oh no, no run configuration,
         // create a custom executable run configuration
-        t->addRunConfiguration(new QtSupport::CustomExecutableRunConfiguration(t));
     }
 }
 
