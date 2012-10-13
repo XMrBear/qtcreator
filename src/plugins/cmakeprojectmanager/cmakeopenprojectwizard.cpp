@@ -584,6 +584,13 @@ void CMakeRunPage::initializePage()
             foreach (const GeneratorInfo &info, infos)
                 if (cachedGenerator.isEmpty() || info.generator() == cachedGenerator)
                     m_generatorComboBox->addItem(info.displayName(), qVariantFromValue(info));
+
+            QSettings *settings = Core::ICore::settings();
+            settings->beginGroup(QLatin1String("CMakeSettings"));
+            int index = settings->value(QLatin1String("cmakeGeneratorIndex")).toInt();
+            settings->endGroup();
+            if (index != -1 && index < m_generatorComboBox->count())
+                m_generatorComboBox->setCurrentIndex(index);
         }
     } else {
         // Note: We don't compare the actually cached generator to what is set in the buildconfiguration
@@ -626,19 +633,25 @@ void CMakeRunPage::runCMake()
 
     Utils::Environment env = m_cmakeWizard->environment();
     int index = m_generatorComboBox->currentIndex();
-
     if (index == -1) {
         m_output->appendPlainText(tr("No generator selected."));
         return;
     }
+
     GeneratorInfo generatorInfo = m_generatorComboBox->itemData(index).value<GeneratorInfo>();
     m_cmakeWizard->setKit(generatorInfo.kit());
     m_cmakeWizard->setUseNinja(generatorInfo.isNinja());
 
-    // If mode is initial the user chooses the kit, otherwise it's already choosen
-    // and the environment already contains the kit
-    if (m_mode == Initial)
+    if (m_mode == Initial) {
+        QSettings *settings = Core::ICore::settings();
+        settings->beginGroup(QLatin1String("CMakeSettings"));
+        settings->setValue(QLatin1String("cmakeGeneratorIndex"), index);
+        settings->endGroup();
+
+        // If mode is initial the user chooses the kit, otherwise it's already choosen
+        // and the environment already contains the kit
         generatorInfo.kit()->addToEnvironment(env);
+    }
 
     m_runCMake->setEnabled(false);
     m_argumentsLineEdit->setEnabled(false);
