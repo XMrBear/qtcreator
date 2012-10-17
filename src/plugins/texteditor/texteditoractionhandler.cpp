@@ -218,6 +218,7 @@ void TextEditorActionHandler::createActions()
     m_deleteLineAction = new QAction(tr("Delete &Line"), this);
     m_modifyingActions << m_deleteLineAction;
     command = Core::ActionManager::registerAction(m_deleteLineAction, Constants::DELETE_LINE, m_contextId, true);
+    command->setDefaultKeySequence(QKeySequence(tr("Ctrl+D")));
     connect(m_deleteLineAction, SIGNAL(triggered()), this, SLOT(deleteLine()));
 
     m_deleteEndOfWordAction = new QAction(tr("Delete Word from Cursor On"), this);
@@ -397,9 +398,11 @@ void TextEditorActionHandler::createActions()
     QAction *a = 0;
     a = new QAction(tr("Go to Line Start"), this);
     command = Core::ActionManager::registerAction(a, Constants::GOTO_LINE_START, m_contextId, true);
+    command->setDefaultKeySequence(QKeySequence(tr("Alt+Shift+Return")));
     connect(a, SIGNAL(triggered()), this, SLOT(gotoLineStart()));
     a = new QAction(tr("Go to Line End"), this);
     command = Core::ActionManager::registerAction(a, Constants::GOTO_LINE_END, m_contextId, true);
+    command->setDefaultKeySequence(QKeySequence(tr("Shift+Return")));
     connect(a, SIGNAL(triggered()), this, SLOT(gotoLineEnd()));
     a = new QAction(tr("Go to Next Line"), this);
     command = Core::ActionManager::registerAction(a, Constants::GOTO_NEXT_LINE, m_contextId, true);

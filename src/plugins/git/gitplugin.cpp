@@ -381,13 +381,17 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
     // --------------
     gitContainer->addSeparator(globalcontext);
 
+    ActionCommandPair repoAction =
     createRepositoryAction(gitContainer,
                            tr("Diff"), Core::Id("Git.DiffRepository"),
                            globalcontext, true, SLOT(diffRepository()));
+    repoAction.second->setDefaultKeySequence(QKeySequence(QLatin1String("Ctrl+Alt+Shift+D")));
 
+    repoAction =
     createRepositoryAction(gitContainer,
                            tr("Log"), Core::Id("Git.LogRepository"),
                            globalcontext, true, &GitClient::graphLog);
+    repoAction.second->setDefaultKeySequence(QKeySequence(QLatin1String("Ctrl+Alt+Shift+L")));
 
     createRepositoryAction(gitContainer,
                            tr("Status"), Core::Id("Git.StatusRepository"),
@@ -410,18 +414,22 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
     // --------------
     gitContainer->addSeparator(globalcontext);
 
+    repoAction =
     createRepositoryAction(gitContainer,
                            tr("Launch gitk"), Core::Id("Git.LaunchGitK"),
                            globalcontext, true, &GitClient::launchGitK);
+    repoAction.second->setDefaultKeySequence(QKeySequence(QLatin1String("Ctrl+Alt+Shift+G")));
 
     m_repositoryBrowserAction
             = createRepositoryAction(gitContainer,
                                      tr("Launch repository browser"), Core::Id("Git.LaunchRepositoryBrowser"),
                                      globalcontext, true, &GitClient::launchRepositoryBrowser).first;
 
+    repoAction =
     createRepositoryAction(gitContainer,
                            tr("Branches..."), Core::Id("Git.BranchList"),
                            globalcontext, true, SLOT(branchList()));
+    repoAction.second->setDefaultKeySequence(QKeySequence(QLatin1String("Ctrl+Alt+Shift+B")));
 
     createRepositoryAction(gitContainer,
                            tr("Remotes..."), Core::Id("Git.RemoteList"),
@@ -429,6 +437,7 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
 
     m_showAction = new QAction(tr("Show..."), this);
     Core::Command *showCommitCommand = Core::ActionManager::registerAction(m_showAction, "Git.ShowCommit", globalcontext);
+    showCommitCommand->setDefaultKeySequence(QKeySequence(tr("Ctrl+Alt+Shift+S")));
     connect(m_showAction, SIGNAL(triggered()), this, SLOT(showCommit()));
     gitContainer->addAction(showCommitCommand);
 
@@ -515,9 +524,11 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
                                            globalcontext, true, SLOT(startCommit()));
     actionCommand.second->setDefaultKeySequence(QKeySequence(Core::UseMacShortcuts ? tr("Meta+G,Meta+C") : tr("Alt+G,Alt+C")));
 
+    repoAction =
     createRepositoryAction(gitContainer,
                            tr("Amend Last Commit..."), Core::Id("Git.AmendCommit"),
                            globalcontext, true, SLOT(startAmendCommit()));
+    repoAction.second->setDefaultKeySequence(QKeySequence(QLatin1String("Ctrl+Alt+Shift+A")));
 
     // Subversion in a submenu.
     gitContainer->addSeparator(globalcontext);

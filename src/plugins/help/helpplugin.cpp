@@ -761,7 +761,7 @@ void HelpPlugin::updateCloseButton()
 {
     Core::HelpManager *manager = Core::HelpManager::instance();
     const bool closeOnReturn = manager->customValue(QLatin1String("ReturnOnClose"),
-        false).toBool();
+        true).toBool();
     m_closeButton->setEnabled((OpenPagesManager::instance().pageCount() > 1)
         | closeOnReturn);
 }
