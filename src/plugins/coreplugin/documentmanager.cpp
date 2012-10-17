@@ -198,7 +198,7 @@ DocumentManagerPrivate::DocumentManagerPrivate(QMainWindow *mw) :
     m_linkWatcher(0),
     m_blockActivated(false),
     m_lastVisitedDirectory(QDir::currentPath()),
-    m_useProjectsDirectory(Utils::HostOsInfo::isMacHost()), // Creator is in bizarre places when launched via finder.
+    m_useProjectsDirectory(true), // Creator is in bizarre places when launched via finder.
     m_blockedIDocument(0)
 {
 }
@@ -1189,10 +1189,19 @@ void readSettings()
     s->beginGroup(QLatin1String(directoryGroupC));
     const QString settingsProjectDir = s->value(QLatin1String(projectDirectoryKeyC),
                                                 QString()).toString();
-    if (!settingsProjectDir.isEmpty() && QFileInfo(settingsProjectDir).isDir())
+    if (!settingsProjectDir.isEmpty() && QFileInfo(settingsProjectDir).isDir()) {
         d->m_projectsDirectory = settingsProjectDir;
-    else
+    } else {
+#ifdef Q_OS_LINUX
+        d->m_projectsDirectory = Utils::PathChooser::homePath() + QLatin1String("/qpSOFT/Projects");
+#else
+#ifdef Q_OS_WIN
+        d->m_projectsDirectory = QLatin1String("D:\\qpSOFT\\Projects");
+#else
         d->m_projectsDirectory = Utils::PathChooser::homePath();
+#endif
+#endif
+    }
     d->m_useProjectsDirectory = s->value(QLatin1String(useProjectDirectoryKeyC),
                                          d->m_useProjectsDirectory).toBool();
 

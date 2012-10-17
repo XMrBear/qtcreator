@@ -2951,6 +2951,7 @@ void DebuggerPluginPrivate::extensionsInitialized()
 
     cmd = ActionManager::registerAction(m_debugWithoutDeployAction,
         "Debugger.DebugWithoutDeploy", globalcontext);
+    cmd->setDefaultKeySequence(QKeySequence(QLatin1String("Alt+F5")));
     cmd->setAttribute(Command::CA_Hide);
     mstart->addAction(cmd, CC::G_DEFAULT_ONE);
 

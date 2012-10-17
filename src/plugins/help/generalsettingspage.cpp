@@ -121,7 +121,7 @@ QWidget *GeneralSettingsPage::createPage(QWidget *parent)
     }
 
     m_returnOnClose = manager->customValue(QLatin1String("ReturnOnClose"),
-        false).toBool();
+        true).toBool();
     m_ui->m_returnOnClose->setChecked(m_returnOnClose);
 
     return widget;
