@@ -94,6 +94,8 @@ static QPair<QString, QString> autoDetectCdbDebugger()
         }
     }
 
+    cdbs.append(FileName::fromString(QString::fromLocal8Bit(qgetenv("CDB_EXEC"))));
+
     foreach (const FileName &cdb, cdbs) {
         QList<Abi> abis = Abi::abisOfBinary(cdb);
         if (abis.isEmpty())
