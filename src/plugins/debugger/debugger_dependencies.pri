@@ -2,8 +2,6 @@ QTC_PLUGIN_NAME = Debugger
 QTC_LIB_DEPENDS += \
     cplusplus \
     utils \
-    qmldebug \
-    qmljs \
     ssh
 QTC_PLUGIN_DEPENDS += \
     coreplugin \
@@ -13,3 +11,4 @@ QTC_PLUGIN_DEPENDS += \
     texteditor
 QTC_PLUGIN_RECOMMENDS += \
     cppeditor
+

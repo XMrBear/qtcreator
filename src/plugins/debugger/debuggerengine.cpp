@@ -62,8 +62,6 @@
 #include <utils/qtcassert.h>
 #include <utils/fileinprojectfinder.h>
 
-#include <qmljs/consolemanagerinterface.h>
-
 #include <QDebug>
 #include <QTimer>
 #include <QFileInfo>
@@ -516,9 +514,6 @@ void DebuggerEngine::showMessage(const QString &msg, int channel, int timeout) c
     }
     //if (msg.size() && msg.at(0).isUpper() && msg.at(1).isUpper())
     //    qDebug() << qPrintable(msg) << "IN STATE" << state();
-    QmlJS::ConsoleManagerInterface *consoleManager = QmlJS::ConsoleManagerInterface::instance();
-    if (channel == ConsoleOutput && consoleManager)
-        consoleManager->printToConsolePane(QmlJS::ConsoleItem::UndefinedType, msg);
 
     debuggerCore()->showMessage(msg, channel, timeout);
     if (d->m_runControl)
