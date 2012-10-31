@@ -19,7 +19,6 @@ HEADERS += todoplugin.h \
     todoitemsmodel.h \
     todoitemsscanner.h \
     cpptodoitemsscanner.h \
-    qmljstodoitemsscanner.h \
     lineparser.h
 SOURCES += todoplugin.cpp \
     keyword.cpp \
@@ -32,7 +31,6 @@ SOURCES += todoplugin.cpp \
     todoitemsmodel.cpp \
     todoitemsscanner.cpp \
     cpptodoitemsscanner.cpp \
-    qmljstodoitemsscanner.cpp \
     lineparser.cpp
 OTHER_FILES += \
     Todo.pluginspec.in
