@@ -84,9 +84,6 @@ DebuggerEngine *createCdbEngine(const DebuggerStartParameters &sp, QString *erro
 DebuggerEngine *createGdbEngine(const DebuggerStartParameters &sp);
 DebuggerEngine *createScriptEngine(const DebuggerStartParameters &sp);
 DebuggerEngine *createPdbEngine(const DebuggerStartParameters &sp);
-DebuggerEngine *createQmlEngine(const DebuggerStartParameters &sp);
-DebuggerEngine *createQmlCppEngine(const DebuggerStartParameters &sp, QString *error);
-DebuggerEngine *createLldbEngine(const DebuggerStartParameters &sp);
 
 static const char *engineTypeName(DebuggerEngineType et)
 {
@@ -652,12 +649,6 @@ DebuggerEngine *DebuggerRunControlFactory::createEngine(DebuggerEngineType et,
         return createCdbEngine(sp, errorMessage);
     case PdbEngineType:
         return createPdbEngine(sp);
-    case QmlEngineType:
-        return createQmlEngine(sp);
-    case LldbEngineType:
-        return createLldbEngine(sp);
-    case QmlCppEngineType:
-        return createQmlCppEngine(sp, errorMessage);
     default:
         break;
     }
