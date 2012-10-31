@@ -1,4 +1,4 @@
-QT += xml script declarative
+QT += xml script
 
 include(../../qtcreatorplugin.pri)
 include(customwizard/customwizard.pri)
