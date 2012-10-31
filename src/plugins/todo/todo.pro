@@ -13,9 +13,9 @@ HEADERS += todoplugin.h \
     todoitemsmodel.h \
     todoitemsscanner.h \
     cpptodoitemsscanner.h \
-    qmljstodoitemsscanner.h \
     lineparser.h \
     todooutputtreeview.h
+
 SOURCES += todoplugin.cpp \
     keyword.cpp \
     todooutputpane.cpp \
@@ -27,7 +27,6 @@ SOURCES += todoplugin.cpp \
     todoitemsmodel.cpp \
     todoitemsscanner.cpp \
     cpptodoitemsscanner.cpp \
-    qmljstodoitemsscanner.cpp \
     lineparser.cpp \
     todooutputtreeview.cpp
 
