@@ -33,8 +33,6 @@
 
 #include <utils/stringutils.h>
 
-#include <QDeclarativeEngine>
-#include <QDeclarativeContext>
 #include <QFileInfo>
 #include <QDir>
 
@@ -212,11 +210,6 @@ void ProjectWelcomePage::facilitateQml(QDeclarativeEngine *engine)
     ProjectExplorerPlugin *pePlugin = ProjectExplorer::ProjectExplorerPlugin::instance();
     m_sessionModel = new SessionModel(pePlugin->session(), this);
     m_projectModel = new ProjectModel(pePlugin, this);
-
-    QDeclarativeContext *ctx = engine->rootContext();
-    ctx->setContextProperty(QLatin1String("sessionList"), m_sessionModel);
-    ctx->setContextProperty(QLatin1String("projectList"), m_projectModel);
-    ctx->setContextProperty(QLatin1String("projectWelcomePage"), this);
 }
 
 QUrl ProjectWelcomePage::pageLocation() const
