@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -27,34 +27,31 @@
 **
 ****************************************************************************/
 
-#ifndef PROFILECOMPLETIONASSIST_H
-#define PROFILECOMPLETIONASSIST_H
+#include "cmakefilecompletionassist.h"
+#include "cmakeprojectconstants.h"
+#include "cmakeprojectmanager.h"
 
-#include <texteditor/codeassist/completionassistprovider.h>
+#include <texteditor/codeassist/keywordscompletionassist.h>
 
-#include <QStringList>
+using namespace CMakeProjectManager::Internal;
+using namespace TextEditor;
 
-namespace Qt4ProjectManager {
-namespace Internal {
+// -------------------------------
+// CMakeFileCompletionAssistProvider
+// -------------------------------
+CMakeFileCompletionAssistProvider::CMakeFileCompletionAssistProvider(CMakeSettingsPage *settingsPage)
+    : m_settingsPage(settingsPage)
+{}
 
-class ProFileCompletionAssistProvider : public TextEditor::CompletionAssistProvider
+CMakeFileCompletionAssistProvider::~CMakeFileCompletionAssistProvider()
+{}
+
+bool CMakeFileCompletionAssistProvider::supportsEditor(const Core::Id &editorId) const
 {
-    Q_OBJECT
-public:
-    ProFileCompletionAssistProvider();
-    void init();
-    virtual ~ProFileCompletionAssistProvider();
+    return editorId == CMakeProjectManager::Constants::CMAKE_EDITOR_ID;
+}
 
-    virtual bool supportsEditor(const Core::Id &editorId) const;
-    virtual TextEditor::IAssistProcessor *createProcessor() const;
-    QStringList variables() const;
-    QStringList functions() const;
-private:
-    QStringList m_variables;
-    QStringList m_functions;
-};
-
-} // Internal
-} // Qt4ProjectManager
-
-#endif // PROFILECOMPLETIONASSIST_H
+IAssistProcessor *CMakeFileCompletionAssistProvider::createProcessor() const
+{
+    return new KeywordsCompletionAssistProcessor(m_settingsPage->keywords());
+}
