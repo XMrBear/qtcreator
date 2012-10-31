@@ -423,14 +423,12 @@ QList<CustomWizard*> CustomWizard::createWizards()
     const QString userTemplateDirName = Core::ICore::userResourcePath() +
                                         QLatin1Char('/') + QLatin1String(templatePathC);
 
-
     const QDir templateDir(templateDirName);
     if (CustomWizardPrivate::verbose)
         verboseLog = QString::fromLatin1("### CustomWizard: Checking '%1'\n").arg(templateDirName);
     if (!templateDir.exists()) {
         if (CustomWizardPrivate::verbose)
            qWarning("Custom project template path %s does not exist.", qPrintable(templateDir.absolutePath()));
-        return rc;
     }
 
     const QDir userTemplateDir(userTemplateDirName);
@@ -445,6 +443,11 @@ QList<CustomWizard*> CustomWizard::createWizards()
             verboseLog = QString::fromLatin1("### CustomWizard: userTemplateDir '%1' found, adding\n").arg(userTemplateDirName);
         dirs += userTemplateDir.entryInfoList(filters, sortflags);
     }
+
+    const QDir loadenTemplateDir(Core::ICore::resourcePath() +
+                                 QLatin1Char('/') + QLatin1String("wizards"));
+    if (loadenTemplateDir.exists())
+        dirs += loadenTemplateDir.entryInfoList(filters, sortflags);
 
     const QString configFile = QLatin1String(configFileC);
     // Check and parse config file in each directory.

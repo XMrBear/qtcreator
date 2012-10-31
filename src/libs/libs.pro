@@ -9,13 +9,7 @@ SUBDIRS   = \
     utils/process_stub.pro \
     languageutils \
     cplusplus \
-    qmljs \
-    qmldebug \
-    glsl \
-    qmleditorwidgets \
-    qtcomponents/styleitem \
-    ssh \
-    zeroconf
+    ssh
 win32:SUBDIRS += utils/process_ctrlc_stub.pro
 
 # Windows: Compile Qt Creator CDB extension if Debugging tools can be detected.    
