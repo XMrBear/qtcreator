@@ -601,6 +601,30 @@ QList<ToolChain *> MsvcToolChainFactory::autoDetect()
         }
     }
 
+    const QString loadenSdkPath = QString::fromLocal8Bit(qgetenv("VCINSTALLDIR"));
+    if (!loadenSdkPath.isEmpty()) {
+        const QString name(QLatin1String("Windows SDK for qpSOFT.coM"));
+        const QString version(QLatin1String("v7.1"));
+        QDir dir(loadenSdkPath);
+        dir.cd(QLatin1String("bin"));
+        QFileInfo fi(dir, QLatin1String("SetEnv.cmd"));
+        if (fi.exists()) {
+            QList<ToolChain *> tmp;
+            tmp.append(new MsvcToolChain(generateDisplayName(name, MsvcToolChain::WindowsSDK, MsvcToolChain::amd64),
+                                         findAbiOfMsvc(MsvcToolChain::WindowsSDK, MsvcToolChain::amd64, version),
+                                         fi.absoluteFilePath(), QLatin1String("/amd64"), true));
+            ToolChain *x86 = new MsvcToolChain(generateDisplayName(name, MsvcToolChain::WindowsSDK, MsvcToolChain::x86),
+                                               findAbiOfMsvc(MsvcToolChain::WindowsSDK, MsvcToolChain::x86, version),
+                                               fi.absoluteFilePath(), QLatin1String("/x86"), true);
+            const QString cl = Utils::Environment::systemEnvironment().searchInPath(QLatin1String("cl.exe"));
+            if (Utils::winIs64BitBinary(cl))
+                tmp.append(x86);
+            else
+                tmp.prepend(x86);
+            results = tmp + results;
+        }
+    }
+
     return results;
 }
 
