@@ -38,8 +38,6 @@
 #include "gitversioncontrol.h"
 #include "branchdialog.h"
 #include "remotedialog.h"
-#include "clonewizard.h"
-#include "gitorious/gitoriousclonewizard.h"
 #include "stashdialog.h"
 #include "settingspage.h"
 #include "resetdialog.h"
@@ -291,8 +289,6 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
         addAutoReleasedObject(new GitEditorFactory(editorParameters + i, m_gitClient, describeSlot));
 
     addAutoReleasedObject(new GitSubmitEditorFactory(&submitParameters));
-    addAutoReleasedObject(new CloneWizard);
-    addAutoReleasedObject(new Gitorious::Internal::GitoriousCloneWizard);
 
     const QString prefix = QLatin1String("git");
     m_commandLocator = new Locator::CommandLocator("Git", prefix, prefix);
