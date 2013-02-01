@@ -39,7 +39,6 @@
 #include "gitversioncontrol.h"
 #include "branchdialog.h"
 #include "remotedialog.h"
-#include "clonewizard.h"
 #include "stashdialog.h"
 #include "settingspage.h"
 #include "logchangedialog.h"
@@ -291,16 +290,6 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
 
     addAutoReleasedObject(new VcsSubmitEditorFactory(&submitParameters,
         []() { return new GitSubmitEditor(&submitParameters); }));
-
-    auto cloneWizardFactory = new BaseCheckoutWizardFactory;
-    cloneWizardFactory->setId(QLatin1String(VcsBase::Constants::VCS_ID_GIT));
-    cloneWizardFactory->setIcon(QIcon(QLatin1String(":/git/images/git.png")));
-    cloneWizardFactory->setDescription(tr("Clones a Git repository and tries to load the contained project."));
-    cloneWizardFactory->setDisplayName(tr("Git Repository Clone"));
-    cloneWizardFactory->setWizardCreator([this] (const FileName &path, QWidget *parent) {
-        return new CloneWizard(path, parent);
-    });
-    addAutoReleasedObject(cloneWizardFactory);
 
     const QString prefix = QLatin1String("git");
     m_commandLocator = new CommandLocator("Git", prefix, prefix);
