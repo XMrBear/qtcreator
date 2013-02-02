@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Nicolas Arnaud-Cormos
+** Copyright (c) 2013 Nicolas Arnaud-Cormos
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -53,7 +53,7 @@ using namespace Macros;
 class MacroEvent::MacroEventPrivate
 {
 public:
-    QByteArray id;
+    Core::Id id;
     QMap<quint8, QVariant> values;
 };
 
@@ -88,9 +88,7 @@ MacroEvent& MacroEvent::operator=(const MacroEvent &other)
 
 QVariant MacroEvent::value(quint8 id) const
 {
-    if (d->values.contains(id))
-        return d->values.value(id);
-    return QVariant();
+    return d->values.value(id);
 }
 
 void MacroEvent::setValue(quint8 id, const QVariant &value)
@@ -100,7 +98,9 @@ void MacroEvent::setValue(quint8 id, const QVariant &value)
 
 void MacroEvent::load(QDataStream &stream)
 {
-    stream >> d->id;
+    QByteArray ba;
+    stream >> ba;
+    d->id = Core::Id(ba);
     int count;
     stream >> count;
     quint8 id;
@@ -114,7 +114,7 @@ void MacroEvent::load(QDataStream &stream)
 
 void MacroEvent::save(QDataStream &stream) const
 {
-    stream << d->id;
+    stream << d->id.name();
     stream << d->values.count();
     QMapIterator<quint8, QVariant> i(d->values);
     while (i.hasNext()) {
@@ -123,17 +123,12 @@ void MacroEvent::save(QDataStream &stream) const
     }
 }
 
-const QByteArray & MacroEvent::id() const
+Core::Id MacroEvent::id() const
 {
     return d->id;
 }
 
-void MacroEvent::setId(const char *id)
+void MacroEvent::setId(Core::Id id)
 {
     d->id = id;
-}
-
-QMap<quint8, QVariant> MacroEvent::values() const
-{
-    return d->values;
 }

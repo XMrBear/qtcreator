@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -76,7 +76,7 @@ public:
      * expression evaluator instance still exists, and no new call to evaluate
      * has been made!
      *
-     * @param expression        The expression to evaluate.
+     * @param utf8code          The code of expression to evaluate.
      * @param scope             The scope enclosing the expression.
      */
     QList<LookupItem> operator()(const QByteArray &utf8code,

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 BogDan Vatra <bog_dan_ro@yahoo.com>
+** Copyright (c) 2013 BogDan Vatra <bog_dan_ro@yahoo.com>
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -91,6 +91,7 @@ private:
     bool m_useLocalQtLibs;
     QString m_localLibs;
     QString m_localJars;
+    QString m_localJarsInitClasses;
     QMutex m_mutex;
 };
 

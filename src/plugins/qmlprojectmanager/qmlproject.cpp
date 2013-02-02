@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -60,6 +60,7 @@ namespace QmlProjectManager {
 QmlProject::QmlProject(Internal::Manager *manager, const QString &fileName)
     : m_manager(manager),
       m_fileName(fileName),
+      m_defaultImport(UnknownImport),
       m_modelManager(QmlJS::ModelManagerInterface::instance())
 {
     setProjectContext(Core::Context(QmlProjectManager::Constants::PROJECTCONTEXT));
@@ -111,6 +112,18 @@ QDir QmlProject::projectDir() const
 QString QmlProject::filesFileName() const
 { return m_fileName; }
 
+static QmlProject::QmlImport detectImport(const QString &qml) {
+    static QRegExp qtQuick1RegExp(QLatin1String("import\\s+QtQuick\\s+1"));
+    static QRegExp qtQuick2RegExp(QLatin1String("import\\s+QtQuick\\s+2"));
+
+    if (qml.contains(qtQuick1RegExp))
+        return QmlProject::QtQuick1Import;
+    else if (qml.contains(qtQuick2RegExp))
+        return QmlProject::QtQuick2Import;
+    else
+        return QmlProject::UnknownImport;
+}
+
 void QmlProject::parseProject(RefreshOptions options)
 {
     Core::MessageManager *messageManager = Core::ICore::messageManager();
@@ -142,11 +155,14 @@ void QmlProject::parseProject(RefreshOptions options)
             QString mainFilePath = m_projectItem.data()->mainFile();
             if (!mainFilePath.isEmpty()) {
                 mainFilePath = projectDir().absoluteFilePath(mainFilePath);
-                if (!QFileInfo(mainFilePath).isReadable()) {
+                Utils::FileReader reader;
+                QString errorMessage;
+                if (!reader.fetch(mainFilePath, &errorMessage)) {
                     messageManager->printToOutputPane(
                                 tr("Warning while loading project file %1.").arg(m_fileName));
-                    messageManager->printToOutputPane(
-                                tr("File '%1' does not exist or is not readable.").arg(mainFilePath), true);
+                    messageManager->printToOutputPane(errorMessage, true);
+                } else {
+                    m_defaultImport = detectImport(QString::fromUtf8(reader.data()));
                 }
             }
         }
@@ -168,22 +184,33 @@ void QmlProject::refresh(RefreshOptions options)
     if (options & Files)
         m_rootNode->refresh();
 
-    QmlJS::ModelManagerInterface::ProjectInfo pinfo(this);
-    pinfo.sourceFiles = files();
-    pinfo.importPaths = customImportPaths();
-    QtSupport::BaseQtVersion *version = 0;
-    if (activeTarget()) {
-        ProjectExplorer::ToolChain *tc = ProjectExplorer::ToolChainKitInformation::toolChain(activeTarget()->kit());
-        version = QtSupport::QtKitInformation::qtVersion(activeTarget()->kit());
-        QtSupport::QmlDumpTool::pathAndEnvironment(this, version, tc, false, &pinfo.qmlDumpPath, &pinfo.qmlDumpEnvironment);
+    QmlJS::ModelManagerInterface::ProjectInfo projectInfo(this);
+    projectInfo.sourceFiles = files();
+    projectInfo.importPaths = customImportPaths();
+
+    QtSupport::BaseQtVersion *qtVersion = 0;
+    {
+        ProjectExplorer::Target *target = activeTarget();
+        ProjectExplorer::Kit *kit = target ? target->kit() : ProjectExplorer::KitManager::instance()->defaultKit();
+        ProjectExplorer::ToolChain *toolChain = ProjectExplorer::ToolChainKitInformation::toolChain(kit);
+        qtVersion = QtSupport::QtKitInformation::qtVersion(kit);
+        QtSupport::QmlDumpTool::pathAndEnvironment(this, qtVersion, toolChain, false,
+                                                   &projectInfo.qmlDumpPath, &projectInfo.qmlDumpEnvironment);
     }
-    if (version) {
-        pinfo.tryQmlDump = true;
-        pinfo.qtImportsPath = version->qmakeProperty("QT_INSTALL_IMPORTS");
-        pinfo.qtQmlPath = version->qmakeProperty("QT_INSTALL_QML");
-        pinfo.qtVersionString = version->qtVersionString();
+
+    if (qtVersion) {
+        projectInfo.tryQmlDump = true;
+        projectInfo.qtImportsPath = qtVersion->qmakeProperty("QT_INSTALL_IMPORTS");
+        projectInfo.qtQmlPath = qtVersion->qmakeProperty("QT_INSTALL_QML");
+        projectInfo.qtVersionString = qtVersion->qtVersionString();
+
+        if (!projectInfo.qtQmlPath.isEmpty())
+            projectInfo.importPaths += projectInfo.qtQmlPath;
+        if (!projectInfo.qtImportsPath.isEmpty())
+            projectInfo.importPaths += projectInfo.qtImportsPath;
+
     }
-    m_modelManager->updateProjectInfo(pinfo);
+    m_modelManager->updateProjectInfo(projectInfo);
 }
 
 QStringList QmlProject::convertToAbsoluteFiles(const QStringList &paths) const
@@ -201,11 +228,10 @@ QStringList QmlProject::convertToAbsoluteFiles(const QStringList &paths) const
 QStringList QmlProject::files() const
 {
     QStringList files;
-    if (m_projectItem) {
+    if (m_projectItem)
         files = m_projectItem.data()->files();
-    } else {
+    else
         files = m_files;
-    }
     return files;
 }
 
@@ -245,6 +271,11 @@ void QmlProject::refreshProjectFile()
     refresh(QmlProject::ProjectFile | Files);
 }
 
+QmlProject::QmlImport QmlProject::defaultImport() const
+{
+    return m_defaultImport;
+}
+
 void QmlProject::refreshFiles(const QSet<QString> &/*added*/, const QSet<QString> &removed)
 {
     refresh(Files);
@@ -281,11 +312,26 @@ bool QmlProject::supportsKit(ProjectExplorer::Kit *k, QString *errorMessage) con
         return false;
     }
 
-    // TODO: Limit supported versions?
     QtSupport::BaseQtVersion *version = QtSupport::QtKitInformation::qtVersion(k);
-    if (!version && errorMessage)
-        *errorMessage = tr("No Qt version set in kit.");
-    return version;
+    if (!version) {
+        if (errorMessage)
+            *errorMessage = tr("No Qt version set in kit.");
+        return false;
+    }
+
+    if (version->qtVersion() < QtSupport::QtVersionNumber(4, 7, 0)) {
+        if (errorMessage)
+            *errorMessage = tr("Qt version is too old.");
+        return false;
+    }
+
+    if (version->qtVersion() < QtSupport::QtVersionNumber(5, 0, 0)
+            && defaultImport() == QtQuick2Import) {
+        if (errorMessage)
+            *errorMessage = tr("Qt version is too old.");
+        return false;
+    }
+    return true;
 }
 
 ProjectExplorer::ProjectNode *QmlProject::rootProjectNode() const
@@ -303,11 +349,12 @@ bool QmlProject::fromMap(const QVariantMap &map)
     if (!Project::fromMap(map))
         return false;
 
+    // refresh first - project information is used e.g. to decide the default RC's
+    refresh(Everything);
+
     ProjectExplorer::Kit *defaultKit = ProjectExplorer::KitManager::instance()->defaultKit();
     if (!activeTarget() && defaultKit)
         addTarget(createTarget(defaultKit));
-
-    refresh(Everything);
 
     // addedTarget calls updateEnabled on the runconfigurations
     // which needs to happen after refresh

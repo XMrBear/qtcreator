@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -88,9 +88,8 @@ void OpenEditorsWindow::selectAndHide()
 void OpenEditorsWindow::setVisible(bool visible)
 {
     QWidget::setVisible(visible);
-    if (visible) {
+    if (visible)
         setFocus();
-    }
 }
 
 bool OpenEditorsWindow::isCentering()

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -441,6 +441,7 @@ namespace {
     const char PLUGIN_VERSION[] = "version";
     const char PLUGIN_COMPATVERSION[] = "compatVersion";
     const char PLUGIN_EXPERIMENTAL[] = "experimental";
+    const char PLUGIN_DISABLED_BY_DEFAULT[] = "disabledByDefault";
     const char VENDOR[] = "vendor";
     const char COPYRIGHT[] = "copyright";
     const char LICENSE[] = "license";
@@ -609,15 +610,13 @@ void PluginSpecPrivate::readPluginSpec(QXmlStreamReader &reader)
     } else if (compatVersion.isEmpty()) {
         compatVersion = version;
     }
-    QString experimentalString = reader.attributes().value(QLatin1String(PLUGIN_EXPERIMENTAL)).toString();
-    experimental = (experimentalString.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0);
-    if (!experimentalString.isEmpty() && !experimental
-            && experimentalString.compare(QLatin1String("false"), Qt::CaseInsensitive) != 0) {
-        reader.raiseError(msgInvalidFormat(PLUGIN_EXPERIMENTAL));
+    disabledByDefault = readBooleanValue(reader, PLUGIN_DISABLED_BY_DEFAULT);
+    experimental = readBooleanValue(reader, PLUGIN_EXPERIMENTAL);
+    if (reader.hasError())
         return;
-    }
-    disabledByDefault = experimental;
-    enabled = !experimental;
+    if (experimental)
+        disabledByDefault = true;
+    enabled = !disabledByDefault;
     while (!reader.atEnd()) {
         reader.readNext();
         switch (reader.tokenType()) {
@@ -667,11 +666,10 @@ void PluginSpecPrivate::readArgumentDescriptions(QXmlStreamReader &reader)
         switch (reader.tokenType()) {
         case QXmlStreamReader::StartElement:
             element = reader.name().toString();
-            if (element == QLatin1String(ARGUMENT)) {
+            if (element == QLatin1String(ARGUMENT))
                 readArgumentDescription(reader);
-            } else {
+            else
                 reader.raiseError(msgInvalidElement(name));
-            }
             break;
         case QXmlStreamReader::Comment:
         case QXmlStreamReader::Characters:
@@ -708,6 +706,17 @@ void PluginSpecPrivate::readArgumentDescription(QXmlStreamReader &reader)
     argumentDescriptions.push_back(arg);
 }
 
+bool PluginSpecPrivate::readBooleanValue(QXmlStreamReader &reader, const char *key)
+{
+    const QString valueString = reader.attributes().value(QLatin1String(key)).toString();
+    const bool isOn = valueString.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+    if (!valueString.isEmpty() && !isOn
+            && valueString.compare(QLatin1String("false"), Qt::CaseInsensitive) != 0) {
+        reader.raiseError(msgInvalidFormat(key));
+    }
+    return isOn;
+}
+
 /*!
     \fn void PluginSpecPrivate::readDependencies(QXmlStreamReader &reader)
     \internal
@@ -720,11 +729,10 @@ void PluginSpecPrivate::readDependencies(QXmlStreamReader &reader)
         switch (reader.tokenType()) {
         case QXmlStreamReader::StartElement:
             element = reader.name().toString();
-            if (element == QLatin1String(DEPENDENCY)) {
+            if (element == QLatin1String(DEPENDENCY))
                 readDependencyEntry(reader);
-            } else {
+            else
                 reader.raiseError(msgInvalidElement(name));
-            }
             break;
         case QXmlStreamReader::Comment:
         case QXmlStreamReader::Characters:
@@ -1019,9 +1027,8 @@ bool PluginSpecPrivate::delayedInitialize()
 {
     if (hasError)
         return false;
-    if (state != PluginSpec::Running) {
+    if (state != PluginSpec::Running)
         return false;
-    }
     if (!plugin) {
         errorString = QCoreApplication::translate("PluginSpec", "Internal error: have no plugin instance to perform delayedInitialize");
         hasError = true;

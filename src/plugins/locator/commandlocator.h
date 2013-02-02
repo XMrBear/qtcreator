@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -32,15 +32,8 @@
 
 #include "locator_global.h"
 #include "ilocatorfilter.h"
-#include <QList>
 
-QT_BEGIN_NAMESPACE
-class QAction;
-QT_END_NAMESPACE
-
-namespace Core {
-    class Command;
-}
+namespace Core { class Command; }
 
 namespace Locator {
 /* Command locators: Provides completion for a set of
@@ -53,30 +46,19 @@ class LOCATOR_EXPORT CommandLocator : public Locator::ILocatorFilter
     Q_OBJECT
 
 public:
-    explicit CommandLocator(const QString &prefix,
-                            const QString &displayName,
-                            const QString &shortCutString,
-                            QObject *parent = 0);
-    virtual ~CommandLocator();
+    CommandLocator(Core::Id id, const QString &displayName,
+                   const QString &shortCutString, QObject *parent = 0);
+    ~CommandLocator();
 
     void appendCommand(Core::Command *cmd);
 
-    virtual QString displayName() const;
-    virtual QString id() const;
-    virtual Priority priority() const;
-    virtual QList<FilterEntry> matchesFor(QFutureInterface<Locator::FilterEntry> &future, const QString &entry);
-    virtual void accept(FilterEntry selection) const;
-    virtual void refresh(QFutureInterface<void> &future);
+    QList<FilterEntry> matchesFor(QFutureInterface<Locator::FilterEntry> &future, const QString &entry);
+    void accept(FilterEntry selection) const;
+    void refresh(QFutureInterface<void> &future);
 
 private:
     CommandLocatorPrivate *d;
 };
-
-inline CommandLocator &operator<<(CommandLocator &locator, Core::Command *cmd)
-{
-    locator.appendCommand(cmd);
-    return locator;
-}
 
 } // namespace Locator
 

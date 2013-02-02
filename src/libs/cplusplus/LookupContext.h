@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -101,6 +101,7 @@ private:
 
 private:
     typedef std::map<const Name *, ClassOrNamespace *, Name::Compare> Table;
+    typedef std::map<const TemplateNameId *, ClassOrNamespace *, TemplateNameId::Compare> TemplateNameIdTable;
 
     CreateBindings *_factory;
     ClassOrNamespace *_parent;
@@ -110,7 +111,7 @@ private:
     QList<Enum *> _enums;
     QList<Symbol *> _todo;
     QSharedPointer<Control> _control;
-    QMap<const Name *, ClassOrNamespace *> _instantiations;
+    TemplateNameIdTable _specializations;
 
     // it's an instantiation.
     const TemplateNameId *_templateId;
@@ -281,7 +282,11 @@ public:
     static const Name *minimalName(Symbol *symbol, ClassOrNamespace *target, Control *control);
 
     void setExpandTemplates(bool expandTemplates)
-    { m_expandTemplates = expandTemplates; }
+    {
+        if (_bindings)
+            _bindings->setExpandTemplates(expandTemplates);
+        m_expandTemplates = expandTemplates;
+    }
 
 private:
     // The current expression.

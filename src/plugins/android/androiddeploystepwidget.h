@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 BogDan Vatra <bog_dan_ro@yahoo.com>
+** Copyright (c) 2013 BogDan Vatra <bog_dan_ro@yahoo.com>
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -54,6 +54,7 @@ private slots:
     void setQASIPackagePath();
     void useLocalQtLibsStateChanged(int);
     void editRulesFile();
+    void cleanLibsOnDevice();
 
 private:
     virtual QString summaryText() const;

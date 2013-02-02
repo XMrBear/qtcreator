@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -48,7 +48,7 @@
 #endif
 
 #include <projectexplorer/abi.h>
-#include <projectexplorer/applicationrunconfiguration.h> // For LocalApplication*
+#include <projectexplorer/localapplicationrunconfiguration.h> // For LocalApplication*
 #include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/project.h>
 #include <projectexplorer/projectexplorer.h>
@@ -604,9 +604,8 @@ DebuggerRunControl *DebuggerRunControlFactory::doCreate
     DebuggerStartParameters sp = sp0;
     if (!debuggerCore()->boolSetting(AutoEnrichParameters)) {
         const QString sysroot = sp.sysRoot;
-        if (sp.debugInfoLocation.isEmpty()) {
+        if (sp.debugInfoLocation.isEmpty())
             sp.debugInfoLocation = sysroot + QLatin1String("/usr/lib/debug");
-        }
         if (sp.debugSourceLocation.isEmpty()) {
             QString base = sysroot + QLatin1String("/usr/src/debug/");
             sp.debugSourceLocation.append(base + QLatin1String("qt5base/src/corelib"));

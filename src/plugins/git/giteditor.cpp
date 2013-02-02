@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -66,8 +66,16 @@ GitEditor::GitEditor(const VcsBase::VcsBaseEditorParameters *type,
 {
     QTC_ASSERT(m_changeNumberPattern8.isValid(), return);
     QTC_ASSERT(m_changeNumberPattern40.isValid(), return);
+    /* Diff format:
+        diff --git a/src/plugins/git/giteditor.cpp b/src/plugins/git/giteditor.cpp
+        index 40997ff..4e49337 100644
+        --- a/src/plugins/git/giteditor.cpp
+        +++ b/src/plugins/git/giteditor.cpp
+    */
+    setDiffFilePattern(QRegExp(QLatin1String("^(?:diff --git a/|index |[+-]{3} (?:/dev/null|[ab]/(.+$)))")));
+    setLogEntryPattern(QRegExp(QLatin1String("^commit ([0-9a-f]{8})[0-9a-f]{32}")));
     setAnnotateRevisionTextFormat(tr("Blame %1"));
-    setAnnotatePreviousRevisionTextFormat(tr("Blame parent revision %1"));
+    setAnnotatePreviousRevisionTextFormat(tr("Blame Parent Revision %1"));
 }
 
 QSet<QString> GitEditor::annotationChanges() const
@@ -107,45 +115,10 @@ QString GitEditor::changeUnderCursor(const QTextCursor &c) const
     return QString();
 }
 
-VcsBase::DiffHighlighter *GitEditor::createDiffHighlighter() const
-{
-    const QRegExp filePattern(QLatin1String("^(diff --git a/|index |[+-][+-][+-] [ab/]).*$"));
-    return new VcsBase::DiffHighlighter(filePattern);
-}
-
 VcsBase::BaseAnnotationHighlighter *GitEditor::createAnnotationHighlighter(const QSet<QString> &changes,
                                                                            const QColor &bg) const
 {
     return new GitAnnotationHighlighter(changes, bg);
-}
-
-QString GitEditor::fileNameFromDiffSpecification(const QTextBlock &inBlock) const
-{
-    // Check for "+++ b/src/plugins/git/giteditor.cpp" (blame and diff)
-    // as well as "--- a/src/plugins/git/giteditor.cpp".
-    // Go back chunks.
-    bool checkForOld = false;
-
-    const QString oldFileIndicator = QLatin1String("--- a/");
-    const QString newFileIndicator = QLatin1String("+++ ");
-    for (QTextBlock block = inBlock; block.isValid(); block = block.previous()) {
-        QString diffFileName = block.text();
-        if (diffFileName.startsWith(oldFileIndicator) && checkForOld) {
-            diffFileName.remove(0, oldFileIndicator.size());
-            checkForOld = false;
-            return diffFileName;
-        } else if (diffFileName.startsWith(newFileIndicator)) {
-            diffFileName.remove(0, newFileIndicator.size());
-            if (diffFileName == QLatin1String("/dev/null")) {
-                checkForOld = true;
-                continue;
-            }
-            diffFileName.remove(0, 2); // remove "b/"
-            return findDiffFile(diffFileName);
-        }
-        checkForOld = false;
-    }
-    return QString();
 }
 
 /* Remove the date specification from annotation, which is tabular:
@@ -247,6 +220,20 @@ void GitEditor::commandFinishedGotoLine(bool ok, int /* exitCode */, const QVari
     }
 }
 
+void GitEditor::cherryPickChange()
+{
+    const QFileInfo fi(source());
+    const QString workingDirectory = fi.isDir() ? fi.absoluteFilePath() : fi.absolutePath();
+    GitPlugin::instance()->gitClient()->cherryPickCommit(workingDirectory, m_currentChange);
+}
+
+void GitEditor::revertChange()
+{
+    const QFileInfo fi(source());
+    const QString workingDirectory = fi.isDir() ? fi.absoluteFilePath() : fi.absolutePath();
+    GitPlugin::instance()->gitClient()->revertCommit(workingDirectory, m_currentChange);
+}
+
 QString GitEditor::decorateVersion(const QString &revision) const
 {
     const QFileInfo fi(source());
@@ -277,6 +264,24 @@ bool GitEditor::isValidRevision(const QString &revision) const
     return GitPlugin::instance()->gitClient()->isValidRevision(revision);
 }
 
+void GitEditor::addChangeActions(QMenu *menu, const QString &change)
+{
+    m_currentChange = change;
+    menu->addAction(tr("Cherry-pick Change %1").arg(change), this, SLOT(cherryPickChange()));
+    menu->addAction(tr("Revert Change %1").arg(change), this, SLOT(revertChange()));
+}
+
+QString GitEditor::revisionSubject(const QTextBlock &inBlock) const
+{
+    for (QTextBlock block = inBlock.next(); block.isValid(); block = block.next()) {
+        const QString line = block.text().trimmed();
+        if (line.isEmpty()) {
+            block = block.next();
+            return block.text().trimmed();
+        }
+    }
+    return QString();
+}
+
 } // namespace Internal
 } // namespace Git
-

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -48,11 +48,15 @@
 #include <projectexplorer/toolchain.h>
 #include <projectexplorer/target.h>
 #include <projectexplorer/deployconfiguration.h>
+#include <projectexplorer/projectmacroexpander.h>
 #include <qtsupport/customexecutablerunconfiguration.h>
+#include <qtsupport/baseqtversion.h>
+#include <qtsupport/qtkitinformation.h>
 #include <cpptools/ModelManagerInterface.h>
 #include <extensionsystem/pluginmanager.h>
 #include <utils/qtcassert.h>
 #include <utils/stringutils.h>
+#include <utils/hostosinfo.h>
 #include <coreplugin/icore.h>
 #include <coreplugin/infobar.h>
 #include <coreplugin/documentmanager.h>
@@ -195,10 +199,21 @@ void CMakeProject::changeBuildDirectory(CMakeBuildConfiguration *bc, const QStri
     parseCMakeLists();
 }
 
-QString CMakeProject::defaultBuildDirectory() const
+QString CMakeProject::shadowBuildDirectory(const QString &projectFilePath, const Kit *k, const QString &bcName)
 {
-    return Utils::expandMacros(Core::DocumentManager::instance()->buildDirectory(),
-                               Core::VariableManager::instance()->macroExpander());
+    if (projectFilePath.isEmpty())
+        return QString();
+    QFileInfo info(projectFilePath);
+
+    QtSupport::BaseQtVersion *version = QtSupport::QtKitInformation::qtVersion(k);
+    if (version && !version->supportsShadowBuilds())
+        return info.absolutePath();
+
+    const QString projectName = QFileInfo(info.absolutePath()).fileName();
+    ProjectExplorer::ProjectExpander expander(projectFilePath, projectName, k, bcName);
+    QDir projectDir = QDir(projectDirectory(projectFilePath));
+    QString buildPath = Utils::expandMacros(Core::DocumentManager::buildDirectory(), &expander);
+    return QDir::cleanPath(projectDir.absoluteFilePath(buildPath));
 }
 
 bool CMakeProject::parseCMakeLists()
@@ -284,9 +299,8 @@ bool CMakeProject::parseCMakeLists()
     while (!cmakeCache.atEnd()) {
         QByteArray line = cmakeCache.readLine();
         if (line.startsWith("QT_UIC_EXECUTABLE")) {
-            if (int pos = line.indexOf('=')) {
+            if (int pos = line.indexOf('='))
                 m_uicCommand = QString::fromLocal8Bit(line.mid(pos + 1).trimmed());
-            }
             break;
         }
     }
@@ -307,11 +321,40 @@ bool CMakeProject::parseCMakeLists()
     allIncludePaths.append(projectDirectory());
     allIncludePaths.append(cbpparser.includeFiles());
 
-    QStringList cxxflags; // FIXME: We should do better than this!
+    QStringList cxxflags;
+    foreach (const CMakeBuildTarget &buildTarget, m_buildTargets) {
+        if (buildTarget.title.endsWith(QLatin1String("/fast")))
+            continue;
+        QString makeCommand = QDir::fromNativeSeparators(buildTarget.makeCommand);
+        int startIndex = makeCommand.indexOf(QLatin1Char('\"'));
+        int endIndex = makeCommand.indexOf(QLatin1Char('\"'), startIndex + 1);
+        if (startIndex == -1 || endIndex == -1)
+            continue;
+        startIndex += 1;
+        QString makefile = makeCommand.mid(startIndex, endIndex - startIndex);
+        int slashIndex = makefile.lastIndexOf(QLatin1Char('/'));
+        makefile.truncate(slashIndex);
+        makefile.append(QLatin1String("/CMakeFiles/") + buildTarget.title + QLatin1String(".dir/flags.make"));
+        QFile file(makefile);
+        bool found = false;
+        if (file.exists()) {
+            file.open(QIODevice::ReadOnly | QIODevice::Text);
+            QStringList lines = QString::fromLatin1(file.readAll()).split(QLatin1Char('\n'));
+            foreach (const QString &line, lines) {
+                if (line.startsWith(QLatin1String("CXX_FLAGS ="))) {
+                    int index = line.indexOf(QLatin1Char('=')) + 1;
+                    cxxflags = line.mid(index).trimmed().split(QLatin1Char(' '));
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (found)
+            break;
+    }
 
     QByteArray allDefines;
     allDefines.append(tc->predefinedMacros(cxxflags));
-    allDefines.append(cbpparser.defines());
 
     QStringList allFrameworkPaths;
     QList<ProjectExplorer::HeaderPath> allHeaderPaths;
@@ -339,7 +382,12 @@ bool CMakeProject::parseCMakeLists()
             part->sourceFiles = m_files;
             part->defines = allDefines;
             part->frameworkPaths = allFrameworkPaths;
-            part->language = CPlusPlus::CppModelManagerInterface::ProjectPart::CXX11;
+            if (tc)
+                part->language = tc->compilerFlags(cxxflags) == ToolChain::STD_CXX11
+                        ? CPlusPlus::CppModelManagerInterface::ProjectPart::CXX11
+                        : CPlusPlus::CppModelManagerInterface::ProjectPart::CXX;
+            else
+                part->language = CPlusPlus::CppModelManagerInterface::ProjectPart::CXX11;
             pinfo.appendProjectPart(part);
             modelmanager->updateProjectInfo(pinfo);
             m_codeModelFuture.cancel();
@@ -653,16 +701,28 @@ QString CMakeProject::uicCommand() const
 
 QString CMakeProject::uiHeaderFile(const QString &uiFile)
 {
-    QDir srcDirRoot = QDir(projectDirectory());
-    QString relativePath = srcDirRoot.relativeFilePath(uiFile);
+    QFileInfo fi(uiFile);
+    Utils::FileName project = Utils::FileName::fromString(projectDirectory());
+    Utils::FileName baseDirectory = Utils::FileName::fromString(fi.absolutePath());
+
+    while (baseDirectory.isChildOf(project)) {
+        Utils::FileName cmakeListsTxt = baseDirectory;
+        cmakeListsTxt.appendPath(QLatin1String("CMakeLists.txt"));
+        if (cmakeListsTxt.toFileInfo().exists())
+            break;
+        QDir dir(baseDirectory.toString());
+        dir.cdUp();
+        baseDirectory = Utils::FileName::fromString(dir.absolutePath());
+    }
+
+    QDir srcDirRoot = QDir(project.toString());
+    QString relativePath = srcDirRoot.relativeFilePath(baseDirectory.toString());
     QDir buildDir = QDir(activeTarget()->activeBuildConfiguration()->buildDirectory());
     QString uiHeaderFilePath = buildDir.absoluteFilePath(relativePath);
-
-    QFileInfo fi(uiHeaderFilePath);
-    uiHeaderFilePath = fi.absolutePath();
     uiHeaderFilePath += QLatin1String("/ui_");
     uiHeaderFilePath += fi.completeBaseName();
     uiHeaderFilePath += QLatin1String(".h");
+
     return QDir::cleanPath(uiHeaderFilePath);
 }
 
@@ -978,11 +1038,10 @@ bool CMakeCbpParser::parseCbpFile(const QString &fileName)
 
         while (!atEnd()) {
             readNext();
-            if (name() == QLatin1String("CodeBlocks_project_file")) {
+            if (name() == QLatin1String("CodeBlocks_project_file"))
                 parseCodeBlocks_project_file();
-            } else if (isStartElement()) {
+            else if (isStartElement())
                 parseUnknownElement();
-            }
         }
         fi.close();
         m_includeFiles.sort();
@@ -996,13 +1055,12 @@ void CMakeCbpParser::parseCodeBlocks_project_file()
 {
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (name() == QLatin1String("Project")) {
+        else if (name() == QLatin1String("Project"))
             parseProject();
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
@@ -1010,17 +1068,16 @@ void CMakeCbpParser::parseProject()
 {
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (name() == QLatin1String("Option")) {
+        else if (name() == QLatin1String("Option"))
             parseOption();
-        } else if (name() == QLatin1String("Unit")) {
+        else if (name() == QLatin1String("Unit"))
             parseUnit();
-        } else if (name() == QLatin1String("Build")) {
+        else if (name() == QLatin1String("Build"))
             parseBuild();
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
@@ -1028,13 +1085,12 @@ void CMakeCbpParser::parseBuild()
 {
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (name() == QLatin1String("Target")) {
+        else if (name() == QLatin1String("Target"))
             parseBuildTarget();
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
@@ -1048,14 +1104,15 @@ void CMakeCbpParser::parseBuildTarget()
     while (!atEnd()) {
         readNext();
         if (isEndElement()) {
-            if (m_buildTargetType || m_buildTarget.title == QLatin1String("all") || m_buildTarget.title == QLatin1String("install")) {
+            if (m_buildTargetType || m_buildTarget.title == QLatin1String("all") || m_buildTarget.title == QLatin1String("install"))
                 m_buildTargets.append(m_buildTarget);
-            }
             return;
         } else if (name() == QLatin1String("Compiler")) {
             parseCompiler();
         } else if (name() == QLatin1String("Option")) {
             parseBuildTargetOption();
+        } else if (name() == QLatin1String("MakeCommands")) {
+            parseMakeCommands();
         } else if (isStartElement()) {
             parseUnknownElement();
         }
@@ -1080,13 +1137,10 @@ void CMakeCbpParser::parseBuildTargetOption()
     }
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (name() == QLatin1String("MakeCommand")) {
-            parseMakeCommand();
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
@@ -1105,27 +1159,25 @@ void CMakeCbpParser::parseOption()
 
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
-void CMakeCbpParser::parseMakeCommand()
+void CMakeCbpParser::parseMakeCommands()
 {
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (name() == QLatin1String("Build")) {
+        else if (name() == QLatin1String("Build"))
             parseBuildTargetBuild();
-        } else if (name() == QLatin1String("Clean")) {
+        else if (name() == QLatin1String("Clean"))
             parseBuildTargetClean();
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
@@ -1135,11 +1187,10 @@ void CMakeCbpParser::parseBuildTargetBuild()
         m_buildTarget.makeCommand = attributes().value(QLatin1String("command")).toString();
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
@@ -1149,11 +1200,10 @@ void CMakeCbpParser::parseBuildTargetClean()
         m_buildTarget.makeCleanCommand = attributes().value(QLatin1String("command")).toString();
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
@@ -1161,13 +1211,12 @@ void CMakeCbpParser::parseCompiler()
 {
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (name() == QLatin1String("Add")) {
+        else if (name() == QLatin1String("Add"))
             parseAdd();
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
@@ -1178,33 +1227,20 @@ void CMakeCbpParser::parseAdd()
 
     const QString includeDirectory = addAttributes.value(QLatin1String("directory")).toString();
     // allow adding multiple times because order happens
-    if (!includeDirectory.isEmpty()) {
+    if (!includeDirectory.isEmpty())
         m_includeFiles.append(includeDirectory);
-    }
 
     QString compilerOption = addAttributes.value(QLatin1String("option")).toString();
     // defining multiple times a macro to the same value makes no sense
-    if (!compilerOption.isEmpty() && !m_compilerOptions.contains(compilerOption)) {
+    if (!compilerOption.isEmpty() && !m_compilerOptions.contains(compilerOption))
         m_compilerOptions.append(compilerOption);
-        int macroNameIndex = compilerOption.indexOf(QLatin1String("-D")) + 2;
-        if (macroNameIndex != 1) {
-            int assignIndex = compilerOption.indexOf(QLatin1Char('='), macroNameIndex);
-            if (assignIndex != -1) {
-                compilerOption[assignIndex] = ' ';
-            }
-            m_defines.append("#define ");
-            m_defines.append(compilerOption.mid(macroNameIndex).toLatin1());
-            m_defines.append('\n');
-        }
-    }
 
     while (!atEnd()) {
         readNext();
-        if (isEndElement()) {
+        if (isEndElement())
             return;
-        } else if (isStartElement()) {
+        else if (isStartElement())
             parseUnknownElement();
-        }
     }
 }
 
@@ -1293,11 +1329,6 @@ bool CMakeCbpParser::hasCMakeFiles()
 QStringList CMakeCbpParser::includeFiles()
 {
     return m_includeFiles;
-}
-
-QByteArray CMakeCbpParser::defines() const
-{
-    return m_defines;
 }
 
 QList<CMakeBuildTarget> CMakeCbpParser::buildTargets()

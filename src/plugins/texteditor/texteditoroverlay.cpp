@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -91,9 +91,8 @@ void TextEditorOverlay::addOverlaySelection(int begin, int end,
     selection.m_cursor_begin = QTextCursor(document->docHandle(), begin);
     selection.m_cursor_end = QTextCursor(document->docHandle(), end);
 
-    if (overlaySelectionFlags & ExpandBegin) {
+    if (overlaySelectionFlags & ExpandBegin)
         selection.m_cursor_begin.setKeepPositionOnInsert(true);
-    }
 
     if (overlaySelectionFlags & LockSize)
         selection.m_fixedLength = (end - begin);

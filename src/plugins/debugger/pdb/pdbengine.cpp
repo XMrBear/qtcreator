@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -29,11 +29,12 @@
 
 #include "pdbengine.h"
 
-#include "debuggerstartparameters.h"
 #include "debuggeractions.h"
 #include "debuggercore.h"
 #include "debuggerdialogs.h"
 #include "debuggerplugin.h"
+#include "debuggerprotocol.h"
+#include "debuggerstartparameters.h"
 #include "debuggerstringutils.h"
 #include "debuggertooltipmanager.h"
 
@@ -41,10 +42,9 @@
 #include "moduleshandler.h"
 #include "registerhandler.h"
 #include "stackhandler.h"
+#include "sourceutils.h"
 #include "watchhandler.h"
 #include "watchutils.h"
-
-#include "../gdb/gdbmi.h"
 
 #include <utils/qtcassert.h>
 

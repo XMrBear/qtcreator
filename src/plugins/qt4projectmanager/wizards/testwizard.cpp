@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -120,9 +120,8 @@ static QString generateTestCode(const TestWizardParameters &testParams,
     }
     // Test slot with data or dummy
     writeVoidMemberBody(str, testParams.className, testParams.testSlot, false);
-    if (testParams.useDataSet) {
+    if (testParams.useDataSet)
         str << indent << "QFETCH(" << testDataTypeC << ", data);\n";
-    }
     switch (testParams.type) {
     case TestWizardParameters::Test:
         str << indent << "QVERIFY2(true, \"Failure\");\n";

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -118,6 +118,15 @@ CompileOutputWindow::CompileOutputWindow(BuildManager * /*bm*/, QAction *cancelB
     m_outputWindow->setReadOnly(true);
     m_outputWindow->setUndoRedoEnabled(false);
     m_outputWindow->setMaxLineCount(MAX_LINECOUNT);
+
+    // Let selected text be colored as if the text edit was editable,
+    // otherwise the highlight for searching is too light
+    QPalette p = m_outputWindow->palette();
+    QColor activeHighlight = p.color(QPalette::Active, QPalette::Highlight);
+    p.setColor(QPalette::Highlight, activeHighlight);
+    QColor activeHighlightedText = p.color(QPalette::Active, QPalette::HighlightedText);
+    p.setColor(QPalette::HighlightedText, activeHighlightedText);
+    m_outputWindow->setPalette(p);
 
     m_cancelBuildButton->setDefaultAction(cancelBuildAction);
 

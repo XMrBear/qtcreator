@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 AudioCodes Ltd.
+** Copyright (c) 2013 AudioCodes Ltd.
 ** Author: Orgad Shaneh <orgad.shaneh@audiocodes.com>
 ** Contact: http://www.qt-project.org/legal
 **
@@ -31,7 +31,7 @@
 #include "clearcasesubmiteditor.h"
 #include "clearcasesubmiteditorwidget.h"
 
-#include <utils/submiteditorwidget.h>
+#include <vcsbase/submiteditorwidget.h>
 #include <vcsbase/submitfilemodel.h>
 
 using namespace ClearCase::Internal;

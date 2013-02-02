@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -29,13 +29,14 @@
 
 #include "generalsettings.h"
 #include "coreconstants.h"
+#include "icore.h"
+#include "infobar.h"
+#include "editormanager/editormanager.h"
 
 #include <utils/stylehelper.h>
 #include <utils/qtcolorbutton.h>
 #include <utils/consoleprocess.h>
 #include <utils/unixutils.h>
-#include <coreplugin/editormanager/editormanager.h>
-#include <coreplugin/icore.h>
 
 #include <QMessageBox>
 
@@ -54,7 +55,7 @@ using namespace Core::Internal;
 GeneralSettings::GeneralSettings():
     m_page(0), m_dialog(0)
 {
-    setId(QLatin1String(Core::Constants::SETTINGS_ID_ENVIRONMENT));
+    setId(Core::Constants::SETTINGS_ID_ENVIRONMENT);
     setDisplayName(tr("General"));
     setCategory(Core::Constants::SETTINGS_CATEGORY_CORE);
     setDisplayCategory(QCoreApplication::translate("Core", Core::Constants::SETTINGS_TR_CATEGORY_CORE));
@@ -65,9 +66,8 @@ static bool hasQmFilesForLocale(const QString &locale, const QString &creatorTrP
 {
     static const QString qtTrPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
 
-    const QString trFile = QLatin1String("qt_") + locale + QLatin1String(".qm");
-    return QFile::exists(qtTrPath + QLatin1Char('/') + trFile)
-            || QFile::exists(creatorTrPath + QLatin1Char('/') + trFile);
+    const QString trFile = QLatin1String("/qt_") + locale + QLatin1String(".qm");
+    return QFile::exists(qtTrPath + trFile) || QFile::exists(creatorTrPath + trFile);
 }
 
 void GeneralSettings::fillLanguageBox() const
@@ -137,8 +137,10 @@ QWidget *GeneralSettings::createPage(QWidget *parent)
     m_page->autoSaveCheckBox->setChecked(EditorManager::instance()->autoSaveEnabled());
     m_page->autoSaveInterval->setValue(EditorManager::instance()->autoSaveInterval());
 
-    connect(m_page->resetButton, SIGNAL(clicked()),
+    connect(m_page->resetColorButton, SIGNAL(clicked()),
             this, SLOT(resetInterfaceColor()));
+    connect(m_page->resetWarningsButton, SIGNAL(clicked()),
+            this, SLOT(resetWarnings()));
 #ifdef Q_OS_UNIX
     connect(m_page->resetTerminalButton, SIGNAL(clicked()),
             this, SLOT(resetTerminal()));
@@ -200,6 +202,12 @@ void GeneralSettings::finish()
 void GeneralSettings::resetInterfaceColor()
 {
     m_page->colorButton->setColor(StyleHelper::DEFAULT_BASE_COLOR);
+}
+
+void GeneralSettings::resetWarnings()
+{
+    Core::InfoBar::clearGloballySuppressed();
+    QMessageBox::information(0, tr("Reset warnings"), tr("Done"));
 }
 
 void GeneralSettings::resetTerminal()

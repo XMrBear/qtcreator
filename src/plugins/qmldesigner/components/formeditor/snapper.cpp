@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -390,14 +390,12 @@ double Snapper::snappedOffsetForLines(const SnapLineMap &snappingLineMap,
         double offset = value - snapLine;
         double distance = qAbs(offset);
 
-        if (distance < snappingDistance()) {
+        if (distance < snappingDistance())
             minimumSnappingLineMap.insert(distance, offset);
-        }
     }
 
-    if (!minimumSnappingLineMap.isEmpty()) {
+    if (!minimumSnappingLineMap.isEmpty())
         return  minimumSnappingLineMap.begin().value();
-    }
 
     return std::numeric_limits<double>::max();
 }
@@ -437,9 +435,8 @@ double Snapper::snappedOffsetForOffsetLines(const SnapLineMap &snappingOffsetMap
         }
     }
 
-    if (!minimumSnappingLineMap.isEmpty()) {
+    if (!minimumSnappingLineMap.isEmpty())
         return  minimumSnappingLineMap.begin().value();
-    }
 
     return std::numeric_limits<double>::max();
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -76,9 +76,8 @@ void LocalQmlProfilerRunner::stop()
     if (QmlProfilerPlugin::debugOutput)
         qWarning("QmlProfiler: Stopping application ...");
 
-    if (m_launcher.isRunning()) {
+    if (m_launcher.isRunning())
         m_launcher.stop();
-    }
 }
 
 quint16 LocalQmlProfilerRunner::debugPort() const

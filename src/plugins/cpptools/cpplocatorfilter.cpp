@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -47,6 +47,8 @@ CppLocatorFilter::CppLocatorFilter(CppModelManager *manager)
     : m_manager(manager),
     m_forceNewSearchList(true)
 {
+    setId("Classes and Methods");
+    setDisplayName(tr("C++ Classes and Methods"));
     setShortcutString(QString(QLatin1Char(':')));
     setIncludedByDefault(false);
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -57,7 +57,10 @@ const char USE_NINJA_KEY[] = "CMakeProjectManager.CMakeBuildConfiguration.UseNin
 CMakeBuildConfiguration::CMakeBuildConfiguration(ProjectExplorer::Target *parent) :
     BuildConfiguration(parent, Core::Id(Constants::CMAKE_BC_ID)), m_useNinja(false)
 {
-    m_buildDirectory = static_cast<CMakeProject *>(parent->project())->defaultBuildDirectory();
+    CMakeProject *project = static_cast<CMakeProject *>(parent->project());
+    m_buildDirectory = project->shadowBuildDirectory(project->document()->fileName(),
+                                                     parent->kit(),
+                                                     displayName());
 }
 
 CMakeBuildConfiguration::CMakeBuildConfiguration(ProjectExplorer::Target *parent,
@@ -170,7 +173,7 @@ CMakeBuildConfiguration *CMakeBuildConfigurationFactory::create(ProjectExplorer:
 
     bool ok = true;
     QString buildConfigurationName = name;
-    if (buildConfigurationName.isEmpty())
+    if (buildConfigurationName.isNull())
         buildConfigurationName = QInputDialog::getText(0,
                                                        tr("New Configuration"),
                                                        tr("New configuration name:"),
@@ -184,7 +187,9 @@ CMakeBuildConfiguration *CMakeBuildConfigurationFactory::create(ProjectExplorer:
     info.sourceDirectory = project->projectDirectory();
     info.environment = Utils::Environment::systemEnvironment();
     parent->kit()->addToEnvironment(info.environment);
-    info.buildDirectory = project->defaultBuildDirectory();
+    info.buildDirectory = project->shadowBuildDirectory(project->document()->fileName(),
+                                                        parent->kit(),
+                                                        buildConfigurationName);
     info.kit = parent->kit();
     info.useNinja = false; // This is ignored anyway
 
@@ -260,9 +265,8 @@ ProjectExplorer::BuildConfiguration::BuildType CMakeBuildConfiguration::buildTyp
         while (!cmakeCache.atEnd()) {
             QByteArray line = cmakeCache.readLine();
             if (line.startsWith("CMAKE_BUILD_TYPE")) {
-                if (int pos = line.indexOf('=')) {
+                if (int pos = line.indexOf('='))
                     cmakeBuildType = QString::fromLocal8Bit(line.mid(pos + 1).trimmed());
-                }
                 break;
             }
         }

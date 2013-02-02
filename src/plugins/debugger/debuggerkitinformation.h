@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -64,6 +64,8 @@ public:
 
     QList<ProjectExplorer::Task> validate(const ProjectExplorer::Kit *k) const
         { return DebuggerKitInformation::validateDebugger(k); }
+
+    void setup(ProjectExplorer::Kit *k);
 
     static QList<ProjectExplorer::Task> validateDebugger(const ProjectExplorer::Kit *k);
     static bool isValidDebugger(const ProjectExplorer::Kit *k);

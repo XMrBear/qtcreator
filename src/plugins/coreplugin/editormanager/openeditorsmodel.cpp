@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -235,9 +235,8 @@ QList<OpenEditorsModel::Entry> OpenEditorsModel::restoredEditors() const
 {
     QList<Entry> result;
     for (int i = d->m_editors.count()-1; i >= 0; --i) {
-        if (!d->m_editors.at(i).editor) {
+        if (!d->m_editors.at(i).editor)
             result.append(d->m_editors.at(i));
-        }
     }
     return result;
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -317,6 +317,9 @@ void FormEditorItem::paintPlaceHolderForInvisbleItem(QPainter *painter) const
 
 void FormEditorItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
+    if (!painter->isActive())
+        return;
+
     if (!qmlItemNode().isValid())
         return;
 

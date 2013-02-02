@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -55,6 +55,16 @@ CvsEditor::CvsEditor(const VcsBase::VcsBaseEditorParameters *type,
 {
     QTC_ASSERT(m_revisionAnnotationPattern.isValid(), return);
     QTC_ASSERT(m_revisionLogPattern.isValid(), return);
+    /* Diff format:
+    \code
+    cvs diff -d -u -r1.1 -r1.2:
+    --- mainwindow.cpp<\t>13 Jul 2009 13:50:15 -0000<tab>1.1
+    +++ mainwindow.cpp<\t>14 Jul 2009 07:09:24 -0000<tab>1.2
+    @@ -6,6 +6,5 @@
+    \endcode
+    */
+    setDiffFilePattern(QRegExp(QLatin1String("^[-+]{3} ([^\\t]+)")));
+    setLogEntryPattern(QRegExp(QLatin1String("^revision (.+)$")));
     setAnnotateRevisionTextFormat(tr("Annotate revision \"%1\""));
 }
 
@@ -113,43 +123,10 @@ QString CvsEditor::changeUnderCursor(const QTextCursor &c) const
     return QString();
 }
 
-/* \code
-cvs diff -d -u -r1.1 -r1.2:
---- mainwindow.cpp<\t>13 Jul 2009 13:50:15 -0000 <\t>1.1
-+++ mainwindow.cpp<\t>14 Jul 2009 07:09:24 -0000<\t>1.2
-@@ -6,6 +6,5 @@
-\endcode
-*/
-
-VcsBase::DiffHighlighter *CvsEditor::createDiffHighlighter() const
-{
-    const QRegExp filePattern(QLatin1String("^[-+][-+][-+] .*1\\.[\\d\\.]+$"));
-    QTC_CHECK(filePattern.isValid());
-    return new VcsBase::DiffHighlighter(filePattern);
-}
-
 VcsBase::BaseAnnotationHighlighter *CvsEditor::createAnnotationHighlighter(const QSet<QString> &changes,
                                                                            const QColor &bg) const
 {
     return new CvsAnnotationHighlighter(changes, bg);
-}
-
-QString CvsEditor::fileNameFromDiffSpecification(const QTextBlock &inBlock) const
-{
-    // "+++ mainwindow.cpp<\t>13 Jul 2009 13:50:15 -0000      1.1"
-    // Go back chunks
-    const QString diffIndicator = QLatin1String("+++ ");
-    for (QTextBlock  block = inBlock; block.isValid() ; block = block.previous()) {
-        QString diffFileName = block.text();
-        if (diffFileName.startsWith(diffIndicator)) {
-            diffFileName.remove(0, diffIndicator.size());
-            const int tabIndex = diffFileName.indexOf(QLatin1Char('\t'));
-            if (tabIndex != -1)
-                diffFileName.truncate(tabIndex);
-            return findDiffFile(diffFileName);
-        }
-    }
-    return QString();
 }
 
 QStringList CvsEditor::annotationPreviousVersions(const QString &revision) const

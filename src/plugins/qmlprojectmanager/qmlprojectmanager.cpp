@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -47,7 +47,7 @@ Manager::Manager()
 }
 
 QString Manager::mimeType() const
-{ return QLatin1String(Constants::QMLMIMETYPE); }
+{ return QLatin1String(Constants::QMLPROJECT_MIMETYPE); }
 
 ProjectExplorer::Project *Manager::openProject(const QString &fileName, QString *errorString)
 {
@@ -78,9 +78,8 @@ void Manager::unregisterProject(QmlProject *project)
 void Manager::notifyChanged(const QString &fileName)
 {
     foreach (QmlProject *project, m_projects) {
-        if (fileName == project->filesFileName()) {
+        if (fileName == project->filesFileName())
             project->refresh(QmlProject::Files);
-        }
     }
 }
 

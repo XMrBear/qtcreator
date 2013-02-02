@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -107,11 +107,10 @@ void getFrame(CIDebugSymbols *debugSymbols,
     WCHAR wBuf[MAX_PATH];
     f->address = s.InstructionOffset;
     HRESULT hr = debugSymbols->GetNameByOffsetWide(f->address, wBuf, MAX_PATH, 0, 0);
-    if (SUCCEEDED(hr)) {
+    if (SUCCEEDED(hr))
         f->function = wBuf;
-    } else {
+    else
         f->function.clear();
-    }
     ULONG64 ul64Displacement = 0;
     hr = debugSymbols->GetLineByOffsetWide(f->address, &(f->line), wBuf, MAX_PATH, 0, &ul64Displacement);
     if (SUCCEEDED(hr)) {
@@ -573,18 +572,29 @@ std::wstring memoryToHexW(CIDebugDataSpaces *ds, ULONG64 address, ULONG length,
 static StackFrames getStackTrace(CIDebugControl *debugControl,
                                  CIDebugSymbols *debugSymbols,
                                  unsigned maxFrames,
+                                 bool *incomplete,
                                  std::string *errorMessage)
 {
 
-    if (!maxFrames)
+    if (maxFrames) {
+        *incomplete = false;
+    } else {
+        *incomplete = true;
         return StackFrames();
-    DEBUG_STACK_FRAME *frames = new DEBUG_STACK_FRAME[maxFrames];
+    }
+    // Ask for one more frame to find out whether it is a complete listing.
+    const unsigned askedFrames = maxFrames + 1;
+    DEBUG_STACK_FRAME *frames = new DEBUG_STACK_FRAME[askedFrames];
     ULONG frameCount = 0;
-    const HRESULT hr = debugControl->GetStackTrace(0, 0, 0, frames, maxFrames, &frameCount);
+    const HRESULT hr = debugControl->GetStackTrace(0, 0, 0, frames, askedFrames, &frameCount);
     if (FAILED(hr)) {
         delete [] frames;
         *errorMessage = msgDebugEngineComFailed("GetStackTrace", hr);
         return StackFrames();
+    }
+    if (askedFrames == frameCount) {
+        --frameCount;
+        *incomplete = true;
     }
     StackFrames rc(frameCount, StackFrame());
     for (ULONG f = 0; f < frameCount; ++f)
@@ -598,8 +608,9 @@ std::string gdbmiStack(CIDebugControl *debugControl,
                        unsigned maxFrames,
                        bool humanReadable, std::string *errorMessage)
 {
+    bool incomplete;
     const StackFrames frames = getStackTrace(debugControl, debugSymbols,
-                                        maxFrames, errorMessage);
+                                        maxFrames, &incomplete, errorMessage);
     if (frames.empty() && maxFrames > 0)
         return std::string();
 
@@ -613,6 +624,8 @@ std::string gdbmiStack(CIDebugControl *debugControl,
         if (humanReadable)
             str << '\n';
     }
+    if (incomplete) // Empty elements indicates incomplete.
+        str <<",{}";
     str << ']';
     return str.str();
 }

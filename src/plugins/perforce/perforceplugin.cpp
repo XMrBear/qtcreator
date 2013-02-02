@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -211,7 +211,8 @@ static const VcsBase::VcsBaseSubmitEditorParameters submitParameters = {
     Perforce::Constants::SUBMIT_MIMETYPE,
     Perforce::Constants::PERFORCE_SUBMIT_EDITOR_ID,
     Perforce::Constants::PERFORCE_SUBMIT_EDITOR_DISPLAY_NAME,
-    Perforce::Constants::PERFORCESUBMITEDITOR_CONTEXT
+    Perforce::Constants::PERFORCESUBMITEDITOR_CONTEXT,
+    VcsBase::VcsBaseSubmitEditorParameters::DiffFiles
 };
 
 bool PerforcePlugin::initialize(const QStringList & /* arguments */, QString *errorMessage)
@@ -238,7 +239,7 @@ bool PerforcePlugin::initialize(const QStringList & /* arguments */, QString *er
         addAutoReleasedObject(new PerforceEditorFactory(editorParameters + i, this, describeSlot));
 
     const QString prefix = QLatin1String("p4");
-    m_commandLocator = new Locator::CommandLocator(QLatin1String("Perforce"), prefix, prefix);
+    m_commandLocator = new Locator::CommandLocator("Perforce", prefix, prefix);
     addAutoReleasedObject(m_commandLocator);
 
     Core::ActionContainer *mtools =
@@ -584,11 +585,10 @@ void PerforcePlugin::printOpenedFileList()
         const int delimiterPos = line.indexOf(delimiter);
         if (delimiterPos > 0)
             mapped = fileNameFromPerforceName(line.left(delimiterPos), true, &errorMessage);
-        if (mapped.isEmpty()) {
+        if (mapped.isEmpty())
             outWin->appendSilently(line);
-        } else {
+        else
             outWin->appendSilently(mapped + QLatin1Char(' ') + line.mid(delimiterPos));
-        }
     }
     outWin->popup(Core::IOutputPane::ModeSwitch | Core::IOutputPane::WithFocus);
 }
@@ -722,11 +722,10 @@ void PerforcePlugin::annotate(const QString &workingDir,
     const QString source = VcsBase::VcsBaseEditorWidget::getSource(workingDir, files);
     QStringList args;
     args << QLatin1String("annotate") << QLatin1String("-cqi");
-    if (changeList.isEmpty()) {
+    if (changeList.isEmpty())
         args << fileName;
-    } else {
+    else
         args << (fileName + QLatin1Char('@') + changeList);
-    }
     const PerforceResponse result = runP4Cmd(workingDir, args,
                                              CommandToWindow|StdErrToWindow|ErrorToWindow,
                                              QStringList(), QByteArray(), codec);
@@ -833,11 +832,10 @@ bool PerforcePlugin::managesDirectory(const QString &directory, QString *topLeve
 {
     const bool rc = managesDirectoryFstat(directory);
     if (topLevel) {
-        if (rc) {
+        if (rc)
             *topLevel = m_settings.topLevelSymLinkTarget();
-        } else {
+        else
             topLevel->clear();
-        }
     }
     return rc;
 }
@@ -1260,11 +1258,10 @@ void PerforcePlugin::p4Diff(const PerforceDiffParameters &p)
     if (!p.diffArguments.isEmpty()) // -duw..
         args << (QLatin1String("-d") + p.diffArguments.join(QString()));
     QStringList extraArgs;
-    if (p.files.size() > 1) {
+    if (p.files.size() > 1)
         extraArgs = p.files;
-    } else {
+    else
         args.append(p.files);
-    }
     const unsigned flags = CommandToWindow|StdErrToWindow|ErrorToWindow|OverrideDiffEnvironment;
     const PerforceResponse result = runP4Cmd(p.workingDir, args, flags,
                                              extraArgs, QByteArray(), codec);
@@ -1528,6 +1525,23 @@ void PerforcePlugin::getTopLevel()
     connect(checker, SIGNAL(succeeded(QString)),checker, SLOT(deleteLater()));
     checker->start(m_settings.p4BinaryPath(), m_settings.commonP4Arguments(QString()), 30000);
 }
+
+#ifdef WITH_TESTS
+void PerforcePlugin::testLogResolving()
+{
+    // Source: http://mail.opensolaris.org/pipermail/opengrok-discuss/2008-October/001668.html
+    QByteArray data(
+                "... #4 change 12345 edit on 2013/01/28 by User at UserWorkspaceName(text)\n"
+                "\n"
+                "        Comment\n"
+                "... #3 change 12344 edit on 2013/01/27 by User at UserWorkspaceName(text)\n"
+                "\n"
+                "        Comment\n"
+                );
+    PerforceEditor editor(editorParameters + 1, 0);
+    editor.testLogResolving(data, "12345", "12344");
+}
+#endif
 
 }
 }

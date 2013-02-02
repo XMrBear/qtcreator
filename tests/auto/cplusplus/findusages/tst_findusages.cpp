@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -81,6 +81,7 @@ private Q_SLOTS:
     void lambdaCaptureByReference();
     void shadowedNames_1();
     void shadowedNames_2();
+    void staticVariables();
 
     // Qt keywords
     void qproperty_1();
@@ -90,6 +91,9 @@ private Q_SLOTS:
 //    void objc_methods();
 //    void objc_fields();
 //    void objc_classes();
+
+    // templates
+    void instantiateTemplateWithNestedClass();
 };
 
 void tst_FindUsages::inlineMethod()
@@ -254,6 +258,52 @@ void tst_FindUsages::shadowedNames_2()
     QCOMPARE(findUsages.usages().size(), 3);
 }
 
+void tst_FindUsages::staticVariables()
+{
+    const QByteArray src = "\n"
+            "struct Outer\n"
+            "{\n"
+            "    static int Foo;\n"
+            "    struct Inner\n"
+            "    {\n"
+            "        Outer *outer;\n"
+            "        void foo();\n"
+            "    };\n"
+            "};\n"
+            "\n"
+            "int Outer::Foo = 42;\n"
+            "\n"
+            "void Outer::Inner::foo()\n"
+            "{\n"
+            "    Foo  = 7;\n"
+            "    Outer::Foo = 7;\n"
+            "    outer->Foo = 7;\n"
+            "}\n"
+            ;
+    Document::Ptr doc = Document::create("staticVariables");
+    doc->setUtf8Source(src);
+    doc->parse();
+    doc->check();
+
+    QVERIFY(doc->diagnosticMessages().isEmpty());
+    QCOMPARE(doc->globalSymbolCount(), 3U);
+
+    Snapshot snapshot;
+    snapshot.insert(doc);
+
+    Class *c = doc->globalSymbolAt(0)->asClass();
+    QVERIFY(c);
+    QCOMPARE(c->name()->identifier()->chars(), "Outer");
+    QCOMPARE(c->memberCount(), 2U);
+    Declaration *d = c->memberAt(0)->asDeclaration();
+    QVERIFY(d);
+    QCOMPARE(d->name()->identifier()->chars(), "Foo");
+
+    FindUsages findUsages(src, doc, snapshot);
+    findUsages(d);
+    QCOMPARE(findUsages.usages().size(), 5);
+}
+
 #if 0
 @interface Clazz {} +(void)method:(int)arg; @end
 @implementation Clazz +(void)method:(int)arg {
@@ -349,6 +399,49 @@ void tst_FindUsages::qproperty_1()
     findUsages(setX_method);
     QCOMPARE(findUsages.usages().size(), 2);
     QCOMPARE(findUsages.references().size(), 2);
+}
+
+void tst_FindUsages::instantiateTemplateWithNestedClass()
+{
+    const QByteArray src = "\n"
+            "struct Foo\n"
+            "{ int bar; };\n"
+            "template <typename T>\n"
+            "struct Template\n"
+            "{\n"
+            "   struct Nested\n"
+            "   {\n"
+            "       T t;\n"
+            "   }nested;\n"
+            "};\n"
+            "void f()\n"
+            "{\n"
+            "   Template<Foo> templateFoo;\n"
+            "   templateFoo.nested.t.bar;\n"
+            "}\n"
+            ;
+
+    Document::Ptr doc = Document::create("simpleTemplate");
+    doc->setUtf8Source(src);
+    doc->parse();
+    doc->check();
+
+    QVERIFY(doc->diagnosticMessages().isEmpty());
+    QCOMPARE(doc->globalSymbolCount(), 3U);
+
+    Snapshot snapshot;
+    snapshot.insert(doc);
+
+    Class *classFoo = doc->globalSymbolAt(0)->asClass();
+    QVERIFY(classFoo);
+    QCOMPARE(classFoo->memberCount(), 1U);
+    Declaration *barDeclaration = classFoo->memberAt(0)->asDeclaration();
+    QVERIFY(barDeclaration);
+    QCOMPARE(barDeclaration->name()->identifier()->chars(), "bar");
+
+    FindUsages findUsages(src, doc, snapshot);
+    findUsages(barDeclaration);
+    QCOMPARE(findUsages.usages().size(), 2);
 }
 
 QTEST_APPLESS_MAIN(tst_FindUsages)

@@ -18,11 +18,11 @@ def main():
     installLazySignalHandler("{type='Core::FutureProgress' unnamed='1'}", "finished()", "__handleFutureProgress__")
     # wait for parsing to complete
     waitForSignal("{type='CppTools::Internal::CppModelManager' unnamed='1'}", "sourceFilesRefreshed(QStringList)")
-    # open test .pro project.
-    test.verify(waitForObjectItem(":Qt Creator_Utils::NavigationTreeView", "propertyanimation"),
-                "Verifying if: Project is opened.")
     # open .cpp file in editor
-    doubleClickItem(":Qt Creator_Utils::NavigationTreeView", "propertyanimation.Sources.main\\.cpp", 5, 5, 0, Qt.LeftButton)
+    if not openDocument("propertyanimation.Sources.main\\.cpp"):
+        test.fatal("Could not open main.cpp")
+        invokeMenuItem("File", "Exit")
+        return
     test.verify(checkIfObjectExists(":Qt Creator_CppEditor::Internal::CPPEditorWidget"),
                 "Verifying if: .cpp file is opened in Edit mode.")
     # place cursor on line "QmlApplicationViewer viewer;"
@@ -39,7 +39,7 @@ def main():
     test.verify(result, "Verifying if: The list of all usages of the selected text is displayed in Search Results. "
                 "File with used text is opened.")
     # move cursor to the other word and test Find Usages function by pressing Ctrl+Shift+U.
-    doubleClickItem(":Qt Creator_Utils::NavigationTreeView", "propertyanimation.Sources.main\\.cpp", 5, 5, 0, Qt.LeftButton)
+    openDocument("propertyanimation.Sources.main\\.cpp")
     if not placeCursorToLine(editorWidget, "viewer.setOrientation(QmlApplicationViewer::ScreenOrientationAuto);"):
         return
     for i in range(4):

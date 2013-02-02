@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -92,13 +92,11 @@ void FindNodesForFileVisitor::visitProjectNode(ProjectNode *node)
 
 void FindNodesForFileVisitor::visitFolderNode(FolderNode *node)
 {
-    if (node->path() == m_path) {
+    if (node->path() == m_path)
         m_nodes << node;
-    }
     foreach (FileNode *fileNode, node->fileNodes()) {
-        if (fileNode->path() == m_path) {
+        if (fileNode->path() == m_path)
             m_nodes << fileNode;
-        }
     }
 }
 

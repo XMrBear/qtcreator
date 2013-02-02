@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -322,12 +322,12 @@ public:
     DNSServiceErrorType createConnection(MainConnection *mainConnection, ConnectionRef *sdRef) {
         if (!m_simplePollNew || !m_clientNew || !m_simplePollSetFunc)
             return kDNSServiceErr_Unknown;
-        MyAvahiConnection *connection = new MyAvahiConnection;
-        connection->lib = this;
         if (sdRef == 0) {
             qDebug() << "Error: sdRef is null in createConnection";
             return kDNSServiceErr_Unknown;
         }
+        MyAvahiConnection *connection = new MyAvahiConnection;
+        connection->lib = this;
         /* Allocate main loop object */
         connection->simple_poll = m_simplePollNew();
         if (!connection->simple_poll) {
@@ -506,9 +506,8 @@ extern "C" void cAvahiBrowseReply(
     }
 
     ServiceBrowserPrivate *browser = reinterpret_cast<ServiceBrowserPrivate *>(context);
-    if (browser == 0) {
+    if (browser == 0)
         qDebug() << "Error context is null in cAvahiBrowseReply";
-    }
     switch (event) {
         case AVAHI_BROWSER_FAILURE:
             browser->browseReply(kDNSServiceFlagsMoreComing, 0, protocol, kDNSServiceErr_Unknown,

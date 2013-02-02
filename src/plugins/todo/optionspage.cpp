@@ -1,7 +1,7 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Dmitry Savchenko
-** Copyright (c) 2010 Vasiliy Sorokin
+** Copyright (c) 2013 Dmitry Savchenko
+** Copyright (c) 2013 Vasiliy Sorokin
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -49,7 +49,7 @@ OptionsPage::OptionsPage(const Settings &settings, QObject *parent) :
 {
     setSettings(settings);
 
-    setId(QLatin1String("TodoSettings"));
+    setId("TodoSettings");
     setDisplayName(tr("To-Do"));
     setCategory("To-Do");
     setDisplayCategory(tr("To-Do"));

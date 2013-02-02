@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -145,7 +145,7 @@ private:
     Utils::ProxyAction *m_action;
     QString m_toolTip;
 
-    QMap<int, QPointer<QAction> > m_contextActionMap;
+    QMap<Id, QPointer<QAction> > m_contextActionMap;
     QMap<QAction*, bool> m_scriptableMap;
     bool m_active;
     bool m_contextInitialized;

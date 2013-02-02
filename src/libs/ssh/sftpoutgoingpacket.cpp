@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -154,7 +154,7 @@ SftpOutgoingPacket &SftpOutgoingPacket::generateCreateLink(const QString &filePa
 SftpOutgoingPacket &SftpOutgoingPacket::generateOpenFile(const QString &path,
     OpenType openType, SftpOverwriteMode mode, const QList<quint32> &attributes, quint32 requestId)
 {
-    quint32 pFlags;
+    quint32 pFlags = 0;
     switch (openType) {
     case Read:
         pFlags = SSH_FXF_READ;

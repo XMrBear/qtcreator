@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -258,6 +258,7 @@ Command *ActionManager::registerAction(QAction *action, const Id &id, const Cont
 */
 Command *ActionManager::registerShortcut(QShortcut *shortcut, const Id &id, const Context &context, bool scriptable)
 {
+    QTC_CHECK(!context.isEmpty());
     Shortcut *sc = 0;
     if (CommandPrivate *c = m_instance->d->m_idCmdMap.value(id, 0)) {
         sc = qobject_cast<Shortcut *>(c);
@@ -282,11 +283,7 @@ Command *ActionManager::registerShortcut(QShortcut *shortcut, const Id &id, cons
     shortcut->setParent(ICore::mainWindow());
     sc->setShortcut(shortcut);
     sc->setScriptable(scriptable);
-
-    if (context.isEmpty())
-        sc->setContext(Context(0));
-    else
-        sc->setContext(context);
+    sc->setContext(context);
 
     emit m_instance->commandListChanged();
     emit m_instance->commandAdded(id.toString());
@@ -445,11 +442,6 @@ bool ActionManager::isPresentationModeEnabled()
     return m_instance->d->m_presentationLabel;
 }
 
-bool ActionManager::hasContext(int context)
-{
-    return m_instance->d->m_context.contains(context);
-}
-
 /*!
     \class ActionManagerPrivate
     \inheaderfile actionmanager_p.h
@@ -471,12 +463,12 @@ ActionManagerPrivate::~ActionManagerPrivate()
     qDeleteAll(m_idCmdMap.values());
 }
 
-QDebug operator<<(QDebug in, const Context &context)
+QDebug operator<<(QDebug d, const Context &context)
 {
-    in << "CONTEXT: ";
-    foreach (int c, context)
-        in << "   " << c << Id::fromUniqueIdentifier(c).toString();
-    return in;
+    d << "CONTEXT: ";
+    foreach (Id id, context)
+        d << "   " << id.uniqueIdentifier() << " " << id.toString();
+    return d;
 }
 
 void ActionManagerPrivate::setContext(const Context &context)
@@ -571,7 +563,7 @@ void ActionManagerPrivate::initialize()
     for (int i = 0; i < shortcuts; ++i) {
         settings->setArrayIndex(i);
         const QKeySequence key(settings->value(QLatin1String(sequenceKey)).toString());
-        const Id id = Id(settings->value(QLatin1String(idKey)).toString());
+        const Id id = Id::fromSetting(settings->value(QLatin1String(idKey)));
 
         Command *cmd = ActionManager::command(id);
         if (cmd)

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Brian McGillion
+** Copyright (c) 2013 Brian McGillion
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -45,10 +45,10 @@ public:
 
     MercurialSettings *settings() const;
 
-    virtual bool synchronousClone(const QString &workingDir,
-                                  const QString &srcLocation,
-                                  const QString &dstLocation,
-                                  const QStringList &extraOptions = QStringList());
+    bool synchronousClone(const QString &workingDir,
+                          const QString &srcLocation,
+                          const QString &dstLocation,
+                          const QStringList &extraOptions = QStringList());
     bool manifestSync(const QString &repository, const QString &filename);
     QString branchQuerySync(const QString &repositoryRoot);
     QStringList parentRevisionsSync(const QString &workingDirectory,

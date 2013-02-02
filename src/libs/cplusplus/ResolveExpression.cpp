@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -357,9 +357,8 @@ void ResolveExpression::thisObject()
 bool ResolveExpression::visit(CompoundExpressionAST *ast)
 {
     CompoundStatementAST *cStmt = ast->statement;
-    if (cStmt && cStmt->statement_list) {
+    if (cStmt && cStmt->statement_list)
         accept(cStmt->statement_list->lastValue());
-    }
     return false;
 }
 
@@ -907,6 +906,8 @@ ClassOrNamespace *ResolveExpression::baseExpression(const QList<LookupItem> &bas
     TypedefsResolver typedefsResolver(_context);
 
     foreach (const LookupItem &r, baseResults) {
+        if (!r.type().type())
+            continue;
         FullySpecifiedType ty = r.type().simplified();
         FullySpecifiedType originalType = ty;
         Scope *scope = r.scope();
@@ -977,10 +978,23 @@ ClassOrNamespace *ResolveExpression::baseExpression(const QList<LookupItem> &bas
             }
         } else if (accessOp == T_DOT) {
             if (replacedDotOperator) {
-                if (PointerType *ptrTy = ty->asPointerType()) {
-                    // replace . with ->
+                *replacedDotOperator = originalType->isPointerType() || ty->isPointerType();
+                // replace . with ->
+                if (PointerType *ptrTy = originalType->asPointerType()) {
+                    // case when original type is a pointer and
+                    // typedef is for type
+                    // e.g.:
+                    // typedef S SType;
+                    // SType *p;
                     ty = ptrTy->elementType();
-                    *replacedDotOperator = true;
+                }
+                else if (PointerType *ptrTy = ty->asPointerType()) {
+                    // case when original type is a type and
+                    // typedef is for pointer of type
+                    // e.g.:
+                    // typedef S* SPTR;
+                    // SPTR p;
+                    ty = ptrTy->elementType();
                 }
             }
 

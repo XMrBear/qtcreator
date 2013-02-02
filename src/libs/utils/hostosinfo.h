@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -47,8 +47,11 @@ class QTCREATOR_UTILS_EXPORT HostOsInfo
 public:
     // Add more as needed.
     enum HostOs { HostOsWindows, HostOsLinux, HostOsMac, HostOsOtherUnix, HostOsOther };
-
     static inline HostOs hostOs();
+
+    enum HostArchitecture { HostArchitectureX86, HostArchitectureAMD64, HostArchitectureItanium,
+                            HostArchitectureArm, HostArchitectureUnknown };
+    static HostArchitecture hostArchitecture();
 
     static bool isWindowsHost() { return hostOs() == HostOsWindows; }
     static bool isLinuxHost() { return hostOs() == HostOsLinux; }

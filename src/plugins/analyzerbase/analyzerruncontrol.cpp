@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 ** Author: Andreas Hartmetz, KDAB (andreas.hartmetz@kdab.com)
 **
@@ -35,7 +35,7 @@
 #include "analyzermanager.h"
 #include "analyzerstartparameters.h"
 
-#include <projectexplorer/applicationrunconfiguration.h>
+#include <projectexplorer/localapplicationrunconfiguration.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/task.h>

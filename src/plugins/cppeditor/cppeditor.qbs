@@ -1,6 +1,8 @@
 import qbs.base 1.0
+import qbs.fileinfo as FileInfo
 
 import "../QtcPlugin.qbs" as QtcPlugin
+import "../../../qbs/defaults.js" as Defaults
 
 QtcPlugin {
     name: "CppEditor"
@@ -14,7 +16,6 @@ QtcPlugin {
     Depends { name: "cpp" }
 
     cpp.includePaths: base.concat("../../libs/3rdparty")
-    cpp.defines: base.concat(["QT_NO_CAST_FROM_ASCII"])
 
     files: [
         "CppEditor.mimetypes.xml",
@@ -58,4 +59,13 @@ QtcPlugin {
         "cpptypehierarchy.cpp",
         "cpptypehierarchy.h",
     ]
+
+    Group {
+        condition: Defaults.testsEnabled(qbs)
+        files: [
+            "cppquickfix_test.cpp"
+        ]
+
+        cpp.defines: outer.concat(['SRCDIR="' + FileInfo.path(filePath) + '"'])
+    }
 }

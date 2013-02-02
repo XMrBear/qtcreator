@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -307,9 +307,8 @@ Command *ActionContainerPrivate::addSeparator(const Context &context, const Id &
     static int separatorIdCount = 0;
     QAction *separator = new QAction(this);
     separator->setSeparator(true);
-    Command *cmd = ActionManager::registerAction(separator, Id(QString::fromLatin1("%1.Separator.%2")
-                                                 .arg(id().toString()).arg(++separatorIdCount)),
-                                                 context);
+    Id sepId = id().withSuffix(".Separator.").withSuffix(++separatorIdCount);
+    Command *cmd = ActionManager::registerAction(separator, sepId, context);
     addAction(cmd, group);
     if (outSeparator)
         *outSeparator = separator;

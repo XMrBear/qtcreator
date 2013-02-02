@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -39,7 +39,7 @@
 #include <qmlprojectmanager/qmlprojectrunconfiguration.h>
 #include <qmlprojectmanager/qmlprojectplugin.h>
 #include <projectexplorer/localapplicationruncontrol.h>
-#include <projectexplorer/applicationrunconfiguration.h>
+#include <projectexplorer/localapplicationrunconfiguration.h>
 #include <qmldebug/qmloutputparser.h>
 #include <remotelinux/remotelinuxrunconfiguration.h>
 
@@ -341,16 +341,14 @@ void QmlProfilerEngine::processIsRunning(quint16 port)
 void QmlProfilerEngine::registerProfilerStateManager( QmlProfilerStateManager *profilerState )
 {
     // disconnect old
-    if (d->m_profilerState) {
+    if (d->m_profilerState)
         disconnect(d->m_profilerState, SIGNAL(stateChanged()), this, SLOT(profilerStateChanged()));
-    }
 
     d->m_profilerState = profilerState;
 
     // connect
-    if (d->m_profilerState) {
+    if (d->m_profilerState)
         connect(d->m_profilerState, SIGNAL(stateChanged()), this, SLOT(profilerStateChanged()));
-    }
 }
 
 void QmlProfilerEngine::profilerStateChanged()

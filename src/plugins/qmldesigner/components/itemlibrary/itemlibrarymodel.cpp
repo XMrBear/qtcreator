@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -382,6 +382,9 @@ bool ItemLibraryModel::isItemVisible(int itemLibId)
 
 Import entryToImport(const ItemLibraryEntry &entry)
 {
+    if (entry.majorVersion() == -1 && entry.minorVersion() == -1)
+        return Import::createFileImport(entry.requiredImport());
+
     return Import::createLibraryImport(entry.requiredImport(), QString::number(entry.majorVersion()) + QLatin1Char('.') +
                                                                QString::number(entry.minorVersion()));
 

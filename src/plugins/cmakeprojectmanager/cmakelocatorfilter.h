@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2012 Kläralvdalens Datakonsult AB, a KDAB Group company.
+** Copyright (C) 2013 Kläralvdalens Datakonsult AB, a KDAB Group company.
 ** Contact: Kläralvdalens Datakonsult AB (info@kdab.com)
 **
 ** This file is part of Qt Creator.
@@ -44,10 +44,6 @@ class CMakeLocatorFilter : public Locator::ILocatorFilter
 public:
     CMakeLocatorFilter();
     ~CMakeLocatorFilter();
-
-    QString displayName() const { return tr("Build CMake target"); }
-    QString id() const { return QLatin1String("Build CMake target"); }
-    Priority priority() const { return Medium; }
 
     QList<Locator::FilterEntry> matchesFor(QFutureInterface<Locator::FilterEntry> &future, const QString &entry);
     void accept(Locator::FilterEntry selection) const;

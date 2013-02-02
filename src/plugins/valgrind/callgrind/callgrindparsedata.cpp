@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -137,9 +137,8 @@ void ParseData::Private::addCompressedString(NameLookupTable &lookup, const QStr
 
 void ParseData::Private::cycleDetection()
 {
-    if (m_cycleCacheValid) {
+    if (m_cycleCacheValid)
         return;
-    }
     cleanupFunctionCycles();
     Internal::CycleDetection algorithm(m_q);
     m_cycleCache = algorithm.run(m_functions);

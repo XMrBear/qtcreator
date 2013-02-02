@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -48,7 +48,7 @@ public:
     ItemLibraryView(QObject* parent = 0);
     ~ItemLibraryView();
 
-    ItemLibraryWidget *widget();
+    QWidget *widget();
 
     // AbstractView
     void modelAttached(Model *model);
@@ -89,6 +89,8 @@ public:
     void rewriterEndTransaction();
 
     void actualStateChanged(const ModelNode &node);
+
+    void setResourcePath(const QString &resourcePath);
 
 protected:
     void updateImports();

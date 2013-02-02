@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -52,9 +52,6 @@ class OpenDocumentsFilter : public Locator::ILocatorFilter
 
 public:
     explicit OpenDocumentsFilter(Core::EditorManager *editorManager);
-    QString displayName() const { return tr("Open Documents"); }
-    QString id() const { return QLatin1String("Open documents"); }
-    Locator::ILocatorFilter::Priority priority() const { return Locator::ILocatorFilter::Medium; }
     QList<Locator::FilterEntry> matchesFor(QFutureInterface<Locator::FilterEntry> &future, const QString &entry);
     void accept(Locator::FilterEntry selection) const;
     void refresh(QFutureInterface<void> &future);

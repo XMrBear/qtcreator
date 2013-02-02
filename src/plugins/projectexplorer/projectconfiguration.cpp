@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -68,11 +68,10 @@ void ProjectConfiguration::setDisplayName(const QString &name)
 {
     if (displayName() == name)
         return;
-    if (name == m_defaultDisplayName) {
+    if (name == m_defaultDisplayName)
         m_displayName.clear();
-    } else {
+    else
         m_displayName = name;
-    }
     emit displayNameChanged();
 }
 

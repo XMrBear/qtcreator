@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -138,9 +138,8 @@ NodeInstanceServerProxy::NodeInstanceServerProxy(NodeInstanceView *nodeInstanceV
    }
 
    QByteArray envImportPath = qgetenv("QTCREATOR_QMLPUPPET_PATH");
-   if (!envImportPath.isEmpty()) {
+   if (!envImportPath.isEmpty())
        applicationPath = envImportPath;
-   }
 
    QProcessEnvironment enviroment = QProcessEnvironment::systemEnvironment();
 
@@ -210,7 +209,6 @@ NodeInstanceServerProxy::NodeInstanceServerProxy(NodeInstanceView *nodeInstanceV
            }
 
        } else {
-           if (!hasQtQuick2(m_nodeInstanceView.data()))
                QMessageBox::warning(0, tr("Cannot Start QML Puppet Executable"),
                                     tr("The executable of the QML Puppet process (%1) cannot be started. "
                                        "Please check your installation. "
@@ -221,7 +219,6 @@ NodeInstanceServerProxy::NodeInstanceServerProxy(NodeInstanceView *nodeInstanceV
        m_localServer->close();
 
    } else {
-       if (!hasQtQuick2(m_nodeInstanceView.data()))
            QMessageBox::warning(0, tr("Cannot Find QML Puppet Executable"),
                                 tr("The executable of the QML Puppet process (%1) cannot be found. "
                                    "Please check your installation. "
@@ -363,9 +360,8 @@ void NodeInstanceServerProxy::readFirstDataStream()
         QDataStream in(m_firstSocket.data());
         in.setVersion(QDataStream::Qt_4_8);
 
-        if (m_firstBlockSize == 0) {
+        if (m_firstBlockSize == 0)
             in >> m_firstBlockSize;
-        }
 
         if (m_firstSocket->bytesAvailable() < m_firstBlockSize)
             break;
@@ -401,9 +397,8 @@ void NodeInstanceServerProxy::readSecondDataStream()
         QDataStream in(m_secondSocket.data());
         in.setVersion(QDataStream::Qt_4_8);
 
-        if (m_secondBlockSize == 0) {
+        if (m_secondBlockSize == 0)
             in >> m_secondBlockSize;
-        }
 
         if (m_secondSocket->bytesAvailable() < m_secondBlockSize)
             break;
@@ -439,9 +434,8 @@ void NodeInstanceServerProxy::readThirdDataStream()
         QDataStream in(m_thirdSocket.data());
         in.setVersion(QDataStream::Qt_4_8);
 
-        if (m_thirdBlockSize == 0) {
+        if (m_thirdBlockSize == 0)
             in >> m_thirdBlockSize;
-        }
 
         if (m_thirdSocket->bytesAvailable() < m_thirdBlockSize)
             break;

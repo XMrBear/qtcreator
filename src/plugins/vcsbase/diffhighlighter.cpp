@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -116,7 +116,7 @@ DiffFormats DiffHighlighterPrivate::analyzeLine(const QString &text) const
 {
     // Do not match on git "--- a/" as a deleted line, check
     // file first
-    if (m_filePattern.exactMatch(text))
+    if (m_filePattern.indexIn(text) == 0)
         return DiffFileFormat;
     if (text.startsWith(m_diffInIndicator))
         return DiffInFormat;
@@ -130,9 +130,8 @@ DiffFormats DiffHighlighterPrivate::analyzeLine(const QString &text) const
 } // namespace Internal
 
 // --- DiffHighlighter
-DiffHighlighter::DiffHighlighter(const QRegExp &filePattern,
-                                 QTextDocument *document) :
-    TextEditor::SyntaxHighlighter(document),
+DiffHighlighter::DiffHighlighter(const QRegExp &filePattern) :
+    TextEditor::SyntaxHighlighter(static_cast<QTextDocument *>(0)),
     d(new Internal::DiffHighlighterPrivate(filePattern))
 {
 }
@@ -254,11 +253,6 @@ void DiffHighlighter::setFormats(const QVector<QTextCharFormat> &s)
     } else {
         qWarning("%s: insufficient setting size: %d", Q_FUNC_INFO, s.size());
     }
-}
-
-QRegExp DiffHighlighter::filePattern() const
-{
-    return d->m_filePattern;
 }
 
 } // namespace VcsBase

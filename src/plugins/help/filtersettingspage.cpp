@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -43,7 +43,7 @@ using namespace Help::Internal;
 
 FilterSettingsPage::FilterSettingsPage()
 {
-    setId(QLatin1String("D.Filters"));
+    setId("D.Filters");
     setDisplayName(tr("Filters"));
     setCategory(Help::Constants::HELP_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("Help", Help::Constants::HELP_TR_CATEGORY));

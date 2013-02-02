@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -52,7 +52,7 @@
 #include <QScrollArea>
 #include <QDesktopServices>
 #include <QPainter>
-#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -127,7 +127,6 @@ private:
 
     QWidget *m_modeWidget;
     QDeclarativeView *m_welcomePage;
-    QHBoxLayout * buttonLayout;
     QList<QObject*> m_pluginList;
     int m_activePlugin;
     NetworkAccessManagerFactory *m_networkAccessManagerFactory;
@@ -308,11 +307,10 @@ void WelcomeMode::welcomePluginAdded(QObject *obj)
         if (pluginHash.contains(plugin->id())) {
             Utils::IWelcomePage* pluginOther = pluginHash.value(plugin->id());
 
-            if (pluginOther->priority() > plugin->priority()) {
+            if (pluginOther->priority() > plugin->priority())
                 m_pluginList.removeAll(pluginOther);
-            } else {
+            else
                 return;
-            }
         }
 
         int insertPos = 0;

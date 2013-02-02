@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -57,7 +57,6 @@
 #include <texteditor/texteditorsettings.h>
 #include <texteditor/syntaxhighlighter.h>
 #include <texteditor/refactoroverlay.h>
-#include <texteditor/tooltip/tooltip.h>
 #include <qmldesigner/qmldesignerconstants.h>
 #include <utils/changeset.h>
 #include <utils/uncommentselection.h>
@@ -73,6 +72,7 @@
 #include <QInputDialog>
 #include <QToolBar>
 #include <QTreeView>
+#include <QSharedPointer>
 
 using namespace GLSL;
 using namespace GLSLEditor;
@@ -159,7 +159,7 @@ GLSLTextEditorWidget::GLSLTextEditorWidget(QWidget *parent) :
 
     connect(this, SIGNAL(textChanged()), this, SLOT(updateDocument()));
 
-    new Highlighter(baseTextDocument());
+    new Highlighter(baseTextDocument().data());
 
 //    if (m_modelManager) {
 //        m_semanticHighlighter->setModelManager(m_modelManager);

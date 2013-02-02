@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -71,6 +71,7 @@ public:
                                      const Macro &,
                                      const QVector<MacroArgumentReference> &);
     virtual void stopExpandingMacro(unsigned, const Macro &) {}
+    virtual void markAsIncludeGuard(const QByteArray &) {}
 
     virtual void startSkippingBlocks(unsigned) {}
     virtual void stopSkippingBlocks(unsigned) {}

@@ -1,7 +1,7 @@
 /**************************************************************************
 **
-** Copyright (C) 2010 Denis Mingulov.
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Denis Mingulov.
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -60,9 +60,7 @@ protected:
       \param actionId Action's internal id
       \param id Command id
       \param title Action's title
-      \param context Current context
-      \param key Key sequence for the command
-      \return Created and registered action, 0 if something goes wrong
+      \param key Key sequence for the commands
      */
     void registerNewAction(int actionId, const Core::Id &id, const QString &title,
                            const QKeySequence &key);

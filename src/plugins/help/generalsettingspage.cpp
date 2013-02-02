@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -63,7 +63,7 @@ GeneralSettingsPage::GeneralSettingsPage()
     QWebSettings* webSettings = QWebSettings::globalSettings();
     m_font.setPointSize(webSettings->fontSize(QWebSettings::DefaultFontSize));
 #endif
-    setId(QLatin1String("A.General settings"));
+    setId("A.General settings");
     setDisplayName(tr("General"));
     setCategory(Help::Constants::HELP_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("Help", Help::Constants::HELP_TR_CATEGORY));
@@ -337,9 +337,8 @@ int GeneralSettingsPage::closestPointSizeIndex(int desiredPointSize) const
             if (closestAbsError == 0)
                 break;
         } else {    // past optimum
-            if (absError > closestAbsError) {
+            if (absError > closestAbsError)
                 break;
-            }
         }
     }
     return closestIndex;

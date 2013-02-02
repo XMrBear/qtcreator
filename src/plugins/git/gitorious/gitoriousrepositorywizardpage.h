@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -58,8 +58,8 @@ public:
                                            QWidget *parent = 0);
     ~GitoriousRepositoryWizardPage();
 
-    virtual void initializePage();
-    virtual bool isComplete() const;
+    void initializePage();
+    bool isComplete() const;
 
     QString repositoryName() const;
     QUrl repositoryURL() const;

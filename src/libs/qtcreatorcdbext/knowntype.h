@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -71,6 +71,7 @@ enum KnownType
     KT_QVariant = KT_Qt_Type + KT_Qt_MovableType + KT_HasSimpleDumper + KT_HasComplexDumper + 17,
     KT_QBasicAtomicInt = KT_Qt_Type + KT_HasSimpleDumper + 18,
     KT_QAtomicInt = KT_Qt_Type + KT_HasSimpleDumper + 19,
+    KT_QStringRef = KT_Qt_Type + KT_HasSimpleDumper + 20,
     KT_QObject = KT_Qt_Type + KT_HasSimpleDumper + KT_HasComplexDumper + 20,
     KT_QWindow = KT_Qt_Type + KT_HasSimpleDumper + KT_HasComplexDumper + 21,
     KT_QWidget = KT_Qt_Type + KT_HasSimpleDumper + KT_HasComplexDumper + 22,

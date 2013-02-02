@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -86,9 +86,8 @@ ProjectExplorer::IDevice::Ptr BlackBerryDeviceConfigurationWizard::device()
 void BlackBerryDeviceConfigurationWizard::accept()
 {
     if (m_sshKeyPage->isGenerated()) {
-        if (saveKeys()) {
+        if (saveKeys())
             QWizard::accept();
-        }
     } else {
         QWizard::accept();
     }
@@ -131,9 +130,8 @@ bool BlackBerryDeviceConfigurationWizard::saveKeys()
     pubKeyContent.append(atHost.toLocal8Bit());
 
     pubSaver.write(pubKeyContent);
-    if (!pubSaver.finalize(this)) {
+    if (!pubSaver.finalize(this))
         return false;
-    }
 
     return true;
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -48,7 +48,13 @@ class InfoBarDisplay;
 class CORE_EXPORT InfoBarEntry
 {
 public:
-    InfoBarEntry(Id _id, const QString &_infoText);
+    enum GlobalSuppressionMode
+    {
+        GlobalSuppressionDisabled,
+        GlobalSuppressionEnabled
+    };
+
+    InfoBarEntry(Id _id, const QString &_infoText, GlobalSuppressionMode _globalSuppression = GlobalSuppressionDisabled);
     InfoBarEntry(const InfoBarEntry &other) { *this = other; }
     void setCustomButtonInfo(const QString &_buttonText, QObject *_object, const char *_member);
     void setCancelButtonInfo(QObject *_object, const char *_member);
@@ -63,6 +69,7 @@ private:
     QString cancelButtonText;
     QObject *cancelObject;
     const char *cancelButtonPressMember;
+    GlobalSuppressionMode globalSuppression;
     friend class InfoBar;
     friend class InfoBarDisplay;
 };
@@ -79,6 +86,9 @@ public:
     bool canInfoBeAdded(Id id) const;
     void enableInfo(Id id);
     void clear();
+    static void globallySuppressInfo(Id id);
+    static void initializeGloballySuppressed();
+    static void clearGloballySuppressed();
 
 signals:
     void changed();
@@ -86,6 +96,7 @@ signals:
 private:
     QList<InfoBarEntry> m_infoBarEntries;
     QSet<Id> m_suppressed;
+    static QSet<Id> globallySuppressed;
     friend class InfoBarDisplay;
 };
 
@@ -100,6 +111,7 @@ public:
 
 private slots:
     void cancelButtonClicked();
+    void suppressButtonClicked();
     void update();
     void infoBarDestroyed();
     void widgetDestroyed();

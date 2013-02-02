@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -31,14 +31,14 @@
 #define PERFORCESUBMITEDITORWIDGET_H
 
 #include "ui_submitpanel.h"
-#include <utils/submiteditorwidget.h>
+#include <vcsbase/submiteditorwidget.h>
 
 namespace Perforce {
 namespace Internal {
 
 /* Submit editor widget with additional information pane
  * at the top. */
-class PerforceSubmitEditorWidget : public Utils::SubmitEditorWidget
+class PerforceSubmitEditorWidget : public VcsBase::SubmitEditorWidget
 {
 
 public:

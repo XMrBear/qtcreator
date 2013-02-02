@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 ** Author: Andreas Hartmetz, KDAB (andreas.hartmetz@kdab.com)
 **
@@ -414,9 +414,8 @@ void MemcheckErrorDelegate::copy()
     const QString relativeTo = relativeToPath();
 
     foreach (const Stack &stack, error.stacks()) {
-        if (!stack.auxWhat().isEmpty()) {
+        if (!stack.auxWhat().isEmpty())
             stream << stack.auxWhat();
-        }
         int i = 1;
         foreach (const Frame &frame, stack.frames()) {
             stream << "  " << i++ << ": " << makeFrameName(frame, relativeTo) << "\n";

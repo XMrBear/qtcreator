@@ -1,7 +1,7 @@
 TEMPLATE = lib
 TARGET = Qnx
 QT += network xml
-PROVIDER = RIM
+PROVIDER = BlackBerry
 
 include(../../qtcreatorplugin.pri)
 include(qnx_dependencies.pri)
@@ -52,7 +52,17 @@ SOURCES += qnxplugin.cpp \
     qnxdeviceconfiguration.cpp \
     blackberrydeployinformation.cpp \
     pathchooserdelegate.cpp \
-    blackberryabstractdeploystep.cpp
+    blackberryabstractdeploystep.cpp \
+    blackberryndksettingswidget.cpp \
+    blackberryndksettingspage.cpp \
+    blackberryconfiguration.cpp \
+    bardescriptormagicmatcher.cpp \
+    bardescriptoreditorfactory.cpp \
+    bardescriptoreditor.cpp \
+    bardescriptoreditorwidget.cpp \
+    bardescriptordocument.cpp \
+    bardescriptordocumentnodehandlers.cpp \
+    bardescriptorpermissionsmodel.cpp
 
 HEADERS += qnxplugin.h\
     qnxconstants.h \
@@ -101,7 +111,17 @@ HEADERS += qnxplugin.h\
     qnxdeviceconfiguration.h \
     blackberrydeployinformation.h \
     pathchooserdelegate.h \
-    blackberryabstractdeploystep.h
+    blackberryabstractdeploystep.h \
+    blackberryndksettingswidget.h \
+    blackberryndksettingspage.h \
+    blackberryconfiguration.h \
+    bardescriptormagicmatcher.h \
+    bardescriptoreditorfactory.h \
+    bardescriptoreditor.h \
+    bardescriptoreditorwidget.h \
+    bardescriptordocument.h \
+    bardescriptordocumentnodehandlers.h \
+    bardescriptorpermissionsmodel.h
 
 FORMS += \
     blackberrydeviceconfigurationwizardsetuppage.ui \
@@ -110,7 +130,9 @@ FORMS += \
     blackberrydeployconfigurationwidget.ui \
     blackberrydeviceconfigurationwidget.ui \
     qnxbaseqtconfigwidget.ui \
-    bardescriptorfileimagewizardpage.ui
+    bardescriptorfileimagewizardpage.ui \
+    blackberryndksettingswidget.ui \
+    bardescriptoreditorwidget.ui
 
 DEFINES += QT_NO_CAST_TO_ASCII QT_NO_CAST_FROM_ASCII
 

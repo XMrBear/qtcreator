@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -221,11 +221,10 @@ void SessionManager::removeDependency(Project *project, Project *depProject)
 
     QStringList proDeps = m_depMap.value(proName);
     proDeps.removeAll(depName);
-    if (proDeps.isEmpty()) {
+    if (proDeps.isEmpty())
         m_depMap.remove(proName);
-    } else {
+    else
         m_depMap[proName] = proDeps;
-    }
     emit dependencyChanged(project, depProject);
 }
 
@@ -448,11 +447,10 @@ QList<Project *> SessionManager::projectOrder(Project *project) const
     QList<Project *> result;
 
     QStringList pros;
-    if (project) {
+    if (project)
         pros = dependencies(project->document()->fileName());
-    } else {
+    else
         pros = dependenciesOrder();
-    }
 
     foreach (const QString &proFile, pros) {
         foreach (Project *pro, projects()) {

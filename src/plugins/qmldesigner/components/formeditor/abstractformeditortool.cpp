@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -193,9 +193,8 @@ static inline bool checkIfNodeIsAView(const ModelNode &node)
 
 void AbstractFormEditorTool::mousePressEvent(const QList<QGraphicsItem*> & /*itemList*/, QGraphicsSceneMouseEvent *event)
 {
-    if (event->button() == Qt::RightButton) {
+    if (event->button() == Qt::RightButton)
         event->accept();
-    }
 }
 
 void AbstractFormEditorTool::mouseReleaseEvent(const QList<QGraphicsItem*> & /*itemList*/, QGraphicsSceneMouseEvent *event)

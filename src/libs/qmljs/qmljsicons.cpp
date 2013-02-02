@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -119,12 +119,10 @@ QIcon Icons::icon(const QString &packageName, const QString typeName) const
 
 QIcon Icons::icon(Node *node) const
 {
-    if (dynamic_cast<AST::UiObjectDefinition*>(node)) {
+    if (dynamic_cast<AST::UiObjectDefinition*>(node))
         return objectDefinitionIcon();
-    }
-    if (dynamic_cast<AST::UiScriptBinding*>(node)) {
+    if (dynamic_cast<AST::UiScriptBinding*>(node))
         return scriptBindingIcon();
-    }
 
     return QIcon();
 }

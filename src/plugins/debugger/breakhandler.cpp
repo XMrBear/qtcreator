@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -398,11 +398,10 @@ void BreakHandler::loadBreakpoints()
         v = map.value(_("message"));
         if (v.isValid())
             data.message = v.toString();
-        if (data.isValid()) {
+        if (data.isValid())
             appendBreakpoint(data);
-        } else {
+        else
             qWarning("Not restoring invalid breakpoint: %s", qPrintable(data.toString()));
-        }
     }
     //qDebug() << "LOADED BREAKPOINTS" << this << list.size();
 }
@@ -1440,8 +1439,13 @@ bool BreakHandler::BreakpointItem::needsChange() const
         return true;
     if (data.command != response.command)
         return true;
-    if (data.lineNumber != response.lineNumber)
+    if (data.type == BreakpointByFileAndLine && data.lineNumber != response.lineNumber)
         return true;
+    // FIXME: Too strict, functions may have parameter lists, or not.
+    // if (data.type == BreakpointByFunction && data.functionName != response.functionName)
+    //     return true;
+    // if (data.type == BreakpointByAddress && data.address != response.address)
+    //     return true;
     return false;
 }
 

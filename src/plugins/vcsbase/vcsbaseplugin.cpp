@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -282,9 +282,8 @@ void StateListener::slotStateChanged()
                                                                     &state.currentProjectTopLevel);
         if (projectControl) {
             // If we have both, let the file's one take preference
-            if (fileControl && projectControl != fileControl) {
+            if (fileControl && projectControl != fileControl)
                 state.clearProject();
-            }
         } else {
             state.clearProject(); // No control found
         }
@@ -408,6 +407,15 @@ bool VcsBasePluginState::hasTopLevel() const
 QString VcsBasePluginState::topLevel() const
 {
     return hasFile() ? data->m_state.currentFileTopLevel : data->m_state.currentProjectTopLevel;
+}
+
+QString VcsBasePluginState::currentDirectoryOrTopLevel() const
+{
+    if (hasFile())
+        return data->m_state.currentFileDirectory;
+    else if (data->m_state.hasProject())
+        return data->m_state.currentProjectTopLevel;
+    return QString();
 }
 
 bool VcsBasePluginState::equals(const Internal::State &rhs) const
@@ -973,10 +981,8 @@ bool VcsBasePlugin::runFullySynchronous(const QString &workingDirectory,
     if (binary.isEmpty())
         return false;
 
-    VcsBase::VcsBaseOutputWindow *outputWindow = VcsBase::VcsBaseOutputWindow::instance();
-
     if (logCommandToWindow)
-        outputWindow->appendCommand(workingDirectory, binary, arguments);
+        VcsBase::VcsBaseOutputWindow::instance()->appendCommand(workingDirectory, binary, arguments);
 
     QProcess process;
     process.setWorkingDirectory(workingDirectory);

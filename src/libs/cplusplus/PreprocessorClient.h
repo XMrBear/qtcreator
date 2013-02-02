@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -68,7 +68,8 @@ class CPLUSPLUS_EXPORT Client
 public:
   enum IncludeType {
     IncludeLocal,
-    IncludeGlobal
+    IncludeGlobal,
+    IncludeNext
   };
 
 public:
@@ -88,6 +89,9 @@ public:
                                    const QVector<MacroArgumentReference> &actuals
                                             = QVector<MacroArgumentReference>()) = 0;
   virtual void stopExpandingMacro(unsigned offset, const Macro &macro) = 0;
+
+  /// Mark the given macro name as the include guard for the current file.
+  virtual void markAsIncludeGuard(const QByteArray &macroName) = 0;
 
   /// Start skipping from the given offset.
   virtual void startSkippingBlocks(unsigned offset) = 0;

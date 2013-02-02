@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -553,9 +553,8 @@ QList<WizardProgressItem *> WizardProgressPrivate::singlePathBetween(WizardProgr
         if (itItem.value().count() != 1)
             return QList<WizardProgressItem *>();
         it = itItem.value().constBegin().key();
-        if (it == item) {
+        if (it == item)
             return path;
-        }
         itItem = visitedItemsToParents.constFind(it);
     }
     return QList<WizardProgressItem *>();

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -38,24 +38,20 @@
 
 namespace Locator {
 
-struct CommandLocatorPrivate {
-    CommandLocatorPrivate(const QString &prefix,
-                          const QString &displayName) :
-        m_prefix(prefix), m_displayName(displayName) {}
-
-    const QString m_prefix;
-    const QString m_displayName;
-
+struct CommandLocatorPrivate
+{
     QList<Core::Command *> commands;
 };
 
-CommandLocator::CommandLocator(const QString &prefix,
+CommandLocator::CommandLocator(Core::Id id,
                                const QString &displayName,
                                const QString &shortCutString,
                                QObject *parent) :
     Locator::ILocatorFilter(parent),
-    d(new CommandLocatorPrivate(prefix, displayName))
+    d(new CommandLocatorPrivate)
 {
+    setId(id);
+    setDisplayName(displayName);
     setShortcutString(shortCutString);
 }
 
@@ -67,21 +63,6 @@ CommandLocator::~CommandLocator()
 void CommandLocator::appendCommand(Core::Command *cmd)
 {
     d->commands.push_back(cmd);
-}
-
-QString CommandLocator::displayName() const
-{
-    return d->m_displayName;
-}
-
-QString CommandLocator::id() const
-{
-    return d->m_prefix;
-}
-
-ILocatorFilter::Priority CommandLocator::priority() const
-{
-    return Medium;
 }
 
 QList<Locator::FilterEntry> CommandLocator::matchesFor(QFutureInterface<Locator::FilterEntry> &future, const QString &entry)
@@ -99,9 +80,8 @@ QList<Locator::FilterEntry> CommandLocator::matchesFor(QFutureInterface<Locator:
                 if (action->isEnabled()) {
                 QString text = action->text();
                 text.remove(ampersand);
-                if (text.contains(entry, Qt::CaseInsensitive)) {
+                if (text.contains(entry, Qt::CaseInsensitive))
                     filters.append(FilterEntry(this, text, QVariant(i)));
-                }
             }
         }
     }

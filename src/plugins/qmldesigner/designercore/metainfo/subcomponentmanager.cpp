@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -100,9 +100,8 @@ static inline bool checkIfDerivedFromItem(const QString &fileName)
     document->parseQml();
 
 
-    if (!document->isParsedCorrectly()) {
+    if (!document->isParsedCorrectly())
         return false;
-    }
 
     snapshot.insert(document);
 
@@ -221,9 +220,8 @@ void SubComponentManager::parseDirectories()
     foreach (const Import &import, m_imports) {
         if (import.isFileImport()) {
             QFileInfo dirInfo = QFileInfo(m_filePath.resolved(import.file()).toLocalFile());
-            if (dirInfo.exists() && dirInfo.isDir()) {
-                parseDirectory(dirInfo.canonicalFilePath());
-            }
+            if (dirInfo.exists() && dirInfo.isDir())
+                parseDirectory(dirInfo.canonicalFilePath(), true, dirInfo.baseName());
         } else {
             QString url = import.url();
             foreach (const QString &path, importPaths()) {
@@ -252,6 +250,7 @@ void SubComponentManager::parseDirectory(const QString &canonicalDirPath, bool a
         foreach (const QFileInfo &metaInfoFile, designerDir.entryInfoList(QDir::Files)) {
             if (model() && model()->metaInfo().itemLibraryInfo()) {
                 Internal::MetaInfoReader reader(model()->metaInfo());
+                reader.setQualifcation(qualification);
                 try {
                     reader.readMetaInfoFile(metaInfoFile.absoluteFilePath(), true);
                 } catch (InvalidMetaInfoException &e) {
@@ -263,9 +262,8 @@ void SubComponentManager::parseDirectory(const QString &canonicalDirPath, bool a
                 }
             }
         }
-        if (!metaFiles.isEmpty()) {
+        if (!metaFiles.isEmpty())
             return;
-        }
     }
 
     if (debug)
@@ -338,9 +336,8 @@ void SubComponentManager::parseFile(const QString &canonicalFilePath, bool addTo
         qDebug() << Q_FUNC_INFO << canonicalFilePath;
 
     QFile file(canonicalFilePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
-    }
 
     QString dir = QFileInfo(canonicalFilePath).path();
     foreach (const QString &qualifier, m_dirToQualifier.values(dir)) {
@@ -361,9 +358,8 @@ QList<QFileInfo> SubComponentManager::watchedFiles(const QString &canonicalDirPa
 
     foreach (const QString &monitoredFile, m_watcher.files()) {
         QFileInfo fileInfo(monitoredFile);
-        if (fileInfo.dir().absolutePath() == canonicalDirPath) {
+        if (fileInfo.dir().absolutePath() == canonicalDirPath)
             files.append(fileInfo);
-        }
     }
     return files;
 }
@@ -394,7 +390,15 @@ void SubComponentManager::registerQmlFile(const QFileInfo &fileInfo, const QStri
         return;
 
     QString componentName = fileInfo.baseName();
+    const QString baseComponentName = componentName;
 
+    QString fixedQualifier = qualifier;
+    if (!qualifier.isEmpty()) {
+        fixedQualifier = qualifier;
+        if (qualifier.right(1) == QLatin1String("."))
+            fixedQualifier.chop(1); //remove last char if it is a dot
+        componentName = fixedQualifier + '.' + componentName;
+    }
 
     if (debug)
         qDebug() << "SubComponentManager" << __FUNCTION__ << componentName;
@@ -403,11 +407,11 @@ void SubComponentManager::registerQmlFile(const QFileInfo &fileInfo, const QStri
         // Add file components to the library
         ItemLibraryEntry itemLibraryEntry;
         itemLibraryEntry.setType(componentName, -1, -1);
-        itemLibraryEntry.setName(componentName);
+        itemLibraryEntry.setName(baseComponentName);
         itemLibraryEntry.setCategory("QML Components");
         if (!qualifier.isEmpty()) {
             itemLibraryEntry.setForceImport(true);
-            itemLibraryEntry.setRequiredImport(qualifier);
+            itemLibraryEntry.setRequiredImport(fixedQualifier);
         }
 
 
@@ -469,9 +473,8 @@ void SubComponentManager::update(const QUrl &filePath, const QList<Import> &impo
                 m_watcher.removePath(oldDir.filePath());
         }
 
-        if (!newDir.filePath().isEmpty()) {
+        if (!newDir.filePath().isEmpty())
             m_dirToQualifier.insertMulti(newDir.canonicalFilePath(), QString());
-        }
     }
 
     //

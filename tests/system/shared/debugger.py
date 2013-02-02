@@ -1,7 +1,7 @@
 import re
 
-def handleDebuggerWarnings(config):
-    if "MSVC" in config:
+def handleDebuggerWarnings(config, isMsvcBuild=False):
+    if isMsvcBuild:
         try:
             popup = waitForObject("{text?='<html><head/><body>*' type='QLabel' unnamed='1' visible='1' window=':Symbol Server_Utils::CheckableMessageBox'}", 10000)
             symServerNotConfiged = ("<html><head/><body><p>The debugger is not configured to use the public "
@@ -40,18 +40,6 @@ def takeDebuggerLog():
 # on the given file,line pairs inside the given list of dicts
 # the lines are treated as regular expression
 def setBreakpointsForCurrentProject(filesAndLines):
-    # internal helper for setBreakpointsForCurrentProject
-    # double clicks the treeElement inside the given navTree
-    # TODO: merge with doubleClickFile() from tst_qml_editor & move to utils(?)
-    def __doubleClickFile__(navTree, treeElement):
-        waitForObjectItem(navTree, treeElement)
-        fileNamePattern = re.compile(".*\.(?P<file>(.*\\\..*)?)$")
-        fileName = fileNamePattern.search(treeElement).group("file").replace("\\.", ".")
-        doubleClickItem(navTree, treeElement, 5, 5, 0, Qt.LeftButton)
-        mainWindow = waitForObject(":Qt Creator_Core::Internal::MainWindow")
-        waitFor('fileName in str(mainWindow.windowTitle)', 5000)
-        return fileName
-
     switchViewTo(ViewConstants.DEBUG)
     removeOldBreakpoints()
     if not filesAndLines or not isinstance(filesAndLines, (list,tuple)):
@@ -61,12 +49,13 @@ def setBreakpointsForCurrentProject(filesAndLines):
                             "window=':Qt Creator_Core::Internal::MainWindow'}")
     for current in filesAndLines:
         for curFile,curLine in current.iteritems():
-            fName = __doubleClickFile__(navTree, curFile)
+            if not openDocument(curFile):
+                return False
             editor = getEditorForFileSuffix(curFile)
             if not placeCursorToLine(editor, curLine, True):
                 return False
             invokeMenuItem("Debug", "Toggle Breakpoint")
-            test.log('Set breakpoint in %s' % fName, curLine)
+            test.log('Set breakpoint in %s' % curFile, curLine)
     try:
         breakPointTreeView = waitForObject(":Breakpoints_Debugger::Internal::BreakTreeView")
         waitFor("breakPointTreeView.model().rowCount() == len(filesAndLines)", 2000)
@@ -99,16 +88,19 @@ def removeOldBreakpoints():
     return test.compare(model.rowCount(), 0, "Check if all breakpoints have been removed.")
 
 # function to do simple debugging of the current (configured) project
+# param kitCount specifies the number of kits currently defined (must be correct!)
+# param currentKit specifies the target to use (zero based index)
+# param currentConfigName is the name of the configuration that should be used
 # param pressContinueCount defines how often it is expected to press
 #       the 'Continue' button while debugging
 # param expectedBPOrder holds a list of dicts where the dicts contain always
 #       only 1 key:value pair - the key is the name of the file, the value is
 #       line number where the debugger should stop
-def doSimpleDebugging(currentConfigName, pressContinueCount=1, expectedBPOrder=[]):
+def doSimpleDebugging(kitCount, currentKit, currentConfigName, pressContinueCount=1, expectedBPOrder=[]):
     expectedLabelTexts = ['Stopped\.', 'Stopped at breakpoint \d+ \(\d+\) in thread \d+\.']
     if len(expectedBPOrder) == 0:
         expectedLabelTexts.append("Running\.")
-    if not __startDebugger__(currentConfigName):
+    if not __startDebugger__(kitCount, currentKit, currentConfigName):
         return False
     statusLabel = findObject(":Debugger Toolbar.StatusText_Utils::StatusLabel")
     test.log("Continuing debugging %d times..." % pressContinueCount)
@@ -139,9 +131,22 @@ def doSimpleDebugging(currentConfigName, pressContinueCount=1, expectedBPOrder=[
             # if stopping failed - debugger had already stopped
             return True
 
-def __startDebugger__(config):
+# param kitCount specifies the number of kits currently defined (must be correct!)
+# param currentKit specifies the target to use (zero based index)
+def isMsvcConfig(kitCount, currentKit):
+    switchViewTo(ViewConstants.PROJECTS)
+    switchToBuildOrRunSettingsFor(kitCount, currentKit, ProjectSettings.BUILD)
+    isMsvc = " -spec win32-msvc" in str(waitForObject(":qmakeCallEdit").text)
+    switchViewTo(ViewConstants.EDIT)
+    return isMsvc
+
+# param kitCount specifies the number of kits currently defined (must be correct!)
+# param currentKit specifies the target to use (zero based index)
+# param config is the name of the configuration that should be used
+def __startDebugger__(kitCount, currentKit, config):
+    isMsvcBuild = isMsvcConfig(kitCount, currentKit)
     clickButton(waitForObject(":*Qt Creator.Start Debugging_Core::Internal::FancyToolButton"))
-    handleDebuggerWarnings(config)
+    handleDebuggerWarnings(config, isMsvcBuild)
     hasNotTimedOut = waitFor("object.exists(':Debugger Toolbar.Continue_QToolButton')", 60000)
     try:
         mBox = findObject(":Failed to start application_QMessageBox")

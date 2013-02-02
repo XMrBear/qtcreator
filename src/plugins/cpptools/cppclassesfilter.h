@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -42,10 +42,6 @@ class CPPTOOLS_EXPORT CppClassesFilter : public Internal::CppLocatorFilter
 public:
     CppClassesFilter(Internal::CppModelManager *manager);
     ~CppClassesFilter();
-
-    QString displayName() const { return tr("C++ Classes"); }
-    QString id() const { return QLatin1String("Classes"); }
-    Priority priority() const { return Medium; }
 };
 
 } // namespace CppTools

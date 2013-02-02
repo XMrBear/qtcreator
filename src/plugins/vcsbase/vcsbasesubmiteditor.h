@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -38,17 +38,16 @@
 
 QT_BEGIN_NAMESPACE
 class QIcon;
-class QAbstractItemModel;
 class QAction;
 QT_END_NAMESPACE
-
-namespace Utils { class SubmitEditorWidget; }
 
 namespace VcsBase {
 namespace Internal {
     class CommonVcsSettings;
 }
 struct VcsBaseSubmitEditorPrivate;
+class SubmitEditorWidget;
+class SubmitFileModel;
 
 class VCSBASE_EXPORT VcsBaseSubmitEditorParameters
 {
@@ -57,12 +56,12 @@ public:
     const char *id;
     const char *displayName;
     const char *context;
+    enum DiffType { DiffRows, DiffFiles } diffType;
 };
 
 class VCSBASE_EXPORT VcsBaseSubmitEditor : public Core::IEditor
 {
     Q_OBJECT
-    Q_PROPERTY(int fileNameColumn READ fileNameColumn WRITE setFileNameColumn DESIGNABLE false)
     Q_PROPERTY(QAbstractItemView::SelectionMode fileListSelectionMode READ fileListSelectionMode WRITE setFileListSelectionMode DESIGNABLE true)
     Q_PROPERTY(bool lineWrap READ lineWrap WRITE setLineWrap DESIGNABLE true)
     Q_PROPERTY(int lineWrapWidth READ lineWrapWidth WRITE setLineWrapWidth DESIGNABLE true)
@@ -71,7 +70,7 @@ class VCSBASE_EXPORT VcsBaseSubmitEditor : public Core::IEditor
 
 protected:
     explicit VcsBaseSubmitEditor(const VcsBaseSubmitEditorParameters *parameters,
-                                 Utils::SubmitEditorWidget *editorWidget);
+                                 SubmitEditorWidget *editorWidget);
 
 public:
     // Register the actions with the submit editor widget.
@@ -94,9 +93,6 @@ public:
                                     bool *promptSetting,
                                     bool forcePrompt = false,
                                     bool canCommitOnFailure = true) const;
-
-    int fileNameColumn() const;
-    void setFileNameColumn(int c);
 
     QAbstractItemView::SelectionMode fileListSelectionMode() const;
     void setFileListSelectionMode(QAbstractItemView::SelectionMode sm);
@@ -132,9 +128,10 @@ public:
 
     QStringList checkedFiles() const;
 
-    void setFileModel(QAbstractItemModel *m, const QString &repositoryDirectory = QString());
-    QAbstractItemModel *fileModel() const;
+    void setFileModel(SubmitFileModel *m, const QString &repositoryDirectory = QString());
+    SubmitFileModel *fileModel() const;
     virtual void updateFileModel() { }
+    QStringList rowsToFiles(const QList<int> &rows) const;
 
     // Utilities returning some predefined icons for actions
     static QIcon diffIcon();
@@ -153,9 +150,10 @@ public:
 
 signals:
     void diffSelectedFiles(const QStringList &files);
+    void diffSelectedFiles(const QList<int> &rows);
 
 private slots:
-    void slotDiffSelectedVcsFiles(const QStringList &rawList);
+    void slotDiffSelectedVcsFiles(const QList<int> &rawList);
     bool save(QString *errorString, const QString &fileName, bool autoSave);
     void slotDescriptionChanged();
     void slotCheckSubmitMessage();

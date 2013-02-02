@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -188,9 +188,8 @@ QVariant CallModel::data(const QModelIndex &index, int role) const
         return parentCost;
     }
 
-    if (role == FunctionCallRole) {
+    if (role == FunctionCallRole)
         return QVariant::fromValue(call);
-    }
 
     if (role == RelativeTotalCostRole) {
         const quint64 totalCost = d->m_data->totalCost(d->m_event);

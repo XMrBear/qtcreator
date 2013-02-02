@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -168,11 +168,10 @@ void QmlProjectRunConfigurationWidget::updateFileComboBox()
             currentIndex = item->index();
     }
 
-    if (currentIndex.isValid()) {
+    if (currentIndex.isValid())
         m_fileListCombo->setCurrentIndex(currentIndex.row());
-    } else {
+    else
         m_fileListCombo->setCurrentIndex(0);
-    }
 }
 
 void QmlProjectRunConfigurationWidget::setMainScript(int index)

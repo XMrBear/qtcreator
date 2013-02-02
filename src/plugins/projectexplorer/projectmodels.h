@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -93,10 +93,16 @@ private slots:
     void filesAboutToBeRemoved(FolderNode *folder, const QList<FileNode*> &staleFiles);
     void filesRemoved();
 
+    void nodeSortKeyAboutToChange(Node *node);
+    void nodeSortKeyChanged();
+
+    void nodeUpdated(ProjectExplorer::Node *node);
+
 private:
     void added(FolderNode* folderNode, const QList<Node*> &newNodeList);
     void removed(FolderNode* parentNode, const QList<Node*> &newNodeList);
     void removeFromCache(QList<FolderNode *> list);
+    void changedSortKey(FolderNode *folderNode, Node *node);
     void fetchMore(FolderNode *foldernode) const;
 
     void recursiveAddFolderNodes(FolderNode *startNode, QList<Node *> *list, const QSet<Node *> &blackList = QSet<Node*>()) const;
@@ -115,6 +121,7 @@ private:
     ProjectNode *m_startupProject;
 
     FolderNode *m_parentFolderForChange;
+    Node *m_nodeForSortKeyChange;
 
     friend class FlatModelManager;
 };

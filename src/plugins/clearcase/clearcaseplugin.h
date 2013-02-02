@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 AudioCodes Ltd.
+** Copyright (c) 2013 AudioCodes Ltd.
 ** Author: Orgad Shaneh <orgad.shaneh@audiocodes.com>
 ** Contact: http://www.qt-project.org/legal
 **
@@ -192,6 +192,11 @@ private slots:
     void syncSlot();
     void closing();
     void updateStatusActions();
+#ifdef WITH_TESTS
+    void testDiffFileResolving_data();
+    void testDiffFileResolving();
+    void testLogResolving();
+#endif
 
 protected:
     void updateActions(VcsBase::VcsBasePlugin::ActionState);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -36,7 +36,7 @@
 
 namespace QmlDesigner {
 
-class CORESHARED_EXPORT ByteArrayModifier: public PlainTextEditModifier
+class QMLDESIGNERCORE_EXPORT ByteArrayModifier: public PlainTextEditModifier
 {
 public:
     static ByteArrayModifier* create(const QString& data);

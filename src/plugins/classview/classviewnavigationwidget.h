@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Denis Mingulov
+** Copyright (c) 2013 Denis Mingulov
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -112,7 +112,7 @@ public slots:
 
     /*!
        \brief Receive a new data for the tree
-       \param Result - root item
+       \param result Pointer to the Class View model root item, method does nothing if null passed
      */
     void onDataUpdate(QSharedPointer<QStandardItem> result);
 
@@ -125,8 +125,8 @@ public slots:
 protected:
     /*!
        \brief Fetch data for expanded items - to be sure that content will exist
-       \param item
-       \param target
+       \param item - does nothing if null
+       \param target - does nothing if null
      */
     void fetchExpandedItems(QStandardItem *item, const QStandardItem *target) const;
 

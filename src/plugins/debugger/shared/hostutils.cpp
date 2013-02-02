@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -194,9 +194,8 @@ void formatWindowsException(unsigned long code, quint64 address,
         break;
     }
     str << ", flags=0x" << flags;
-    if (flags == EXCEPTION_NONCONTINUABLE) {
+    if (flags == EXCEPTION_NONCONTINUABLE)
         str << " (execution cannot be continued)";
-    }
     str.setIntegerBase(10);
 }
 

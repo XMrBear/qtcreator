@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -77,9 +77,8 @@ protected:
 
     virtual bool preVisit(QmlJS::AST::Node *node)
     {
-        if (QmlJS::AST::cast<QmlJS::AST::UiQualifiedId *>(node)) {
+        if (QmlJS::AST::cast<QmlJS::AST::UiQualifiedId *>(node))
             return false;
-        }
         return containsLocation(node->firstSourceLocation(), node->lastSourceLocation());
     }
 
@@ -130,7 +129,7 @@ void QmlProfilerDetailsRewriter::requestDetailsForLocation(int type,
     QFileInfo fileInfo(localFile);
     if (!fileInfo.exists() || !fileInfo.isReadable())
         return;
-    if (QmlJSTools::languageOfFile(localFile) != QmlJS::Document::QmlLanguage)
+    if (!QmlJS::Document::isQmlLikeLanguage(QmlJSTools::languageOfFile(localFile)))
         return;
 
     PendingEvent ev = {location, localFile, type};

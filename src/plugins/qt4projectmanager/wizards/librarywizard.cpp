@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -99,7 +99,7 @@ Core::GeneratedFiles LibraryWizard::generateFiles(const QWizard *w,
     // Create files: global header for shared libs
     QString globalHeaderFileName;
     if (projectParams.type == QtProjectParameters::SharedLibrary) {
-        const QString globalHeaderName = buildFileName(projectPath, projectParams.fileName + QLatin1String(sharedHeaderPostfixC), headerSuffix());
+        const QString globalHeaderName = buildFileName(projectPath, projectParams.fileName.toLower() + QLatin1String(sharedHeaderPostfixC), headerSuffix());
         Core::GeneratedFile globalHeader(globalHeaderName);
         globalHeaderFileName = QFileInfo(globalHeader.path()).fileName();
         globalHeader.setContents(CppTools::AbstractEditorSupport::licenseTemplate(globalHeaderFileName)

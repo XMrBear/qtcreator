@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -65,11 +65,10 @@ void BaseQmlDebuggerClient::statusChanged(QmlDebug::ClientStatus status)
 
 void BaseQmlDebuggerClient::sendMessage(const QByteArray &msg)
 {
-    if (status() == QmlDebug::Enabled) {
+    if (status() == QmlDebug::Enabled)
         QmlDebugClient::sendMessage(msg);
-    } else {
+    else
         d->sendBuffer.append(msg);
-    }
 }
 
 void BaseQmlDebuggerClient::flushSendBuffer()

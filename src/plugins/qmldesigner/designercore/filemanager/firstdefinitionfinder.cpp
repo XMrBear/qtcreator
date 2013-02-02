@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -78,9 +78,8 @@ void FirstDefinitionFinder::extractFirstObjectDefinition(UiObjectInitializer* as
         return;
 
     for (UiObjectMemberList *iter = ast->members; iter; iter = iter->next) {
-        if (UiObjectDefinition *def = cast<UiObjectDefinition*>(iter->member)) {
+        if (UiObjectDefinition *def = cast<UiObjectDefinition*>(iter->member))
             m_firstObjectDefinition = def;
-        }
     }
 }
 

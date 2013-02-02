@@ -11,13 +11,12 @@ QtcPlugin {
     Depends { name: "Qt"; submodules: ["widgets", "xml", "network"] }
 
     property bool enable: false
-    property var pluginspecreplacements: ({"UPDATEINFO_EXPERIMENTAL_STR": (enable ? "false": "true")})
+    pluginspecreplacements: ({"UPDATEINFO_EXPERIMENTAL_STR": (enable ? "false": "true")})
 
     cpp.includePaths: [
         "..",
         buildDirectory,
     ]
-    cpp.defines: base.concat(["QT_NO_CAST_FROM_ASCII"])
 
     files: [
         "updateinfobutton.cpp",

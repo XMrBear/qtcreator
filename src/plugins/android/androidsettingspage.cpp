@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 BogDan Vatra <bog_dan_ro@yahoo.com>
+** Copyright (c) 2013 BogDan Vatra <bog_dan_ro@yahoo.com>
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -40,7 +40,7 @@ namespace Internal {
 AndroidSettingsPage::AndroidSettingsPage(QObject *parent)
     : Core::IOptionsPage(parent)
 {
-    setId(QLatin1String(Constants::ANDROID_SETTINGS_ID));
+    setId(Constants::ANDROID_SETTINGS_ID);
     setDisplayName(tr("Android Configurations"));
     setCategory(Constants::ANDROID_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("Android",

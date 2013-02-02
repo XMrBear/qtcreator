@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -124,9 +124,8 @@ QmlItemNode QmlModelView::createQmlItemNodeFromImage(const QString &imageName, c
             }
         }
 
-        if (!model()->imports().contains(newImport)) {
+        if (!model()->imports().contains(newImport))
             model()->changeImports(QList<Import>() << newImport, QList<Import>());
-        }
 
         QList<QPair<QString, QVariant> > propertyPairList;
         propertyPairList.append(qMakePair(QString("x"), QVariant( round(position.x(), 4))));
@@ -192,7 +191,12 @@ QmlItemNode QmlModelView::createQmlItemNode(const ItemLibraryEntry &itemLibraryE
 
             if (!itemLibraryEntry.requiredImport().isEmpty()) {
                 const QString newImportVersion = QString("%1.%2").arg(QString::number(itemLibraryEntry.majorVersion()), QString::number(itemLibraryEntry.minorVersion()));
+
                 Import newImport = Import::createLibraryImport(newImportUrl, newImportVersion);
+                if (itemLibraryEntry.majorVersion() == -1 && itemLibraryEntry.minorVersion() == -1)
+                    newImport = Import::createFileImport(newImportUrl, QString());
+                else
+                    newImport = Import::createLibraryImport(newImportUrl, newImportVersion);
 
                 foreach (const Import &import, model()->imports()) {
                     if (import.isLibraryImport()
@@ -204,9 +208,8 @@ QmlItemNode QmlModelView::createQmlItemNode(const ItemLibraryEntry &itemLibraryE
                     }
                 }
 
-                if (!model()->hasImport(newImport, true, true)) {
+                if (!model()->hasImport(newImport, true, true))
                     model()->changeImports(QList<Import>() << newImport, QList<Import>());
-                }
             }
         }
 
@@ -231,7 +234,7 @@ QmlItemNode QmlModelView::createQmlItemNode(const ItemLibraryEntry &itemLibraryE
             QScopedPointer<RewriterView> rewriterView(new RewriterView(RewriterView::Amend, 0));
             rewriterView->setCheckSemanticErrors(false);
             rewriterView->setTextModifier(&modifier);
-            inputModel->attachView(rewriterView.data());
+            inputModel->setRewriterView(rewriterView.data());
 
             if (rewriterView->errors().isEmpty() && rewriterView->rootModelNode().isValid()) {
                 ModelNode rootModelNode = rewriterView->rootModelNode();
@@ -245,9 +248,8 @@ QmlItemNode QmlModelView::createQmlItemNode(const ItemLibraryEntry &itemLibraryE
             }
         }
 
-        if (parentNode.hasDefaultProperty()) {
+        if (parentNode.hasDefaultProperty())
             parentNode.nodeAbstractProperty(parentNode.defaultProperty()).reparentHere(newNode);
-        }
 
         if (!newNode.isValid())
             return newNode;
@@ -478,11 +480,10 @@ ModelNode QmlModelView::createQmlState(const QmlDesigner::PropertyListType &prop
 
     QTC_CHECK(rootModelNode().majorQtQuickVersion() < 3);
 
-    if (rootModelNode().majorQtQuickVersion() > 1) {
+    if (rootModelNode().majorQtQuickVersion() > 1)
         return createModelNode("QtQuick.State", 2, 0, propertyList);
-    } else {
+    else
         return createModelNode("QtQuick.State", 1, 0, propertyList);
-    }
 }
 
 

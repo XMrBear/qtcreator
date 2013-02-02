@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -128,9 +128,8 @@ void StyleAnimator::timerEvent(QTimerEvent *)
             delete a;
         }
     }
-    if (animations.size() == 0 && animationTimer.isActive()) {
+    if (animations.size() == 0 && animationTimer.isActive())
         animationTimer.stop();
-    }
 }
 
 void StyleAnimator::stopAnimation(const QWidget *w)
@@ -148,7 +147,6 @@ void StyleAnimator::startAnimation(Animation *t)
 {
     stopAnimation(t->widget());
     animations.append(t);
-    if (animations.size() > 0 && !animationTimer.isActive()) {
+    if (animations.size() > 0 && !animationTimer.isActive())
         animationTimer.start(35, this);
-    }
 }

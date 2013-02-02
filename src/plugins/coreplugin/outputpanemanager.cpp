@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -275,7 +275,7 @@ void OutputPaneManager::init()
 
         QString actionId = QLatin1String("QtCreator.Pane.") + outPane->displayName().simplified();
         actionId.remove(QLatin1Char(' '));
-        Id id(actionId);
+        Id id = Id::fromString(actionId);
         QAction *action = new QAction(outPane->displayName(), this);
         Command *cmd = ActionManager::registerAction(action, id, globalContext);
 
@@ -317,11 +317,10 @@ void OutputPaneManager::shortcutTriggered()
     // then just give it focus.
     int current = currentIndex();
     if (OutputPanePlaceHolder::isCurrentVisible() && current == idx) {
-        if (!outputPane->hasFocus() && outputPane->canFocus()) {
+        if (!outputPane->hasFocus() && outputPane->canFocus())
             outputPane->setFocus();
-        } else {
+        else
             slotHide();
-        }
     } else {
         // Else do the same as clicking on the button does.
         buttonTriggered(idx);

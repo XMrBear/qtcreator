@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -32,9 +32,11 @@
 
 #include <utils/hostosinfo.h>
 #include <utils/qtcassert.h>
+#include <utils/qtcprocess.h>
 
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/variablechooser.h>
+#include <coreplugin/variablemanager.h>
 
 #include <QTextStream>
 #include <QFile>
@@ -181,9 +183,8 @@ QModelIndex ExternalToolModel::index(int row, int column, const QModelIndex &par
         QString category = categoryForIndex(parent, &found);
         if (found) {
             QList<ExternalTool *> items = m_tools.value(category);
-            if (row < items.count()) {
+            if (row < items.count())
                 return createIndex(row, 0, items.at(row));
-            }
         }
     } else if (column == 0 && row < m_tools.keys().count()) {
         return createIndex(row, 0);
@@ -210,14 +211,12 @@ int ExternalToolModel::rowCount(const QModelIndex &parent) const
 {
     if (!parent.isValid())
         return m_tools.keys().count();
-    if (toolForIndex(parent)) {
+    if (toolForIndex(parent))
         return 0;
-    }
     bool found;
     QString category = categoryForIndex(parent, &found);
-    if (found) {
+    if (found)
         return m_tools.value(category).count();
-    }
 
     return 0;
 }
@@ -420,6 +419,7 @@ ExternalToolConfig::ExternalToolConfig(QWidget *parent) :
     connect(ui->executable, SIGNAL(editingFinished()), this, SLOT(updateCurrentItem()));
     connect(ui->executable, SIGNAL(browsingFinished()), this, SLOT(updateCurrentItem()));
     connect(ui->arguments, SIGNAL(editingFinished()), this, SLOT(updateCurrentItem()));
+    connect(ui->arguments, SIGNAL(editingFinished()), this, SLOT(updateEffectiveArguments()));
     connect(ui->workingDirectory, SIGNAL(editingFinished()), this, SLOT(updateCurrentItem()));
     connect(ui->workingDirectory, SIGNAL(browsingFinished()), this, SLOT(updateCurrentItem()));
     connect(ui->outputBehavior, SIGNAL(activated(int)), this, SLOT(updateCurrentItem()));
@@ -559,6 +559,7 @@ void ExternalToolConfig::showInfoForItem(const QModelIndex &index)
 
     ui->description->setCursorPosition(0);
     ui->arguments->setCursorPosition(0);
+    updateEffectiveArguments();
 }
 
 QMap<QString, QList<ExternalTool *> > ExternalToolConfig::tools() const
@@ -604,4 +605,10 @@ void ExternalToolConfig::addCategory()
     ui->toolTree->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Clear);
     ui->toolTree->selectionModel()->setCurrentIndex(index, QItemSelectionModel::SelectCurrent);
     ui->toolTree->edit(index);
+}
+
+void ExternalToolConfig::updateEffectiveArguments()
+{
+    ui->effectiveArguments->setText(Utils::QtcProcess::expandMacros(ui->arguments->text(),
+            Core::VariableManager::instance()->macroExpander()));
 }

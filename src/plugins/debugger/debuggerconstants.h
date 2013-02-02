@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -170,7 +170,8 @@ enum DebuggerCapabilities
     OperateByInstructionCapability = 0x400000,
     RunToLineCapability = 0x800000,
     MemoryAddressCapability = 0x1000000,
-    ShowModuleSectionsCapability = 0x200000
+    ShowModuleSectionsCapability = 0x200000,
+    WatchComplexExpressionsCapability = 0x400000 // Used to filter out challenges for cdb.
 };
 
 enum LogChannel

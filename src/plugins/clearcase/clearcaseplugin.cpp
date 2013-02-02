@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 AudioCodes Ltd.
+** Copyright (c) 2013 AudioCodes Ltd.
 ** Author: Orgad Shaneh <orgad.shaneh@audiocodes.com>
 ** Contact: http://www.qt-project.org/legal
 **
@@ -96,7 +96,9 @@
 #include <QVariant>
 #include <QVBoxLayout>
 #include <QXmlStreamReader>
-
+#ifdef WITH_TESTS
+#include <QTest>
+#endif
 
 namespace ClearCase {
 namespace Internal {
@@ -258,7 +260,8 @@ static const VcsBase::VcsBaseSubmitEditorParameters submitParameters = {
     ClearCase::Constants::CLEARCASE_SUBMIT_MIMETYPE,
     ClearCase::Constants::CLEARCASECHECKINEDITOR_ID,
     ClearCase::Constants::CLEARCASECHECKINEDITOR_DISPLAY_NAME,
-    ClearCase::Constants::CLEARCASECHECKINEDITOR
+    ClearCase::Constants::CLEARCASECHECKINEDITOR,
+    VcsBase::VcsBaseSubmitEditorParameters::DiffFiles
 };
 
 bool ClearCasePlugin::initialize(const QStringList & /*arguments */, QString *errorMessage)
@@ -300,7 +303,7 @@ bool ClearCasePlugin::initialize(const QStringList & /*arguments */, QString *er
     const QString description = QLatin1String("ClearCase");
     const QString prefix = QLatin1String("cc");
     // register cc prefix in Locator
-    m_commandLocator = new Locator::CommandLocator(prefix, description, prefix);
+    m_commandLocator = new Locator::CommandLocator("cc", description, prefix);
     addAutoReleasedObject(m_commandLocator);
 
     //register actions
@@ -939,6 +942,7 @@ void ClearCasePlugin::startCheckInAll()
         if (iterator.value().status == FileStatus::CheckedOut)
             files.append(QDir::toNativeSeparators(iterator.key()));
     }
+    files.sort();
     startCheckIn(topLevel, files);
 }
 
@@ -975,6 +979,7 @@ void ClearCasePlugin::startCheckInActivity()
             last = file;
         }
     }
+    files.sort();
     startCheckIn(topLevel, files);
 }
 
@@ -1939,6 +1944,38 @@ void ClearCasePlugin::sync(QFutureInterface<void> &future, QString topLevel, QSt
     connect(&ccSync, SIGNAL(updateStreamAndView()), plugin, SLOT(updateStreamAndView()));
     ccSync.run(future, topLevel, files);
 }
+
+#ifdef WITH_TESTS
+void ClearCasePlugin::testDiffFileResolving_data()
+{
+    QTest::addColumn<QByteArray>("header");
+    QTest::addColumn<QByteArray>("fileName");
+
+    QTest::newRow("Modified") << QByteArray(
+            "--- src/plugins/clearcase/clearcaseeditor.cpp@@/main/1\t2013-01-20 23:45:48.549615210 +0200\n"
+            "+++ src/plugins/clearcase/clearcaseeditor.cpp@@/main/2\t2013-01-20 23:45:53.217604679 +0200\n"
+            "@@ -58,6 +58,10 @@\n\n")
+        << QByteArray("src/plugins/clearcase/clearcaseeditor.cpp");
+}
+
+void ClearCasePlugin::testDiffFileResolving()
+{
+    ClearCaseEditor editor(editorParameters + 3, 0);
+    editor.testDiffFileResolving();
+}
+
+void ClearCasePlugin::testLogResolving()
+{
+    QByteArray data(
+                "13-Sep.17:41   user1      create version \"src/plugins/clearcase/clearcaseeditor.h@@/main/branch1/branch2/9\" (baseline1, baseline2, ...)\n"
+                "22-Aug.14:13   user2      create version \"src/plugins/clearcase/clearcaseeditor.h@@/main/branch1/branch2/8\" (baseline3, baseline4, ...)\n"
+                );
+    ClearCaseEditor editor(editorParameters + 1, 0);
+    editor.testLogResolving(data,
+                            "src/plugins/clearcase/clearcaseeditor.h@@/main/branch1/branch2/9",
+                            "src/plugins/clearcase/clearcaseeditor.h@@/main/branch1/branch2/8");
+}
+#endif
 
 } // namespace Internal
 } // namespace ClearCase

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -121,9 +121,8 @@ QString JsFileWizard::fileContents(const QString &, bool statelessLibrary) const
     QString contents;
     QTextStream str(&contents);
 
-    if (statelessLibrary) {
+    if (statelessLibrary)
         str << QLatin1String(".pragma library\n\n");
-    }
     str << QLatin1String("function func() {\n")
         << QLatin1String("\n")
         << QLatin1String("}\n");

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -230,9 +230,8 @@ bool CurrentDocumentFind::setFocusToCurrentFindSupport()
 bool CurrentDocumentFind::eventFilter(QObject *obj, QEvent *event)
 {
     if (m_currentWidget && obj == m_currentWidget) {
-        if (event->type() == QEvent::Hide || event->type() == QEvent::Show) {
+        if (event->type() == QEvent::Hide || event->type() == QEvent::Show)
             emit changed();
-        }
     }
     return QObject::eventFilter(obj, event);
 }

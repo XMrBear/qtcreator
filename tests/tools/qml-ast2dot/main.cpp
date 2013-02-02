@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -43,6 +43,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <string>
 #ifdef __GNUC__
 #  include <cxxabi.h>
 #endif
@@ -83,7 +84,7 @@ protected:
     void alignTerminals() {
         out<<"{ rank=same;" << endl;
         foreach (const QByteArray &terminalShape, _terminalShapes) {
-            out << "  " << string(terminalShape) << ";" << endl;
+            out << "  " << string(terminalShape.constData(), terminalShape.size()).c_str() << ";" << endl;
         }
         out<<"}"<<endl;
     }

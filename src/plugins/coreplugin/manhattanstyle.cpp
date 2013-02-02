@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -865,9 +865,8 @@ void ManhattanStyle::drawComplexControl(ComplexControl control, const QStyleOpti
 
             State bflags = toolbutton->state;
             if (bflags & State_AutoRaise) {
-                if (!(bflags & State_MouseOver)) {
+                if (!(bflags & State_MouseOver))
                     bflags &= ~State_Raised;
-                }
             }
 
             State mflags = bflags;

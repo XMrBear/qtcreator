@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -234,6 +234,7 @@ QVariant read(int variantType, const QString &str)
         break;
     case QMetaType::QVector3D:
         value = vector3DFromString(str, &conversionOk);
+        break;
     default: {
         value = QVariant(str);
         value.convert(static_cast<QVariant::Type>(variantType));

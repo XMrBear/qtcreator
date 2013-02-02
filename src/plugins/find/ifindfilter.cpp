@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -253,9 +253,8 @@ QPixmap Find::IFindFilter::pixmapForFindFlags(Find::FindFlags flags)
         painter.drawPixmap(x - 6, 0, regexpIcon);
         x += 6;
     }
-    if (preservecase) {
+    if (preservecase)
         painter.drawPixmap(x - 6, 0, preservecaseIcon);
-    }
     return pixmap;
 }
 

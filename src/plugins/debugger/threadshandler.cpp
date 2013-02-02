@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -28,11 +28,11 @@
 ****************************************************************************/
 
 #include "threadshandler.h"
-#include "gdb/gdbmi.h"
-#include "watchutils.h"
 
 #include "debuggerconstants.h"
 #include "debuggercore.h"
+#include "debuggerprotocol.h"
+#include "watchutils.h"
 
 #include <utils/qtcassert.h>
 

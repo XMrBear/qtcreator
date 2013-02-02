@@ -1,4 +1,5 @@
 import qbs.base 1.0
+import qbs.fileinfo as FileInfo
 
 import "../QtcPlugin.qbs" as QtcPlugin
 import "../../../qbs/defaults.js" as Defaults
@@ -14,9 +15,6 @@ QtcPlugin {
     Depends { name: "Locator" }
     Depends { name: "CPlusPlus" }
     Depends { name: "LanguageUtils" }
-
-    Depends { name: "cpp" }
-    cpp.defines: base.concat(["QT_NO_CAST_FROM_ASCII"])
 
     files: [
         "ModelManagerInterface.cpp",
@@ -76,6 +74,8 @@ QtcPlugin {
         "cppmodelmanager.h",
         "cppqtstyleindenter.cpp",
         "cppqtstyleindenter.h",
+        "cpppointerdeclarationformatter.cpp",
+        "cpppointerdeclarationformatter.h",
         "cpprefactoringchanges.cpp",
         "cpprefactoringchanges.h",
         "cppsemanticinfo.cpp",
@@ -108,7 +108,15 @@ QtcPlugin {
 
     Group {
         condition: Defaults.testsEnabled(qbs)
-        files: ["cppcodegen_test.cpp", "cppcompletion_test.cpp"]
+        files: [
+            "cppcodegen_test.cpp",
+            "cppcompletion_test.cpp",
+            "cppmodelmanager_test.cpp",
+            "modelmanagertesthelper.cpp", "modelmanagertesthelper.h",
+            "cpppointerdeclarationformatter_test.cpp"
+        ]
+
+        cpp.defines: outer.concat(['SRCDIR="' + FileInfo.path(filePath) + '"'])
     }
 
     ProductModule {

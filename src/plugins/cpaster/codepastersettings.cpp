@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -51,7 +51,7 @@ namespace CodePaster {
 
 CodePasterSettingsPage::CodePasterSettingsPage()
 {
-    setId(QLatin1String("C.CodePaster"));
+    setId("C.CodePaster");
     setDisplayName(tr("CodePaster"));
     setCategory(Constants::CPASTER_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("CodePaster",

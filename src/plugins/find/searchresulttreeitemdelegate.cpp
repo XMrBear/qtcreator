@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -78,9 +78,8 @@ void SearchResultTreeItemDelegate::paint(QPainter *painter, const QStyleOptionVi
 
     // icon
     QIcon icon = index.model()->data(index, ItemDataRoles::ResultIconRole).value<QIcon>();
-    if (!icon.isNull()) {
+    if (!icon.isNull())
         pixmapRect = QRect(0, 0, iconSize, iconSize);
-    }
 
     // text
     textRect = opt.rect.adjusted(0, 0, checkRect.width() + pixmapRect.width(), 0);

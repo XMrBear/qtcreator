@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -143,9 +143,8 @@ static bool isEnum(AST::Statement *ast)
     if (!ast)
         return false;
 
-    if (ExpressionStatement *exprStmt = cast<ExpressionStatement*>(ast)) {
+    if (ExpressionStatement *exprStmt = cast<ExpressionStatement*>(ast))
         return isEnum(exprStmt->expression);
-    }
     return false;
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -71,9 +71,8 @@ void CppCodeStylePreferences::setCodeStyleSettings(const CppCodeStyleSettings &d
     v.setValue(data);
     emit valueChanged(v);
     emit codeStyleSettingsChanged(m_data);
-    if (!currentDelegate()) {
+    if (!currentDelegate())
         emit currentValueChanged(v);
-    }
 }
 
 CppCodeStyleSettings CppCodeStylePreferences::currentCodeStyleSettings() const

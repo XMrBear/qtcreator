@@ -13,6 +13,7 @@ HEADERS += projectexplorer.h \
     abiwidget.h \
     clangparser.h \
     gcctoolchain.h \
+    localapplicationrunconfiguration.h \
     projectexplorer_export.h \
     projectwindow.h \
     removetaskhandler.h \
@@ -66,7 +67,6 @@ HEADERS += projectexplorer.h \
     editorsettingspropertiespage.h \
     runconfiguration.h \
     applicationlauncher.h \
-    applicationrunconfiguration.h \
     runsettingspropertiespage.h \
     projecttreewidget.h \
     foldernavigationwidget.h \
@@ -127,13 +127,16 @@ HEADERS += projectexplorer.h \
     devicesupport/localprocesslist.h \
     devicesupport/sshdeviceprocesslist.h \
     deploymentdata.h \
-    buildtargetinfo.h
+    buildtargetinfo.h \
+    customtoolchain.h \
+    projectmacroexpander.h
 
 SOURCES += projectexplorer.cpp \
     abi.cpp \
     abiwidget.cpp \
     clangparser.cpp \
     gcctoolchain.cpp \
+    localapplicationrunconfiguration.cpp \
     projectwindow.cpp \
     removetaskhandler.cpp \
     kit.cpp \
@@ -180,7 +183,6 @@ SOURCES += projectexplorer.cpp \
     editorsettingspropertiespage.cpp \
     runconfiguration.cpp \
     applicationlauncher.cpp \
-    applicationrunconfiguration.cpp \
     runsettingspropertiespage.cpp \
     projecttreewidget.cpp \
     foldernavigationwidget.cpp \
@@ -234,7 +236,9 @@ SOURCES += projectexplorer.cpp \
     devicesupport/deviceapplicationrunner.cpp \
     devicesupport/localprocesslist.cpp \
     devicesupport/sshdeviceprocesslist.cpp \
-    deployablefile.cpp
+    deployablefile.cpp \
+    customtoolchain.cpp \
+    projectmacroexpander.cpp
 
 FORMS += processstep.ui \
     editorsettingspropertiespage.ui \
@@ -285,4 +289,4 @@ RESOURCES += projectexplorer.qrc
     DEFINES += QTC_CPU=X86Architecture
 }
 
-DEFINES += PROJECTEXPLORER_LIBRARY QT_NO_CAST_FROM_ASCII
+DEFINES += PROJECTEXPLORER_LIBRARY

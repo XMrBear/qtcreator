@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 BogDan Vatra <bog_dan_ro@yahoo.com>
+** Copyright (c) 2013 BogDan Vatra <bog_dan_ro@yahoo.com>
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -53,7 +53,7 @@ enum AndroidQemuStatus {
 
 namespace Constants {
 const char ANDROID_SETTINGS_ID[] = "ZZ.Android Configurations";
-const char ANDROID_SETTINGS_CATEGORY[] = "X.Android";
+const char ANDROID_SETTINGS_CATEGORY[] = "XA.Android";
 const char ANDROID_SETTINGS_TR_CATEGORY[] = QT_TRANSLATE_NOOP("Android", "Android");
 const char ANDROID_SETTINGS_CATEGORY_ICON[] = ":/android/images/QtAndroid.png";
 const char ANDROID_TOOLCHAIN_ID[] = "Qt4ProjectManager.ToolChain.Android";

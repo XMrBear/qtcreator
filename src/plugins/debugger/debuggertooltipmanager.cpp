@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -44,9 +44,9 @@
 #include <coreplugin/editormanager/editormanager.h>
 #include <texteditor/itexteditor.h>
 #include <texteditor/basetexteditor.h>
-#include <texteditor/tooltip/tooltip.h>
-#include <texteditor/tooltip/tipcontents.h>
 
+#include <utils/tooltip/tooltip.h>
+#include <utils/tooltip/tipcontents.h>
 #include <utils/qtcassert.h>
 
 #include <QToolButton>
@@ -220,7 +220,7 @@ public:
 DebuggerToolTipEditor::DebuggerToolTipEditor(IEditor *ie) :
     textEditor(0), baseTextEditor(0), document(0)
 {
-    if (ie && ie->document() && isEditorDebuggable(ie)) {
+    if (ie && ie->document()) {
         if (ITextEditor *te = qobject_cast<ITextEditor *>(ie)) {
             if (BaseTextEditorWidget *pe = qobject_cast<BaseTextEditorWidget *>(ie->widget())) {
                 textEditor = te;
@@ -280,11 +280,10 @@ void StandardItemTreeModelBuilder::addItem(const QString &s)
 
 void StandardItemTreeModelBuilder::pushRow()
 {
-    if (m_rowParents.isEmpty()) {
+    if (m_rowParents.isEmpty())
         m_model->appendRow(m_row);
-    } else {
+    else
         m_rowParents.top()->appendRow(m_row);
-    }
     m_rowParents.push(m_row.front());
     m_row.clear();
 }
@@ -379,11 +378,10 @@ void XmlWriterTreeModelVisitor::run()
 void XmlWriterTreeModelVisitor::handleItem(const QModelIndex &m)
 {
     const QString value = m.data(Qt::DisplayRole).toString();
-    if (value.isEmpty()) {
+    if (value.isEmpty())
         m_writer.writeEmptyElement(m_modelItemElement);
-    } else {
+    else
         m_writer.writeTextElement(m_modelItemElement, value);
-    }
 }
 
 // TreeModelVisitor for debugging/copying models
@@ -517,7 +515,7 @@ void DebuggerToolTipWidget::pin()
     if (parentWidget()) {
         // We are currently within a text editor tooltip:
         // Rip out of parent widget and re-show as a tooltip
-        WidgetContent::pinToolTip(this);
+        Utils::WidgetContent::pinToolTip(this);
     } else {
         // We have just be restored from session data.
         setWindowFlags(Qt::ToolTip);
@@ -1030,11 +1028,10 @@ void DebuggerToolTipWidget::restoreTreeModel(QXmlStreamReader &r, QStandardItemM
         case QXmlStreamReader::EndElement: {
             const QStringRef element = r.name();
             // Row closing: pop off parent.
-            if (element == QLatin1String(modelRowElementC)) {
+            if (element == QLatin1String(modelRowElementC))
                 builder.endRow();
-            } else if (element == QLatin1String(modelElementC)) {
+            else if (element == QLatin1String(modelElementC))
                 withinModel = false;
-            }
         }
             break; // EndElement
         default:
@@ -1131,8 +1128,8 @@ void DebuggerToolTipManager::showToolTip(const QPoint &p, IEditor *editor,
     QWidget *widget = editor->widget();
     if (debugToolTipPositioning)
         qDebug() << "DebuggerToolTipManager::showToolTip" << p << " Mouse at " << QCursor::pos();
-    const WidgetContent widgetContent(toolTipWidget, true);
-    ToolTip::instance()->show(p, widgetContent, widget);
+    const Utils::WidgetContent widgetContent(toolTipWidget, true);
+    Utils::ToolTip::instance()->show(p, widgetContent, widget);
     registerToolTip(toolTipWidget);
 }
 
@@ -1145,11 +1142,10 @@ void DebuggerToolTipManager::registerToolTip(DebuggerToolTipWidget *toolTipWidge
 void DebuggerToolTipManager::purgeClosedToolTips()
 {
     for (DebuggerToolTipWidgetList::iterator it = m_tooltips.begin(); it != m_tooltips.end() ; ) {
-        if (it->isNull()) {
+        if (it->isNull())
             it = m_tooltips.erase(it);
-        } else {
+        else
             ++it;
-        }
     }
 }
 
@@ -1272,11 +1268,10 @@ void DebuggerToolTipManager::slotUpdateVisibleToolTips()
     // Reposition and show all tooltips of that file.
     const QString fileName = toolTipEditor.fileName();
     foreach (const QPointer<DebuggerToolTipWidget> &tw, m_tooltips) {
-        if (tw->fileName() == fileName) {
+        if (tw->fileName() == fileName)
             tw->positionShow(toolTipEditor);
-        } else {
+        else
             tw->hide();
-        }
     }
 }
 
@@ -1440,7 +1435,7 @@ void DebuggerToolTipManager::slotTooltipOverrideRequested(ITextEditor *editor,
             break; // Avoid flicker.
 
         DebuggerCore  *core = debuggerCore();
-        if (!isEditorDebuggable(editor) || !core->boolSetting(UseToolTipsInMainEditor))
+        if (!core->boolSetting(UseToolTipsInMainEditor))
             break;
 
         currentEngine = core->currentEngine();

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 AudioCodes Ltd.
+** Copyright (c) 2013 AudioCodes Ltd.
 ** Author: Orgad Shaneh <orgad.shaneh@audiocodes.com>
 ** Contact: http://www.qt-project.org/legal
 **
@@ -55,7 +55,7 @@ public:
     void setIsUcm(bool isUcm);
 
 protected:
-    virtual QByteArray fileContents() const;
+    QByteArray fileContents() const;
 
 };
 

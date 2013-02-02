@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -104,13 +104,12 @@ void AbstractRemoteLinuxPackageInstaller::handleInstallationFinished(int exitSta
     if (!d->isRunning)
         return;
 
-    if (exitStatus != SshRemoteProcess::NormalExit || d->installer->processExitCode() != 0) {
+    if (exitStatus != SshRemoteProcess::NormalExit || d->installer->processExitCode() != 0)
         emit finished(tr("Installing package failed."));
-    } else if (!errorString().isEmpty()) {
+    else if (!errorString().isEmpty())
         emit finished(errorString());
-    } else {
+    else
         emit finished();
-    }
 
     setFinished();
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -464,9 +464,8 @@ QString QmlObjectNode::defaultProperty() const
 
 void QmlObjectNode::setParent(QmlObjectNode newParent)
 {
-    if (newParent.hasDefaultProperty()) {
+    if (newParent.hasDefaultProperty())
         newParent.modelNode().nodeAbstractProperty(newParent.defaultProperty()).reparentHere(modelNode());
-    }
 }
 
 QmlItemNode QmlObjectNode::toQmlItemNode() const

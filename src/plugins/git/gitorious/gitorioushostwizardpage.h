@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -43,9 +43,9 @@ class GitoriousHostWizardPage : public QWizardPage {
     Q_OBJECT
 public:
     GitoriousHostWizardPage(QWidget *parent = 0);
-    virtual ~GitoriousHostWizardPage();
+    ~GitoriousHostWizardPage();
 
-    virtual bool isComplete() const;
+    bool isComplete() const;
 
     int selectedHostIndex() const;
 

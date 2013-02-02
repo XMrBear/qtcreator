@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -29,12 +29,11 @@
 
 #include "coregdbadapter.h"
 
-#include "debuggerstartparameters.h"
-#include "debuggercore.h"
 #include "debuggeractions.h"
+#include "debuggercore.h"
+#include "debuggerprotocol.h"
+#include "debuggerstartparameters.h"
 #include "debuggerstringutils.h"
-#include "gdbmi.h"
-#include "gdbengine.h"
 
 #include <utils/consoleprocess.h>
 #include <utils/elfreader.h>
@@ -185,7 +184,7 @@ void GdbCoreEngine::handleTargetCore(const GdbResponse &response)
     QTC_ASSERT(state() == InferiorSetupRequested, qDebug() << state());
     if (response.resultClass == GdbResultDone) {
         // HACK: The namespace is not accessible in the initial run.
-        loadPythonDumpers();
+        tryLoadPythonDumpers();
         showMessage(tr("Attached to core."), StatusBar);
         handleInferiorPrepared();
         // Due to the auto-solib-add off setting, we don't have any

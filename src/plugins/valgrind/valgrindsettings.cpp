@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 ** Author: Milian Wolff, KDAB (milian.wolff@kdab.com)
 **
@@ -172,9 +172,9 @@ QString ValgrindBaseSettings::valgrindExecutable() const
     return m_valgrindExecutable;
 }
 
-QString ValgrindBaseSettings::id() const
+Core::Id ValgrindBaseSettings::id() const
 {
-    return QLatin1String("Analyzer.Valgrind.Settings");
+    return "Analyzer.Valgrind.Settings";
 }
 
 QString ValgrindBaseSettings::displayName() const

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 AudioCodes Ltd.
+** Copyright (c) 2013 AudioCodes Ltd.
 ** Author: Orgad Shaneh <orgad.shaneh@audiocodes.com>
 ** Contact: http://www.qt-project.org/legal
 **
@@ -40,7 +40,7 @@
 using namespace ClearCase::Internal;
 
 ClearCaseSubmitEditorWidget::ClearCaseSubmitEditorWidget(QWidget *parent) :
-    Utils::SubmitEditorWidget(parent),
+    VcsBase::SubmitEditorWidget(parent),
     m_actSelector(0)
 {
     setDescriptionMandatory(false);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -89,7 +89,7 @@ public slots:
 private slots:
 
 protected:
-    virtual void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e);
 
 private:
     Ui::RemoteDialog *m_ui;

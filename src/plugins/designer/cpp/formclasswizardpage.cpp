@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -132,9 +132,8 @@ bool FormClassWizardPage::validatePage()
 {
     QString errorMessage;
     const bool rc = m_ui->newClassWidget->isValid(&errorMessage);
-    if (!rc) {
+    if (!rc)
         QMessageBox::warning(this, tr("%1 - Error").arg(title()), errorMessage);
-    }
     return rc;
 }
 

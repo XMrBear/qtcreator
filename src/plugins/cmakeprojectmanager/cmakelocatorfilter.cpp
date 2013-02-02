@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2012 Kläralvdalens Datakonsult AB, a KDAB Group company.
+** Copyright (C) 2013 Kläralvdalens Datakonsult AB, a KDAB Group company.
 ** Contact: Kläralvdalens Datakonsult AB (info@kdab.com)
 **
 ** This file is part of Qt Creator.
@@ -45,6 +45,8 @@ using namespace Utils;
 
 CMakeLocatorFilter::CMakeLocatorFilter()
 {
+    setId("Build CMake target");
+    setDisplayName(tr("Build CMake target"));
     setShortcutString(QLatin1String("cm"));
 
     ProjectExplorer::SessionManager *sm = ProjectExplorer::ProjectExplorerPlugin::instance()->session();

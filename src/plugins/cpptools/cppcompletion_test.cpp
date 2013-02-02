@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -72,7 +72,7 @@ struct TestData
     QTextDocument *doc;
 };
 
-static QStringList getCompletions(TestData &data)
+static QStringList getCompletions(TestData &data, bool *replaceAccessOperator = 0)
 {
     QStringList completions;
 
@@ -86,12 +86,15 @@ static QStringList getCompletions(TestData &data)
     IAssistProposalModel *model = proposal->model();
     if (!model)
         return completions;
-    BasicProposalItemListModel *listmodel = dynamic_cast<BasicProposalItemListModel *>(model);
+    CppAssistProposalModel *listmodel = dynamic_cast<CppAssistProposalModel *>(model);
     if (!listmodel)
         return completions;
 
     for (int i = 0; i < listmodel->size(); ++i)
         completions << listmodel->text(i);
+
+    if (replaceAccessOperator)
+        *replaceAccessOperator = listmodel->m_replaceDotForArrow;
 
     return completions;
 }
@@ -559,6 +562,42 @@ void CppToolsPlugin::test_completion_type_of_pointer_is_typedef()
     QCOMPARE(completions.size(), 2);
     QVERIFY(completions.contains(QLatin1String("Foo")));
     QVERIFY(completions.contains(QLatin1String("foo")));
+}
+
+void CppToolsPlugin::test_completion_instantiate_full_specialization()
+{
+    TestData data;
+    data.srcText = "\n"
+            "template<typename T>\n"
+            "struct Template\n"
+            "{\n"
+            "   int templateT_i;\n"
+            "};\n"
+            "\n"
+            "template<>\n"
+            "struct Template<char>\n"
+            "{\n"
+            "    int templateChar_i;\n"
+            "};\n"
+            "\n"
+            "Template<char> templateChar;\n"
+            "@\n"
+            ;
+
+    setup(&data);
+
+    Utils::ChangeSet change;
+    QString txt = QLatin1String("templateChar.");
+    change.insert(data.pos, txt);
+    QTextCursor cursor(data.doc);
+    change.apply(&cursor);
+    data.pos += txt.length();
+
+    QStringList completions = getCompletions(data);
+
+    QCOMPARE(completions.size(), 2);
+    QVERIFY(completions.contains(QLatin1String("Template")));
+    QVERIFY(completions.contains(QLatin1String("templateChar_i")));
 }
 
 void CppToolsPlugin::test_completion()
@@ -1287,4 +1326,160 @@ void CppToolsPlugin::test_completion_instantiate_nested_of_nested_class_when_enc
     QCOMPARE(completions.size(), 2);
     QVERIFY(completions.contains(QLatin1String("Foo")));
     QVERIFY(completions.contains(QLatin1String("foo_i")));
+}
+
+void CppToolsPlugin::test_completion_instantiate_template_with_default_argument_type()
+{
+    TestData data;
+    data.srcText = "\n"
+            "struct Foo\n"
+            "{\n"
+            "    int bar;\n"
+            "};\n"
+            "\n"
+            "template <typename T = Foo>\n"
+            "struct Template\n"
+            "{\n"
+            "    T t;\n"
+            "};\n"
+            "\n"
+            "Template<> templateWithDefaultTypeOfArgument;\n"
+            "@\n"
+            ;
+    setup(&data);
+
+    Utils::ChangeSet change;
+    QString txt = QLatin1String("templateWithDefaultTypeOfArgument.t.");
+    change.insert(data.pos, txt);
+    QTextCursor cursor(data.doc);
+    change.apply(&cursor);
+    data.pos += txt.length();
+
+    QStringList completions = getCompletions(data);
+
+    QCOMPARE(completions.size(), 2);
+    QVERIFY(completions.contains(QLatin1String("Foo")));
+    QVERIFY(completions.contains(QLatin1String("bar")));
+}
+
+void CppToolsPlugin::test_completion_instantiate_template_with_default_argument_type_as_template()
+{
+    TestData data;
+    data.srcText = "\n"
+            "struct Foo\n"
+            "{\n"
+            "    int bar;\n"
+            "};\n"
+            "\n"
+            "template <typename T>\n"
+            "struct TemplateArg\n"
+            "{\n"
+            "    T t;\n"
+            "};\n"
+            "template <typename T, typename S = TemplateArg<T> >\n"
+            "struct Template\n"
+            "{\n"
+            "    S s;\n"
+            "};\n"
+            "\n"
+            "Template<Foo> templateWithDefaultTypeOfArgument;\n"
+            "@\n"
+            ;
+    setup(&data);
+
+    Utils::ChangeSet change;
+    QString txt = QLatin1String("templateWithDefaultTypeOfArgument.s.t.");
+    change.insert(data.pos, txt);
+    QTextCursor cursor(data.doc);
+    change.apply(&cursor);
+    data.pos += txt.length();
+
+    QStringList completions = getCompletions(data);
+
+    QCOMPARE(completions.size(), 2);
+    QVERIFY(completions.contains(QLatin1String("Foo")));
+    QVERIFY(completions.contains(QLatin1String("bar")));
+}
+
+void CppToolsPlugin::test_completion_member_access_operator_1()
+{
+    TestData data;
+    data.srcText = "\n"
+            "struct S { void t(); };\n"
+            "void f() { S *s;\n"
+            "@\n"
+            "}\n"
+            ;
+    setup(&data);
+
+    Utils::ChangeSet change;
+    QString txt = QLatin1String("s.");
+    change.insert(data.pos, txt);
+    QTextCursor cursor(data.doc);
+    change.apply(&cursor);
+    data.pos += txt.length();
+
+    bool replaceAccessOperator = false;
+    QStringList completions = getCompletions(data, &replaceAccessOperator);
+
+    QCOMPARE(completions.size(), 2);
+    QVERIFY(completions.contains(QLatin1String("S")));
+    QVERIFY(completions.contains(QLatin1String("t")));
+    QVERIFY(replaceAccessOperator);
+}
+
+void CppToolsPlugin::test_completion_typedef_of_type_and_replace_access_operator()
+{
+    TestData data;
+    data.srcText = "\n"
+            "struct S { int m; };\n"
+            "typedef S SType;\n"
+            "SType *p;\n"
+            "@\n"
+            "}\n"
+            ;
+    setup(&data);
+
+    Utils::ChangeSet change;
+    QString txt = QLatin1String("p.");
+    change.insert(data.pos, txt);
+    QTextCursor cursor(data.doc);
+    change.apply(&cursor);
+    data.pos += txt.length();
+
+    bool replaceAccessOperator = false;
+    QStringList completions = getCompletions(data, &replaceAccessOperator);
+
+    QCOMPARE(completions.size(), 2);
+    QVERIFY(completions.contains(QLatin1String("S")));
+    QVERIFY(completions.contains(QLatin1String("m")));
+    QVERIFY(replaceAccessOperator);
+}
+
+void CppToolsPlugin::test_completion_typedef_of_pointer_of_type_and_replace_access_operator()
+{
+    TestData data;
+    data.srcText = "\n"
+            "struct S { int m; };\n"
+            "typedef S* SPtr;\n"
+            "SPtr p;\n"
+            "@\n"
+            "}\n"
+            ;
+    setup(&data);
+
+    Utils::ChangeSet change;
+    QString txt = QLatin1String("p.");
+    change.insert(data.pos, txt);
+    QTextCursor cursor(data.doc);
+    change.apply(&cursor);
+    data.pos += txt.length();
+
+    bool replaceAccessOperator = false;
+    QStringList completions = getCompletions(data, &replaceAccessOperator);
+
+    QCOMPARE(completions.size(), 2);
+    QVERIFY(completions.contains(QLatin1String("S")));
+    QVERIFY(completions.contains(QLatin1String("m")));
+    QVERIFY(replaceAccessOperator);
 }

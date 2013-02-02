@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -121,9 +121,8 @@ void CppEditorSupport::updateDocument()
 {
     _revision = editorRevision();
 
-    if (qobject_cast<TextEditor::BaseTextEditorWidget*>(_textEditor->widget()) != 0) {
+    if (qobject_cast<TextEditor::BaseTextEditorWidget*>(_textEditor->widget()) != 0)
         _modelManager->stopEditorSelectionsUpdate();
-    }
 
     _updateDocumentTimer->start(_updateDocumentInterval);
 }

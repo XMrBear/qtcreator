@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -188,11 +188,15 @@ void ToolChainManager::restoreToolChains()
         registerToolChain(toStore);
     }
 
-    // Delete all loaded autodetected tool chains that were not rediscovered:
+    // Keep toolchains that were not rediscovered but are still executable and delete the rest
     foreach (ToolChain *tc, tcsToCheck) {
-        qWarning() << QString::fromLatin1("ToolChain \"%1\" (%2) dropped since it was not auto-detected again")
-                      .arg(tc->displayName()).arg(tc->id());
-        delete tc;
+        if (!tc->isValid()) {
+            qWarning() << QString::fromLatin1("ToolChain \"%1\" (%2) dropped since it is not valid")
+                          .arg(tc->displayName()).arg(tc->id());
+            delete tc;
+        } else {
+            registerToolChain(tc);
+        }
     }
 
     // Store manual tool chains

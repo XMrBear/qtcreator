@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -40,6 +40,8 @@ using namespace CPlusPlus;
 CppCurrentDocumentFilter::CppCurrentDocumentFilter(CppModelManager *manager, Core::EditorManager *editorManager)
     : m_modelManager(manager)
 {
+    setId("Methods in current Document");
+    setDisplayName(tr("C++ Methods in Current Document"));
     setShortcutString(QString(QLatin1Char('.')));
     setIncludedByDefault(false);
 
@@ -120,18 +122,16 @@ void CppCurrentDocumentFilter::refresh(QFutureInterface<void> &future)
 
 void CppCurrentDocumentFilter::onDocumentUpdated(Document::Ptr doc)
 {
-    if (m_currentFileName == doc->fileName()) {
+    if (m_currentFileName == doc->fileName())
         m_itemsOfCurrentDoc.clear();
-    }
 }
 
 void CppCurrentDocumentFilter::onCurrentEditorChanged(Core::IEditor * currentEditor)
 {
-    if (currentEditor) {
+    if (currentEditor)
         m_currentFileName = currentEditor->document()->fileName();
-    } else {
+    else
         m_currentFileName.clear();
-    }
     m_itemsOfCurrentDoc.clear();
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -111,7 +111,6 @@ private:
     ProjectExplorer::KitMatcher *m_preferredMatcher;
     QLayout *m_baseLayout;
     bool m_importSearch;
-    bool m_useScrollArea;
     bool m_ignoreUpdates;
     QString m_proFilePath;
     QString m_defaultShadowBuildLocation;

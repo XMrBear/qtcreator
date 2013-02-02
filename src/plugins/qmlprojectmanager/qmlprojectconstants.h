@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -30,12 +30,14 @@
 #ifndef QMLPROJECTCONSTANTS_H
 #define QMLPROJECTCONSTANTS_H
 
+#include <qmljstools/qmljstoolsconstants.h>
+
 namespace QmlProjectManager {
 namespace Constants {
 
 const char *const PROJECTCONTEXT     = "QmlProject.ProjectContext";
 const char *const LANG_QML           = "QML";
-const char *const QMLMIMETYPE        = "application/x-qmlproject";
+const char *const QMLPROJECT_MIMETYPE        = QmlJSTools::Constants::QMLPROJECT_MIMETYPE;
 
 } // namespace Constants
 } // namespace QmlProjectManager

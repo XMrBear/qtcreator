@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -61,20 +61,18 @@ void FlowLayout::addItem(QLayoutItem *item)
 
 int FlowLayout::horizontalSpacing() const
 {
-    if (m_hSpace >= 0) {
+    if (m_hSpace >= 0)
         return m_hSpace;
-    } else {
+    else
         return smartSpacing(QStyle::PM_LayoutHorizontalSpacing);
-    }
 }
 
 int FlowLayout::verticalSpacing() const
 {
-    if (m_vSpace >= 0) {
+    if (m_vSpace >= 0)
         return m_vSpace;
-    } else {
+    else
         return smartSpacing(QStyle::PM_LayoutVerticalSpacing);
-    }
 }
 
 int FlowLayout::count() const

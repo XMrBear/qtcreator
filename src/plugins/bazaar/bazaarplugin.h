@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Hugues Delorme
+** Copyright (c) 2013 Hugues Delorme
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -80,7 +80,7 @@ class BazaarPlugin : public VcsBase::VcsBasePlugin
 
 public:
     BazaarPlugin();
-    virtual ~BazaarPlugin();
+    ~BazaarPlugin();
     bool initialize(const QStringList &arguments, QString *errorMessage);
 
     static BazaarPlugin *instance();
@@ -112,6 +112,11 @@ private slots:
     void showCommitWidget(const QList<VcsBase::VcsBaseClient::StatusItem> &status);
     void commitFromEditor();
     void diffFromEditorSelected(const QStringList &files);
+#ifdef WITH_TESTS
+    void testDiffFileResolving_data();
+    void testDiffFileResolving();
+    void testLogResolving();
+#endif
 
 protected:
     void updateActions(VcsBase::VcsBasePlugin::ActionState);

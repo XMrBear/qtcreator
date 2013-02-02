@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -48,12 +48,11 @@ public:
                             QWidget *parent);
 
 private:
-    virtual QSet<QString> annotationChanges() const;
-    virtual QString changeUnderCursor(const QTextCursor &) const;
-    virtual VcsBase::DiffHighlighter *createDiffHighlighter() const;
-    virtual VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes, const QColor &bg) const;
-    virtual QString fileNameFromDiffSpecification(const QTextBlock &diffFileName) const;
-    virtual QStringList annotationPreviousVersions(const QString &v) const;
+    QSet<QString> annotationChanges() const;
+    QString changeUnderCursor(const QTextCursor &) const;
+    VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes, const QColor &bg) const;
+    QString findDiffFile(const QString &f) const;
+    QStringList annotationPreviousVersions(const QString &v) const;
 
     mutable QRegExp m_changeNumberPattern;
     PerforcePlugin *m_plugin;

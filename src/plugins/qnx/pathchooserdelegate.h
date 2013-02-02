@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -59,6 +59,9 @@ public:
 
     void updateEditorGeometry(QWidget *editor,
         const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+private slots:
+    void emitCommitData();
 
 private:
     Utils::PathChooser::Kind m_kind;

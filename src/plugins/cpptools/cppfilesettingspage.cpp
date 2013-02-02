@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -319,7 +319,7 @@ CppFileSettingsPage::CppFileSettingsPage(QSharedPointer<CppFileSettings> &settin
     Core::IOptionsPage(parent),
     m_settings(settings)
 {
-    setId(QLatin1String(Constants::CPP_FILE_SETTINGS_ID));
+    setId(Constants::CPP_FILE_SETTINGS_ID);
     setDisplayName(QCoreApplication::translate("CppTools", Constants::CPP_FILE_SETTINGS_NAME));
     setCategory(Constants::CPP_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("CppTools", Constants::CPP_SETTINGS_TR_CATEGORY));

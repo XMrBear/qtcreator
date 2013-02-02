@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -33,17 +33,39 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QProcess>
 
 namespace Git {
 namespace Internal {
 
-ChangeSelectionDialog::ChangeSelectionDialog(QWidget *parent)
+ChangeSelectionDialog::ChangeSelectionDialog(const QString &workingDirectory, QWidget *parent)
     : QDialog(parent)
+    , m_process(0)
 {
     m_ui.setupUi(this);
+    if (!workingDirectory.isEmpty()) {
+        setWorkingDirectory(workingDirectory);
+        m_ui.workingDirectoryButton->setEnabled(false);
+        m_ui.workingDirectoryEdit->setEnabled(false);
+    }
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     connect(m_ui.workingDirectoryButton, SIGNAL(clicked()), this, SLOT(selectWorkingDirectory()));
     setWindowTitle(tr("Select a Git Commit"));
+
+    bool ok;
+    m_gitBinaryPath = GitPlugin::instance()->gitClient()->gitBinaryPath(&ok);
+    if (!ok)
+        return;
+
+    m_gitEnvironment = GitPlugin::instance()->gitClient()->processEnvironment();
+    connect(m_ui.changeNumberEdit, SIGNAL(textChanged(QString)),
+            this, SLOT(recalculateDetails(QString)));
+    recalculateDetails(m_ui.changeNumberEdit->text());
+}
+
+ChangeSelectionDialog::~ChangeSelectionDialog()
+{
+    delete m_process;
 }
 
 QString ChangeSelectionDialog::change() const
@@ -58,6 +80,8 @@ QString ChangeSelectionDialog::workingDirectory() const
 
 void ChangeSelectionDialog::setWorkingDirectory(const QString &s)
 {
+    if (s.isEmpty())
+        return;
     m_ui.workingDirectoryEdit->setText(QDir::toNativeSeparators(s));
     m_ui.changeNumberEdit->setFocus(Qt::ActiveWindowFocusReason);
     m_ui.changeNumberEdit->setText(QLatin1String("HEAD"));
@@ -82,5 +106,39 @@ void ChangeSelectionDialog::selectWorkingDirectory()
                               tr("Selected directory is not a Git repository"));
 }
 
+//! Set commit message in details
+void ChangeSelectionDialog::setDetails(int exitCode)
+{
+    if (exitCode == 0)
+        m_ui.detailsText->setPlainText(QString::fromUtf8(m_process->readAllStandardOutput()));
+    else
+        m_ui.detailsText->setPlainText(tr("Error: unknown reference"));
 }
+
+void ChangeSelectionDialog::recalculateDetails(const QString &ref)
+{
+    if (m_process) {
+        m_process->kill();
+        m_process->waitForFinished();
+        delete m_process;
+    }
+
+    QStringList args;
+    args << QLatin1String("log") << QLatin1String("-n1") << ref;
+
+    m_process = new QProcess(this);
+    m_process->setWorkingDirectory(workingDirectory());
+    m_process->setProcessEnvironment(m_gitEnvironment);
+
+    connect(m_process, SIGNAL(finished(int)), this, SLOT(setDetails(int)));
+
+    m_process->start(m_gitBinaryPath, args);
+    m_process->closeWriteChannel();
+    if (!m_process->waitForStarted())
+        m_ui.detailsText->setPlainText(tr("Error: could not start git"));
+    else
+        m_ui.detailsText->setPlainText(tr("Fetching commit data..."));
 }
+
+} // Internal
+} // Git

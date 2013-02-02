@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -30,6 +30,10 @@
 // std::copy is perfectly fine, don't let MSVC complain about it being deprecated
 #pragma warning (disable: 4996)
 
+#ifndef NOMINMAX
+#  define NOMINMAX
+#endif
+
 #include "symbolgroupvalue.h"
 #include "symbolgroup.h"
 #include "stringutils.h"
@@ -38,6 +42,7 @@
 
 #include <iomanip>
 #include <algorithm>
+#include <limits>
 #include <ctype.h>
 
 typedef std::vector<int>::size_type VectorIndexType;
@@ -701,11 +706,10 @@ const QtInfo &QtInfo::get(const SymbolGroupValueContext &ctx)
         }
         rc.libInfix = qualifiedSymbol.substr(libPos + 4, exclPos - libPos - 4);
         // 'Qt5Cored!qstrdup' or 'QtCored4!qstrdup'.
-        if (isdigit(qualifiedSymbol.at(2))) {
+        if (isdigit(qualifiedSymbol.at(2)))
             rc.version = qualifiedSymbol.at(2) - '0';
-        } else {
+        else
             rc.version = qualifiedSymbol.at(exclPos - 1) - '0';
-        }
         // Any namespace? 'QtCored4!nsp::qstrdup'
         const std::string::size_type nameSpaceStart = exclPos + 1;
         const std::string::size_type colonPos = qualifiedSymbol.find(':', nameSpaceStart);
@@ -1264,6 +1268,8 @@ static KnownType knownClassTypeHelper(const std::string &type,
             return KT_QTransform;
         if (!type.compare(qPos, 10, "QFixedSize"))
             return KT_QFixedSize;
+        if (!type.compare(qPos, 10, "QStringRef"))
+            return KT_QStringRef;
         break;
     case 11:
         if (!type.compare(qPos, 11, "QStringList"))
@@ -1518,36 +1524,40 @@ QtStringAddressData readQtStringAddressData(const SymbolGroupValue &dV,
 
 // Retrieve data from a QByteArrayData(char)/QStringData(wchar_t)
 // in desired type. For empty arrays, no data are allocated.
+// All sizes are in CharType units. zeroTerminated means data are 0-terminated
+// in the data type, but "size" does not contain it.
 template <typename CharType>
 bool readQt5StringData(const SymbolGroupValue &dV, int qtMajorVersion,
-                       bool zeroTerminated, unsigned sizeLimit,
+                       bool zeroTerminated, unsigned position, unsigned sizeLimit,
                        unsigned *fullSize, unsigned *arraySize,
                        CharType **array)
 {
     *array = 0;
-    QtStringAddressData data = readQtStringAddressData(dV, qtMajorVersion);
-    *arraySize = *fullSize = data.size;
-    if (!data.address)
+    const QtStringAddressData data = readQtStringAddressData(dV, qtMajorVersion);
+    if (!data.address || position > data.size)
         return false;
+    const ULONG64 address = data.address + sizeof(CharType) * position;
+    *fullSize = data.size - position;
+    *arraySize = std::min(*fullSize, sizeLimit);
     if (!*fullSize)
         return true;
-    const bool truncated = *fullSize > sizeLimit;
-    *arraySize = truncated ?  sizeLimit : *fullSize;
     const unsigned memorySize =
             sizeof(CharType) * (*arraySize + (zeroTerminated ? 1 : 0));
     unsigned char *memory =
             SymbolGroupValue::readMemory(dV.context().dataspaces,
-                                         data.address, memorySize);
+                                         address, memorySize);
     if (!memory)
         return false;
     *array = reinterpret_cast<CharType *>(memory);
-    if (truncated && zeroTerminated)
+    if ((*arraySize < *fullSize) && zeroTerminated)
         *(*array + *arraySize) = CharType(0);
     return true;
 }
 
 static inline bool dumpQString(const SymbolGroupValue &v, std::wostream &str,
-                               MemoryHandle **memoryHandle = 0)
+                               MemoryHandle **memoryHandle = 0,
+                               unsigned position = 0,
+                               unsigned length = std::numeric_limits<unsigned>::max())
 {
     const QtInfo &qtInfo = QtInfo::get(v.context());
     const SymbolGroupValue dV = v["d"];
@@ -1558,7 +1568,11 @@ static inline bool dumpQString(const SymbolGroupValue &v, std::wostream &str,
         if (const SymbolGroupValue sizeValue = dV["size"]) {
             const int size = sizeValue.intValue();
             if (size >= 0) {
-                const std::wstring stringData = dV["data"].wcharPointerData(size);
+                std::wstring stringData = dV["data"].wcharPointerData(size);
+                if (position && position < stringData.size())
+                    stringData.erase(0, position);
+                if (length < stringData.size())
+                    stringData.erase(length, stringData.size() - length);
                 str << L'"' << stringData << L'"';
                 if (memoryHandle)
                     *memoryHandle = MemoryHandle::fromStdWString(stringData);
@@ -1575,21 +1589,36 @@ static inline bool dumpQString(const SymbolGroupValue &v, std::wostream &str,
     const SymbolGroupValue typeArrayV = dV[unsigned(0)];
     if (!typeArrayV)
         return false;
-    if (!readQt5StringData(typeArrayV, qtInfo.version, true, 10240, &fullSize, &size, &memory))
+    if (!readQt5StringData(typeArrayV, qtInfo.version, true, position,
+                           std::min(length, ExtensionContext::instance().parameters().maxStringLength),
+                           &fullSize, &size, &memory))
         return false;
     if (size) {
         str << L'"' << memory;
-        if (fullSize > size)
+        if (std::min(fullSize, length) > size)
             str << L"...";
         str << L'"';
     } else {
         str << L"\"\"";
     }
-    if (memoryHandle)  {
+    if (memoryHandle)
         *memoryHandle = new MemoryHandle(memory, size);
-    } else {
+    else
         delete [] memory;
-    }
+    return true;
+}
+
+static inline bool dumpQStringRef(const SymbolGroupValue &v, std::wostream &str,
+                                  MemoryHandle **memoryHandle = 0)
+{
+    const int position = v["m_position"].intValue();
+    const int size = v["m_size"].intValue();
+    if (position < 0 || size < 0)
+        return false;
+    const SymbolGroupValue string = v["m_string"];
+    if (!string || !dumpQString(string, str, memoryHandle, position, size))
+        return false;
+    str << L" (" << position << ',' << size << L')';
     return true;
 }
 
@@ -1672,7 +1701,7 @@ static inline bool dumpQByteArray(const SymbolGroupValue &v, std::wostream &str,
     const SymbolGroupValue typeArrayV = dV[unsigned(0)];
     if (!typeArrayV)
         return false;
-    if (!readQt5StringData(typeArrayV, qtInfo.version, false, 10240, &fullSize, &size, &memory))
+    if (!readQt5StringData(typeArrayV, qtInfo.version, false, 0, 10240, &fullSize, &size, &memory))
         return false;
     if (size) {
         // Emulate CDB's behavior of replacing unprintable characters
@@ -1691,11 +1720,10 @@ static inline bool dumpQByteArray(const SymbolGroupValue &v, std::wostream &str,
     } else {
         str << L"<empty>";
     }
-    if (memoryHandle) {
+    if (memoryHandle)
         *memoryHandle = new MemoryHandle(reinterpret_cast<unsigned char *>(memory), size);
-    } else {
+    else
         delete [] memory;
-    }
     return true;
 }
 
@@ -2012,13 +2040,12 @@ static inline bool dumpQFlags(const SymbolGroupValue &v, std::wostream &str)
 
 static bool dumpJulianDate(int julianDay, std::wostream &str)
 {
-    if (julianDay < 0) {
+    if (julianDay < 0)
         return false;
-    } else if (!julianDay) {
+    else if (!julianDay)
         str << L"<null>";
-    } else {
+    else
         formatJulianDate(str, julianDay);
-    }
     return true;
 }
 
@@ -2143,12 +2170,6 @@ inline void dumpRect(std::wostream &str, T x, T y, T width, T height)
     str << y;
 }
 
-template <class T>
-inline void dumpRectPoints(std::wostream &str, T x1, T y1, T x2, T y2)
-{
-    dumpRect(str, x1, y1, (x2 - x1), (y2 - y1));
-}
-
 // Dump Qt's simple geometrical types
 static inline bool dumpQSize_F(const SymbolGroupValue &v, std::wostream &str)
 {
@@ -2176,7 +2197,11 @@ static inline bool dumpQLine_F(const SymbolGroupValue &v, std::wostream &str)
 
 static inline bool dumpQRect(const SymbolGroupValue &v, std::wostream &str)
 {
-    dumpRectPoints(str, v["x1"].intValue(), v["y1"].intValue(), v["x2"].intValue(), v["y2"].intValue());
+    const int x1 = v["x1"].intValue();
+    const int y1 = v["y1"].intValue();
+    const int x2 = v["x2"].intValue();
+    const int y2 = v["y2"].intValue();
+    dumpRect(str, x1, y1, (x2 - x1 + 1), (y2 - y1 + 1));
     return true;
 }
 
@@ -2277,9 +2302,12 @@ static bool dumpStd_W_String(const SymbolGroupValue &v, int type, std::wostream 
     // and MSVC2008 none
     const SymbolGroupValue bx = SymbolGroupValue::findMember(v, "_Bx");
     const int reserved = bx.parent()["_Myres"].intValue();
-    const int size = bx.parent()["_Mysize"].intValue();
+    int size = bx.parent()["_Mysize"].intValue();
     if (!bx || reserved < 0 || size < 0)
         return false;
+    const bool truncated = unsigned(size) > ExtensionContext::instance().parameters().maxStringLength;
+    if (truncated)
+        size = ExtensionContext::instance().parameters().maxStringLength;
     // 'Buf' array for small strings, else pointer 'Ptr'.
     const int bufSize = type == KT_StdString ? 16 : 8; // see basic_string.
     const unsigned long memSize = type == KT_StdString ? size : 2 * size;
@@ -2290,13 +2318,12 @@ static bool dumpStd_W_String(const SymbolGroupValue &v, int type, std::wostream 
     if (!memory)
         return false;
     str << (type == KT_StdString ?
-        quotedWStringFromCharData(memory, memSize) :
-        quotedWStringFromWCharData(memory, memSize));
-    if (memoryHandle) {
+        quotedWStringFromCharData(memory, memSize, truncated) :
+        quotedWStringFromWCharData(memory, memSize, truncated));
+    if (memoryHandle)
         *memoryHandle = new MemoryHandle(memory, memSize);
-    } else {
+    else
         delete [] memory;
-    }
     return true;
 }
 
@@ -2403,9 +2430,8 @@ static bool dumpQVariant(const SymbolGroupValue &v, std::wostream &str, void **s
         break;
     case 10: // String
         str << L"(QString) ";
-        if (const SymbolGroupValue sv = dataV.typeCast(qtInfo.prependQtCoreModule("QString *").c_str())) {
+        if (const SymbolGroupValue sv = dataV.typeCast(qtInfo.prependQtCoreModule("QString *").c_str()))
             dumpQString(sv, str);
-        }
         break;
     case 11: //StringList: Dump container size
         str << L"(QStringList) ";
@@ -2600,6 +2626,9 @@ unsigned dumpSimpleType(SymbolGroupNode  *n, const SymbolGroupValueContext &ctx,
         break;
     case KT_QString:
         rc = dumpQString(v, str, memoryHandleIn) ? SymbolGroupNode::SimpleDumperOk : SymbolGroupNode::SimpleDumperFailed;
+        break;
+    case KT_QStringRef:
+        rc = dumpQStringRef(v, str, memoryHandleIn) ? SymbolGroupNode::SimpleDumperOk : SymbolGroupNode::SimpleDumperFailed;
         break;
     case KT_QColor:
         rc = dumpQColor(v, str) ? SymbolGroupNode::SimpleDumperOk : SymbolGroupNode::SimpleDumperFailed;

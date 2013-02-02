@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -148,11 +148,10 @@ public:
         while (tmpDir.count() >= topLevel.count() && tmpDir.count() > 0) {
             m_cachedMatches.insert(tmpDir, newInfo);
             const int slashPos = tmpDir.lastIndexOf(slash);
-            if (slashPos >= 0) {
+            if (slashPos >= 0)
                 tmpDir.truncate(slashPos);
-            } else {
+            else
                 tmpDir.clear();
-            }
         }
     }
 
@@ -208,8 +207,8 @@ IVersionControl* VcsManager::findVersionControlForDirectory(const QString &input
     if (inputDirectory.isEmpty())
         return 0;
 
-    // Make sure we a clean absolute path:
-    const QString directory = QDir(inputDirectory).canonicalPath();
+    // Make sure we an absolute path:
+    const QString directory = QDir(inputDirectory).absolutePath();
 
     VcsManagerPrivate::VcsInfo *cachedData = d->findInCache(directory);
     if (cachedData) {

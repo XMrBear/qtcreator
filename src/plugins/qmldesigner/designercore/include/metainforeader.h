@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -58,6 +58,8 @@ public:
 
     QStringList errors();
 
+    void setQualifcation(const QString &qualification);
+
 protected:
     virtual void elementStart(const QString &name);
     virtual void elementEnd();
@@ -114,6 +116,8 @@ private:
     QVariant m_currentPropertyValue;
 
     bool m_overwriteDuplicates;
+
+    QString m_qualication;
 };
 
 }

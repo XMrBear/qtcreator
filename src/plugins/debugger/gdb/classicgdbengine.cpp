@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -28,13 +28,13 @@
 ****************************************************************************/
 
 #include "gdbengine.h"
-#include "gdbmi.h"
 
-#include "debuggerstartparameters.h"
 #include "debuggeractions.h"
 #include "debuggercore.h"
+#include "debuggerprotocol.h"
+#include "debuggerstartparameters.h"
 #include "debuggerstringutils.h"
-
+#include "sourceutils.h"
 #include "stackhandler.h"
 #include "watchhandler.h"
 
@@ -552,11 +552,10 @@ void DumperHelper::evaluationParameters(const WatchData &data,
     // in rare cases we need more or less:
     switch (td.type) {
     case QAbstractItemType:
-        if (data.dumperFlags.isEmpty()) {
+        if (data.dumperFlags.isEmpty())
             qWarning("Internal error: empty dumper state '%s'.", data.iname.constData());
-        } else {
+        else
             inner = data.dumperFlags.mid(1);
-        }
         break;
     case QObjectSlotType:
     case QObjectSignalType: {
@@ -1015,8 +1014,8 @@ void GdbEngine::handleDebuggingHelperValue2Classic(const GdbResponse &response)
         return;
     }
 
-    setWatchDataType(data, response.data.findChild("type"));
-    setWatchDataDisplayedType(data, response.data.findChild("displaytype"));
+    data.updateType(response.data.findChild("type"));
+    data.updateDisplayedType(response.data.findChild("displaytype"));
     QList<WatchData> list;
     parseWatchData(watchHandler()->expandedINames(), data, contents, &list);
     //for (int i = 0; i != list.size(); ++i)
@@ -1068,11 +1067,10 @@ void GdbEngine::handleDebuggingHelperValue3Classic(const GdbResponse &response)
                     data1.type = data.type.left(data.type.size() - 4);
                     data1.iname = data.iname + '.' + QByteArray::number(i);
                     const QByteArray &addressSpec = list.at(i);
-                    if (addressSpec.startsWith("0x")) {
+                    if (addressSpec.startsWith("0x"))
                         data.setHexAddress(addressSpec);
-                    } else {
+                    else
                         data.dumperFlags = addressSpec; // Item model dumpers pull tricks
-                    }
                     data1.exp = "((" + gdbQuoteTypes(data1.type) + "*)" + addressSpec + ')';
                     data1.setHasChildren(false);
                     data1.setValueNeeded();
@@ -1278,6 +1276,9 @@ static void showQtDumperLibraryWarning(const QString &details)
         "expand the Details section and click Build All."));
     if (!details.isEmpty())
         dialog.setDetailedText(details);
+#if defined(Q_OS_MAC) && QT_VERSION >= 0x050000
+    dialog.setWindowModality(Qt::WindowModal);
+#endif
     dialog.exec();
     if (dialog.clickedButton() == qtPref) {
         Core::ICore::showOptionsDialog(
@@ -1401,9 +1402,9 @@ void GdbEngine::handleVarListChildrenHelperClassic(const GdbMi &item,
         data.name = _(exp);
         data.iname = parent.iname + '.' + data.name.toLatin1();
         data.variable = name;
-        setWatchDataType(data, item.findChild("type"));
-        setWatchDataValue(data, item);
-        setWatchDataAddress(data, item.findChild("addr"), GdbMi());
+        data.updateType(item.findChild("type"));
+        data.updateValue(item);
+        data.updateAddress(item.findChild("addr"), GdbMi());
         data.setHasChildren(false);
         insertData(data);
     } else if (parent.iname.endsWith('.')) {
@@ -1425,10 +1426,10 @@ void GdbEngine::handleVarListChildrenHelperClassic(const GdbMi &item,
         data.iname = parent.iname + '.' + exp;
         data.variable = name;
         data.sortId = sortId;
-        setWatchDataType(data, item.findChild("type"));
-        setWatchDataValue(data, item);
-        setWatchDataAddress(data, item.findChild("addr"), GdbMi());
-        setWatchDataChildCount(data, item.findChild("numchild"));
+        data.updateType(item.findChild("type"));
+        data.updateValue(item);
+        data.updateAddress(item.findChild("addr"), GdbMi());
+        data.updateChildCount(item.findChild("numchild"));
         if (!watchHandler()->isExpandedIName(data.iname))
             data.setChildrenUnneeded();
 
@@ -1523,7 +1524,7 @@ void GdbEngine::handleEvaluateExpressionClassic(const GdbResponse &response)
         //if (col == 0)
         //    data.name = response.data.findChild("value").data();
         //else
-            setWatchDataValue(data, response.data);
+            data.updateValue(response.data);
     } else {
         data.setError(QString::fromLocal8Bit(response.data.findChild("msg").data()));
     }

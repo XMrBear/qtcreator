@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -127,11 +127,10 @@ void PromptOverwriteDialog::setFileEnabled(const QString &f, bool e)
 {
     if (QStandardItem *item = itemForFile(f)) {
         Qt::ItemFlags flags = item->flags();
-        if (e) {
+        if (e)
             flags |= Qt::ItemIsEnabled;
-        } else {
+        else
             flags &= ~Qt::ItemIsEnabled;
-        }
         item->setFlags(flags);
     }
 }

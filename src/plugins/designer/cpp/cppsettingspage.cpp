@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -105,7 +105,7 @@ QString CppSettingsPageWidget::searchKeywords() const
 CppSettingsPage::CppSettingsPage(QObject *parent) : Core::IOptionsPage(parent)
 {
     m_parameters.fromSettings(Core::ICore::settings());
-    setId(QLatin1String(Designer::Constants::SETTINGS_CPP_SETTINGS_ID));
+    setId(Designer::Constants::SETTINGS_CPP_SETTINGS_ID);
     setDisplayName(QCoreApplication::translate("Designer", Designer::Constants::SETTINGS_CPP_SETTINGS_NAME));
     setCategory(Designer::Constants::SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("Designer", Designer::Constants::SETTINGS_TR_CATEGORY));

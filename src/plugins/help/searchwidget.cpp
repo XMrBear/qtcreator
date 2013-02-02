@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -259,11 +259,10 @@ void SearchWidget::contextMenuEvent(QContextMenuEvent *contextMenuEvent)
     }
 
     QAction *usedAction = menu.exec(mapToGlobal(contextMenuEvent->pos()));
-    if (usedAction == openLink) {
+    if (usedAction == openLink)
         browser->selectAll();
-    } else if (usedAction == openLinkInNewTab) {
+    else if (usedAction == openLinkInNewTab)
         OpenPagesManager::instance().createPageFromSearch(link);
-    } else if (usedAction == copyAnchorAction) {
+    else if (usedAction == copyAnchorAction)
         QApplication::clipboard()->setText(link.toString());
-    }
 }

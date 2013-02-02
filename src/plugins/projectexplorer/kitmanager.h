@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -72,11 +72,14 @@ public:
 
     virtual unsigned int priority() const = 0; // the higher the closer to the top.
 
-    virtual bool visibleIn(Kit *) { return true; }
     virtual QVariant defaultValue(Kit *) const = 0;
 
+    // called to find issues with the kit
     virtual QList<Task> validate(const Kit *) const = 0;
+    // called to fix issues with this kitinformation. Does not modify the rest of the kit.
     virtual void fix(Kit *) { return; }
+    // called on initial setup of a kit.
+    virtual void setup(Kit *) { return; }
 
     virtual ItemList toUserOutput(Kit *) const = 0;
 
@@ -112,7 +115,7 @@ public:
     QList<Kit *> kits(const KitMatcher *m = 0) const;
     Kit *find(const Core::Id &id) const;
     Kit *find(const KitMatcher *m) const;
-    Kit *defaultKit();
+    Kit *defaultKit() const;
 
     QList<KitInformation *> kitInformation() const;
 

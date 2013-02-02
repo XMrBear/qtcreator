@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -31,6 +31,8 @@
 
 #ifndef QNX_QNXCONSTANTS_H
 #define QNX_QNXCONSTANTS_H
+
+#include <QtGlobal>
 
 namespace Qnx {
 
@@ -75,6 +77,7 @@ const char QNX_QNX_OS_TYPE[] = "QnxOsType";
 
 const char QNX_DEBUG_TOKEN_KEY[] = "debugToken";
 
+const char QNX_BLACKBERRY_CASCADES_WIZARD_ID[]     = "Q.QnxBlackBerryCascadesApp";
 const char QNX_BAR_DESCRIPTOR_WIZARD_ID[]          = "Q.QnxBlackBerryBarDescriptor";
 const char QNX_BLACKBERRY_QTQUICK_APP_WIZARD_ID[]  = "Q.QnxBlackBerryQQApp";
 const char QNX_BLACKBERRY_QTQUICK2_APP_WIZARD_ID[] = "Q.QnxBlackBerryQQ2App";
@@ -85,6 +88,16 @@ const char QNX_BB_PLATFORM_NAME[]  = "BlackBerry";
 
 const char QNX_DEBUG_EXECUTABLE[] = "pdebug";
 
+// BlackBerry settings constants
+const char QNX_BB_CATEGORY[] = "XF.BlackBerry";
+const char QNX_BB_CATEGORY_TR[] = QT_TRANSLATE_NOOP("BlackBerry", "BlackBerry");
+const char QNX_BB_CATEGORY_ICON[] = ":/qnx/images/target.png";
+const char QNX_BB_NDK_SETTINGS_ID[] = "ZZ.BlackBerry NDK Configuration";
+
+const char QNX_BAR_DESCRIPTOR_MIME_TYPE[] = "application/vnd.rim.qnx.bar_descriptor";
+const char QNX_BAR_DESCRIPTOR_EDITOR_ID[] = "Qnx.BarDescriptorEditor";
+
+const char QNX_TASK_CATEGORY_BARDESCRIPTOR[] = "Task.Category.BarDescriptor";
 } // namespace Constants
 } // namespace Qnx
 

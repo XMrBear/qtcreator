@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -47,9 +47,6 @@ class AllProjectsFilter : public Locator::BaseFileFilter
 
 public:
     explicit AllProjectsFilter(ProjectExplorerPlugin *pe);
-    QString displayName() const { return tr("Files in Any Project"); }
-    QString id() const { return QLatin1String("Files in any project"); }
-    Locator::ILocatorFilter::Priority priority() const { return Locator::ILocatorFilter::Low; }
     void refresh(QFutureInterface<void> &future);
 
 protected:

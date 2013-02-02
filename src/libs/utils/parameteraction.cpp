@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -93,11 +93,10 @@ void ParameterAction::setEnablingMode(EnablingMode m)
 void ParameterAction::setParameter(const QString &p)
 {
     const bool enabled = !p.isEmpty();
-    if (enabled) {
+    if (enabled)
         setText(m_parameterText.arg(p));
-    } else {
+    else
         setText(m_emptyText);
-    }
     if (m_enablingMode == EnabledWithParameter)
         setEnabled(enabled);
 }

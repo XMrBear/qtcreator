@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -194,9 +194,8 @@ void TargetSetupPageWrapper::keyPressEvent(QKeyEvent *event)
 
 void TargetSetupPageWrapper::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
+    if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
         event->accept();
-    }
 }
 
 void TargetSetupPageWrapper::cancel()

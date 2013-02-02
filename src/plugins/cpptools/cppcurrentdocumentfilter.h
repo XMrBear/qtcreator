@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -50,9 +50,6 @@ public:
     CppCurrentDocumentFilter(CppModelManager *manager, Core::EditorManager *editorManager);
     ~CppCurrentDocumentFilter() {}
 
-    QString displayName() const { return tr("C++ Methods in Current Document"); }
-    QString id() const { return QLatin1String("Methods in current Document"); }
-    Priority priority() const { return Medium; }
     QList<Locator::FilterEntry> matchesFor(QFutureInterface<Locator::FilterEntry> &future, const QString &entry);
     void accept(Locator::FilterEntry selection) const;
     void refresh(QFutureInterface<void> &future);

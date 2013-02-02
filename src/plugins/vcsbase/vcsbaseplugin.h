@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -99,6 +99,7 @@ public:
     // the file one.
     QString topLevel() const;
 
+    QString currentDirectoryOrTopLevel() const;
     bool equals(const VcsBasePluginState &rhs) const;
 
     friend VCSBASE_EXPORT QDebug operator<<(QDebug in, const VcsBasePluginState &state);

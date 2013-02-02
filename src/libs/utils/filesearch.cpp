@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -499,9 +499,8 @@ bool SubDirFileIterator::hasNext() const
         const bool processed = m_processedValues.pop();
         if (dir.exists()) {
             QStringList subDirs;
-            if (!processed) {
+            if (!processed)
                 subDirs = dir.entryList(QDir::Dirs|QDir::Hidden|QDir::NoDotAndDotDot);
-            }
             if (subDirs.isEmpty()) {
                 QStringList fileEntries = dir.entryList(m_filters,
                     QDir::Files|QDir::Hidden);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -134,11 +134,10 @@ QValidator::State IntegerValidator::validateEntry(const QString &s, int base, bo
     if (bigInt)
         return QValidator::Acceptable;
     bool ok;
-    if (signedV) {
+    if (signedV)
         s.toLongLong(&ok, base);
-    } else {
+    else
         s.toULongLong(&ok, base);
-    }
     return ok ? QValidator::Acceptable : QValidator::Intermediate;
 }
 

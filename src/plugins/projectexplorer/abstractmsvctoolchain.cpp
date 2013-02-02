@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -153,7 +153,7 @@ QString AbstractMsvcToolChain::makeCommand(const Utils::Environment &environment
 
 Utils::FileName AbstractMsvcToolChain::compilerCommand() const
 {
-    Utils::Environment env;
+    Utils::Environment env = Utils::Environment::systemEnvironment();
     addToEnvironment(env);
     return Utils::FileName::fromString(env.searchInPath(QLatin1String("cl.exe")));
 }

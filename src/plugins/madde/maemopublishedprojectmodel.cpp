@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -116,11 +116,10 @@ bool MaemoPublishedProjectModel::setData(const QModelIndex &index,
     if (index.column() != IncludeColumn)
         return QFileSystemModel::setData(index, value, role);
     if (role == Qt::CheckStateRole) {
-        if (value == Qt::Checked) {
+        if (value == Qt::Checked)
             m_filesToExclude.remove(filePath(index));
-        } else {
+        else
             m_filesToExclude.insert(filePath(index));
-        }
         if (isDir(index))
             emit layoutChanged();
         return true;

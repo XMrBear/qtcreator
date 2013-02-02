@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -51,6 +51,7 @@ BlackBerryWizardExtension::BlackBerryWizardExtension()
 QList<QWizardPage *> BlackBerryWizardExtension::extensionPages(const Core::IWizard *wizard)
 {
     QStringList validIds;
+    validIds << QLatin1String(Constants::QNX_BLACKBERRY_CASCADES_WIZARD_ID);
     validIds << QLatin1String(Constants::QNX_BAR_DESCRIPTOR_WIZARD_ID);
     validIds << QLatin1String(Constants::QNX_BLACKBERRY_QTQUICK_APP_WIZARD_ID);
     validIds << QLatin1String(Constants::QNX_BLACKBERRY_GUI_APP_WIZARD_ID);

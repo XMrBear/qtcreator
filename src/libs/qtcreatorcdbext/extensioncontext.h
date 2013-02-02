@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -40,6 +40,16 @@ class LocalsSymbolGroup;
 class WatchesSymbolGroup;
 class OutputCallback;
 
+// Global parameters
+class Parameters
+{
+public:
+    Parameters();
+
+    unsigned maxStringLength;
+    unsigned maxStackDepth;
+};
+
 // Global singleton with context.
 // Caches a symbolgroup per frame and thread as long as the session is accessible.
 class ExtensionContext {
@@ -48,8 +58,6 @@ class ExtensionContext {
 
     ExtensionContext();
 public:
-    enum { maxStackFrames = 200 };
-
     // Key used to report stop reason in StopReasonMap
     static const char *stopReasonKeyC;
     static const char *breakPointStopReasonC;  // pre-defined stop reasons
@@ -105,6 +113,9 @@ public:
 
     CIDebugClient *hookedClient() const { return m_hookedClient; }
 
+    const Parameters &parameters() const { return m_parameters; }
+    Parameters &parameters() { return m_parameters; }
+
 private:
     bool isInitialized() const;
 
@@ -120,6 +131,7 @@ private:
 
     StopReasonMap m_stopReason;
     bool m_stateNotification;
+    Parameters m_parameters;
 };
 
 // Context for extension commands to be instantiated on stack in a command handler.

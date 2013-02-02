@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -278,13 +278,12 @@ QString SearchSymbols::symbolName(const Symbol *symbol) const
         } else if (symbol->isEnum()) {
             type = QLatin1String("enum");
         } else if (const Class *c = symbol->asClass())  {
-            if (c->isUnion()) {
+            if (c->isUnion())
                 type = QLatin1String("union");
-            } else if (c->isStruct()) {
+            else if (c->isStruct())
                 type = QLatin1String("struct");
-            } else {
+            else
                 type = QLatin1String("class");
-            }
         } else {
             type = QLatin1String("symbol");
         }

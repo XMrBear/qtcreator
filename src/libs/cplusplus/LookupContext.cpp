@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -335,6 +335,10 @@ QList<LookupItem> LookupContext::lookup(const Name *name, Scope *scope) const
                 if (ClassOrNamespace *binding = bindings()->lookupType(fun)) {
                     candidates = binding->find(name);
 
+                    // try find this name in parent class
+                    while (candidates.isEmpty() && (binding = binding->parent()))
+                        candidates = binding->find(name);
+
                     if (! candidates.isEmpty())
                         return candidates;
                 }
@@ -643,13 +647,11 @@ ClassOrNamespace *ClassOrNamespace::lookupType_helper(const Name *name,
     if (const QualifiedNameId *q = name->asQualifiedNameId()) {
 
         QSet<ClassOrNamespace *> innerProcessed;
-        if (! q->base()) {
+        if (! q->base())
             return globalNamespace()->lookupType_helper(q->name(), &innerProcessed, true, origin);
-        }
 
-        if (ClassOrNamespace *binding = lookupType_helper(q->base(), processed, true, origin)) {
+        if (ClassOrNamespace *binding = lookupType_helper(q->base(), processed, true, origin))
             return binding->lookupType_helper(q->name(), &innerProcessed, false, origin);
-        }
 
         return 0;
 
@@ -714,6 +716,42 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
 
     ClassOrNamespace *reference = it->second;
 
+    const TemplateNameId *templId = name->asTemplateNameId();
+    if (templId) {
+        // if it is a TemplateNameId it could be a specialization(full or partial) or
+        // instantiation of one of the specialization(reference->_specialization) or
+        // base class(reference)
+        if (templId->isSpecialization()) {
+            // if it is a specialization we try to find or create new one and
+            // add to base class(reference)
+            TemplateNameIdTable::const_iterator cit = reference->_specializations.find(templId);
+            if (cit != reference->_specializations.end()) {
+                return cit->second;
+            } else {
+                ClassOrNamespace *newSpecialization = _factory->allocClassOrNamespace(reference);
+#ifdef DEBUG_LOOKUP
+                newSpecialization->_name = templId;
+#endif // DEBUG_LOOKUP
+                reference->_specializations[templId] = newSpecialization;
+                return newSpecialization;
+            }
+        } else {
+            TemplateNameId *nonConstTemplId = const_cast<TemplateNameId *>(templId);
+            // make this instantiation looks like specialization which help to find
+            // full specialization for this instantiation
+            nonConstTemplId->setIsSpecialization(true);
+            TemplateNameIdTable::const_iterator cit = reference->_specializations.find(templId);
+            if (cit != reference->_specializations.end()) {
+                // we found full specialization
+                reference = cit->second;
+            } else {
+                // TODO: find the best specialization(probably partial) for this instantiation
+            }
+            // let's instantiation be instantiation
+            nonConstTemplId->setIsSpecialization(false);
+        }
+    }
+
     // The reference binding might still be missing some of its base classes in the case they
     // are templates. We need to collect them now. First, we track the bases which are already
     // part of the binding so we can identify the missings ones later.
@@ -735,7 +773,6 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
     if (!referenceClass)
         return reference;
 
-    const TemplateNameId *templId = name->asTemplateNameId();
     if ((! templId && _alreadyConsideredClasses.contains(referenceClass)) ||
             (templId &&
             _alreadyConsideredTemplates.contains(templId))) {
@@ -750,9 +787,6 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
     // If we are dealling with a template type, more work is required, since we need to
     // construct all instantiation data.
     if (templId) {
-        if (_instantiations.contains(templId))
-            return _instantiations[templId];
-
         _alreadyConsideredTemplates.insert(templId);
         ClassOrNamespace *instantiation = _factory->allocClassOrNamespace(reference);
 #ifdef DEBUG_LOOKUP
@@ -767,20 +801,27 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
 
         // It gets a bit complicated if the reference is actually a class template because we
         // now must worry about dependent names in base classes.
-        if (Template *templ = referenceClass->enclosingTemplate()) {
-            const unsigned argumentCount = templId->templateArgumentCount();
+        if (Template *templateSpecialization = referenceClass->enclosingTemplate()) {
+            const unsigned argumentCountOfInitialization = templId->templateArgumentCount();
+            const unsigned argumentCountOfSpecialization
+                    = templateSpecialization->templateParameterCount();
 
             if (_factory->expandTemplates()) {
                 Clone cloner(_control.data());
                 Subst subst(_control.data());
-                for (unsigned i = 0, ei = std::min(argumentCount, templ->templateParameterCount()); i < ei; ++i) {
-                    const TypenameArgument *tParam = templ->templateParameterAt(i)->asTypenameArgument();
+                for (unsigned i = 0; i < argumentCountOfSpecialization; ++i) {
+                    const TypenameArgument *tParam
+                            = templateSpecialization->templateParameterAt(i)->asTypenameArgument();
                     if (!tParam)
                         continue;
                     const Name *name = tParam->name();
                     if (!name)
                         continue;
-                    const FullySpecifiedType &ty = templId->templateArgumentAt(i);
+
+                    FullySpecifiedType ty = (i < argumentCountOfInitialization) ?
+                                templId->templateArgumentAt(i):
+                                cloner.type(tParam->type(), &subst);
+
                     subst.bind(cloner.name(name, &subst), ty);
                 }
 
@@ -788,7 +829,9 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
                     Symbol *clone = cloner.symbol(s, &subst);
                     instantiation->_symbols.append(clone);
 #ifdef DEBUG_LOOKUP
-                    Overview oo;oo.showFunctionSignatures = true;oo.showReturnTypes = true; oo.showTemplateParameters = true;
+                    Overview oo;oo.showFunctionSignatures = true;
+                    oo.showReturnTypes = true;
+                    oo.showTemplateParameters = true;
                     qDebug()<<"cloned"<<oo(clone->type());
 #endif // DEBUG_LOOKUP
                 }
@@ -798,8 +841,8 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
             }
 
             QHash<const Name*, unsigned> templParams;
-            for (unsigned i = 0; i < templ->templateParameterCount(); ++i)
-                templParams.insert(templ->templateParameterAt(i)->name(), i);
+            for (unsigned i = 0; i < argumentCountOfSpecialization; ++i)
+                templParams.insert(templateSpecialization->templateParameterAt(i)->name(), i);
 
             foreach (const Name *baseName, allBases) {
                 ClassOrNamespace *baseBinding = 0;
@@ -809,7 +852,7 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
                     // Ex.: template <class T> class A : public T {};
                     if (templParams.contains(nameId)) {
                         const unsigned parameterIndex = templParams.value(nameId);
-                        if (parameterIndex < argumentCount) {
+                        if (parameterIndex < argumentCountOfInitialization) {
                             const FullySpecifiedType &fullType =
                                     templId->templateArgumentAt(parameterIndex);
                             if (fullType.isValid()) {
@@ -821,9 +864,9 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
                 } else {
                     SubstitutionMap map;
                     for (unsigned i = 0;
-                         i < templ->templateParameterCount() && i < argumentCount;
+                         i < argumentCountOfSpecialization && i < argumentCountOfInitialization;
                          ++i) {
-                        map.bind(templ->templateParameterAt(i)->name(),
+                        map.bind(templateSpecialization->templateParameterAt(i)->name(),
                                  templId->templateArgumentAt(i));
                     }
                     SubstitutionEnvironment env;
@@ -842,7 +885,7 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
                         ClassOrNamespace *binding = this;
                         if (const Name *qualification = qBaseName->base()) {
                             const TemplateNameId *baseTemplName = qualification->asTemplateNameId();
-                            if (!baseTemplName || !compareName(baseTemplName, templ->name()))
+                            if (!baseTemplName || !compareName(baseTemplName, templateSpecialization->name()))
                                 binding = lookupType(qualification);
                         }
                         baseName = qBaseName->name();
@@ -861,7 +904,6 @@ ClassOrNamespace *ClassOrNamespace::nestedType(const Name *name, ClassOrNamespac
         }
 
         _alreadyConsideredTemplates.clear(templId);
-        _instantiations[templId] = instantiation;
         return instantiation;
     }
 
@@ -966,9 +1008,8 @@ bool ClassOrNamespace::NestedClassInstantiator::containsTemplateType(Declaration
     NamedType *memberNamedType = findMemberNamedType(memberType);
     if (memberNamedType) {
         const Name *name = memberNamedType->name();
-        if (_subst.contains(name)) {
+        if (_subst.contains(name))
             return true;
-        }
     }
     return false;
 }
@@ -981,15 +1022,12 @@ bool ClassOrNamespace::NestedClassInstantiator::containsTemplateType(Function * 
 
 NamedType *ClassOrNamespace::NestedClassInstantiator::findMemberNamedType(Type *memberType) const
 {
-    if (NamedType *namedType = memberType->asNamedType()) {
+    if (NamedType *namedType = memberType->asNamedType())
         return namedType;
-    }
-    else if (PointerType *pointerType = memberType->asPointerType()) {
+    else if (PointerType *pointerType = memberType->asPointerType())
         return findMemberNamedType(pointerType->elementType().type());
-    }
-    else if (ReferenceType *referenceType = memberType->asReferenceType()) {
+    else if (ReferenceType *referenceType = memberType->asReferenceType())
         return findMemberNamedType(referenceType->elementType().type());
-    }
 
     return 0;
 }

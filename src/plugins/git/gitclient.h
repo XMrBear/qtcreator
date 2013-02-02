@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -82,6 +82,27 @@ class GitClient : public QObject
     Q_OBJECT
 
 public:
+    enum StashResult { StashUnchanged, StashCanceled, StashFailed,
+                       Stashed, NotStashed /* User did not want it */ };
+
+    class StashGuard
+    {
+    public:
+        StashGuard(const QString &workingDirectory, const QString &keyword, bool askUser = true);
+        ~StashGuard();
+
+        void preventPop();
+        bool stashingFailed(bool includeNotStashed) const;
+        StashResult result() const { return stashResult; }
+
+    private:
+        bool pop;
+        StashResult stashResult;
+        QString message;
+        QString workingDir;
+        GitClient *client;
+    };
+
     static const char *stashNamePrefix;
 
     explicit GitClient(GitSettings *settings);
@@ -108,9 +129,8 @@ public:
              bool enableAnnotationContextMenu = false, const QStringList &args = QStringList());
     void blame(const QString &workingDirectory, const QStringList &args, const QString &fileName,
                const QString &revision = QString(), int lineNumber = -1);
-    void checkout(const QString &workingDirectory, const QString &file);
-    void checkoutBranch(const QString &workingDirectory, const QString &branch);
     void hardReset(const QString &workingDirectory, const QString &commit = QString());
+    void softReset(const QString &workingDirectory, const QString &commit);
     void addFile(const QString &workingDirectory, const QString &fileName);
     bool synchronousLog(const QString &workingDirectory,
                         const QStringList &arguments,
@@ -136,7 +156,7 @@ public:
                                   QString revision = QString(), QString *errorMessage = 0,
                                   bool revertStaging = true);
     // Checkout branch
-    bool synchronousCheckoutBranch(const QString &workingDirectory, const QString &branch, QString *errorMessage = 0);
+    bool synchronousCheckout(const QString &workingDirectory, const QString &ref, QString *errorMessage = 0);
 
     // Do a stash and return identier.
     enum { StashPromptDescription = 0x1, StashImmediateRestore = 0x2, StashIgnoreUnchanged = 0x4 };
@@ -149,6 +169,7 @@ public:
                                  QString *errorMessage = 0);
     bool synchronousStashRestore(const QString &workingDirectory,
                                  const QString &stash,
+                                 bool pop = false,
                                  const QString &branch = QString(),
                                  QString *errorMessage = 0);
     bool synchronousStashRemove(const QString &workingDirectory,
@@ -177,13 +198,21 @@ public:
     QString vcsGetRepositoryURL(const QString &directory);
     bool synchronousFetch(const QString &workingDirectory, const QString &remote);
     bool synchronousPull(const QString &workingDirectory, bool rebase);
-    bool synchronousRebaseContinue(const QString &workingDirectory);
+    bool synchronousCommandContinue(const QString &workingDirectory, const QString &command);
     bool synchronousPush(const QString &workingDirectory, const QString &remote = QString());
+    bool synchronousMerge(const QString &workingDirectory, const QString &branch);
+    bool synchronousRebase(const QString &workingDirectory,
+                           const QString &baseBranch,
+                           const QString &topicBranch = QString());
+    bool revertCommit(const QString &workingDirectory, const QString &commit);
+    bool cherryPickCommit(const QString &workingDirectory, const QString &commit);
+    void synchronousAbortCommand(const QString &workingDir, const QString &abortCommand);
 
     // git svn support (asynchronous).
     void synchronousSubversionFetch(const QString &workingDirectory);
     void subversionLog(const QString &workingDirectory);
 
+    void stashPop(const QString &workingDirectory, const QString &stash);
     void stashPop(const QString &workingDirectory);
     void revert(const QStringList &files, bool revertStaging);
     void branchList(const QString &workingDirectory);
@@ -200,10 +229,8 @@ public:
 
     QString readConfigValue(const QString &workingDirectory, const QString &configVar) const;
 
-    enum StashResult { StashUnchanged, StashCanceled, StashFailed,
-                       Stashed, NotStashed /* User did not want it */ };
-    StashResult ensureStash(const QString &workingDirectory, QString *errorMessage);
-    StashResult ensureStash(const QString &workingDirectory);
+    StashResult ensureStash(const QString &workingDirectory, const QString &keyword, bool askUser,
+                            QString *message, QString *errorMessage = 0);
 
     bool getCommitData(const QString &workingDirectory, bool amend,
                        QString *commitTemplate, CommitData *commitData,
@@ -226,7 +253,7 @@ public:
 
     void launchRepositoryBrowser(const QString &workingDirectory);
 
-    QStringList synchronousRepositoryBranches(const QString &repositoryURL);
+    QStringList synchronousRepositoryBranches(const QString &repositoryURL, bool *isDetached = 0);
 
     GitSettings *settings() const;
 
@@ -296,8 +323,9 @@ private:
                          QString *errorMessage,
                          bool revertStaging);
     void connectRepositoryChanged(const QString & repository, VcsBase::Command *cmd);
-    bool synchronousPullOrRebase(const QString &workingDirectory, const QStringList &arguments, bool rebase);
-    void handleMergeConflicts(const QString &workingDir, bool rebase);
+    bool executeAndHandleConflicts(const QString &workingDirectory, const QStringList &arguments,
+                                   const QString &abortCommand = QString());
+    void handleMergeConflicts(const QString &workingDir, const QString &abortCommand);
     bool tryLauchingGitK(const QProcessEnvironment &env,
                          const QString &workingDirectory,
                          const QString &fileName,

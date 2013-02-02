@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -30,73 +30,15 @@
 #ifndef WATCHUTILS_H
 #define WATCHUTILS_H
 
+// NOTE: Don't add dependencies to other files.
+// This is used in the debugger auto-tests.
+
 #include <QSet>
 #include <QString>
-
-namespace TextEditor {
-    class ITextEditor;
-}
-
-namespace Core {
-    class IEditor;
-}
-
-namespace CPlusPlus {
-    class Snapshot;
-}
 
 namespace Debugger {
 namespace Internal {
 
-class WatchData;
-class GdbMi;
-
-// Keep in sync with dumper.py
-enum DebuggerEncoding
-{
-    Unencoded8Bit                          =  0,
-    Base64Encoded8BitWithQuotes            =  1,
-    Base64Encoded16BitWithQuotes           =  2,
-    Base64Encoded32BitWithQuotes           =  3,
-    Base64Encoded16Bit                     =  4,
-    Base64Encoded8Bit                      =  5,
-    Hex2EncodedLatin1WithQuotes            =  6,
-    Hex4EncodedLittleEndianWithQuotes      =  7,
-    Hex8EncodedLittleEndianWithQuotes      =  8,
-    Hex2EncodedUtf8WithQuotes              =  9,
-    Hex8EncodedBigEndian                   = 10,
-    Hex4EncodedBigEndianWithQuotes         = 11,
-    Hex4EncodedLittleEndianWithoutQuotes   = 12,
-    Hex2EncodedLocal8BitWithQuotes         = 13,
-    JulianDate                             = 14,
-    MillisecondsSinceMidnight              = 15,
-    JulianDateAndMillisecondsSinceMidnight = 16,
-    Hex2EncodedInt1                        = 17,
-    Hex2EncodedInt2                        = 18,
-    Hex2EncodedInt4                        = 19,
-    Hex2EncodedInt8                        = 20,
-    Hex2EncodedUInt1                       = 21,
-    Hex2EncodedUInt2                       = 22,
-    Hex2EncodedUInt4                       = 23,
-    Hex2EncodedUInt8                       = 24,
-    Hex2EncodedFloat4                      = 25,
-    Hex2EncodedFloat8                      = 26
-};
-
-// Keep in sync with dumper.py, symbolgroupvalue.cpp of CDB
-enum DebuggerDisplay {
-    StopDisplay                            = 0,
-    DisplayImageData                       = 1,
-    DisplayUtf16String                     = 2,
-    DisplayImageFile                       = 3,
-    DisplayProcess                         = 4,
-    DisplayLatin1String                    = 5,
-    DisplayUtf8String                      = 6
-};
-
-bool isEditorDebuggable(Core::IEditor *editor);
-QByteArray dotEscape(QByteArray str);
-QString currentTime();
 bool isSkippableFunction(const QString &funcName, const QString &fileName);
 bool isLeavableFunction(const QString &funcName, const QString &fileName);
 
@@ -113,45 +55,7 @@ bool isIntOrFloatType(const QByteArray &type);
 bool isIntType(const QByteArray &type);
 
 QString formatToolTipAddress(quint64 a);
-
-QString quoteUnprintableLatin1(const QByteArray &ba);
-
-// Editor tooltip support
-bool isCppEditor(Core::IEditor *editor);
-QString cppExpressionAt(TextEditor::ITextEditor *editor, int pos,
-                        int *line, int *column, QString *function = 0);
-QString fixCppExpression(const QString &exp);
-QString cppFunctionAt(const QString &fileName, int line);
-// Decode string data as returned by the dumper helpers.
-QString decodeData(const QByteArray &baIn, int encoding);
-// Decode string data as returned by the dumper helpers.
-void decodeArray(WatchData *list, const WatchData &tmplate,
-    const QByteArray &rawData, int encoding);
-
-// Get variables that are not initialized at a certain line
-// of a function from the code model. Shadowed variables will
-// be reported using the debugger naming conventions '<shadowed n>'
-bool getUninitializedVariables(const CPlusPlus::Snapshot &snapshot,
-   const QString &function, const QString &file, int line,
-   QStringList *uninitializedVariables);
-
-
-//
-// GdbMi interaction
-//
-
-void setWatchDataValue(WatchData &data, const GdbMi &item);
-void setWatchDataValueToolTip(WatchData &data, const GdbMi &mi,
-    int encoding);
-void setWatchDataChildCount(WatchData &data, const GdbMi &mi);
-void setWatchDataValueEnabled(WatchData &data, const GdbMi &mi);
-void setWatchDataAddress(WatchData &data, const GdbMi &addressMi, const GdbMi &origAddressMi);
-void setWatchDataType(WatchData &data, const GdbMi &mi);
-void setWatchDataDisplayedType(WatchData &data, const GdbMi &mi);
-
-void parseWatchData(const QSet<QByteArray> &expandedINames,
-    const WatchData &parent, const GdbMi &child,
-    QList<WatchData> *insertions);
+QString removeObviousSideEffects(const QString &exp);
 
 } // namespace Internal
 } // namespace Debugger

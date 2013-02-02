@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -77,7 +77,7 @@ public:
     CvsPlugin();
     ~CvsPlugin();
 
-    virtual bool initialize(const QStringList &arguments, QString *errorMessage);
+    bool initialize(const QStringList &arguments, QString *errorMessage);
 
     void cvsDiff(const QString &workingDir, const QStringList &files);
 
@@ -123,10 +123,15 @@ private slots:
     void uneditCurrentFile();
     void uneditCurrentRepository();
     void cvsDiff(const Cvs::Internal::CvsDiffParameters &p);
+#ifdef WITH_TESTS
+    void testDiffFileResolving_data();
+    void testDiffFileResolving();
+    void testLogResolving();
+#endif
 
 protected:
-    virtual void updateActions(VcsBase::VcsBasePlugin::ActionState);
-    virtual bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
+    void updateActions(VcsBase::VcsBasePlugin::ActionState);
+    bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
 
 private:
     bool isCommitEditorOpen() const;

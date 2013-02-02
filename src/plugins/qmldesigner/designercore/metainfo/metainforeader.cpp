@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -81,6 +81,11 @@ void MetaInfoReader::readMetaInfoFile(const QString &path, bool overwriteDuplica
 QStringList MetaInfoReader::errors()
 {
     return QmlJS::SimpleAbstractStreamReader::errors();
+}
+
+void MetaInfoReader::setQualifcation(const QString &qualification)
+{
+    m_qualication = qualification;
 }
 
 void MetaInfoReader::elementStart(const QString &name)
@@ -203,6 +208,8 @@ void MetaInfoReader::readTypeProperty(const QString &name, const QVariant &value
 {
     if (name == QLatin1String("name")) {
         m_currentClassName = value.toString();
+        if (!m_qualication.isEmpty()) //prepend qualification
+            m_currentClassName = m_qualication + QLatin1String(".") + m_currentClassName;
     } else if (name == QLatin1String("icon")) {
         m_currentIcon = absoluteFilePathForDocument(value.toString());
     } else {

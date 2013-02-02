@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -41,7 +41,7 @@ class DisplaySettings;
 class DisplaySettingsPageParameters
 {
 public:
-    QString id;
+    Core::Id id;
     QString displayName;
     QString settingsPrefix;
 };
@@ -64,6 +64,9 @@ public:
 
 signals:
     void displaySettingsChanged(const TextEditor::DisplaySettings &);
+
+private slots:
+    void updateForceOpenLinksInNextSplit(bool openLinksInNextSplitChecked);
 
 private:
     void settingsFromUI(DisplaySettings &displaySettings) const;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -49,7 +49,7 @@ class HighlighterSettingsPage : public TextEditorOptionsPage
     Q_OBJECT
 
 public:
-    HighlighterSettingsPage(const QString &id, QObject *parent);
+    HighlighterSettingsPage(Core::Id id, QObject *parent);
     ~HighlighterSettingsPage();
 
     QWidget *createPage(QWidget *parent);

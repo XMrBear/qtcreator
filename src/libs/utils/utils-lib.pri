@@ -9,8 +9,6 @@ QT += script network
 
 CONFIG += exceptions # used by portlist.cpp, textfileformat.cpp, and ssh/*
 
-DEFINES += QT_NO_CAST_FROM_ASCII
-
 win32-msvc* {
     # disable warnings caused by botan headers
     QMAKE_CXXFLAGS += -wd4250 -wd4290
@@ -40,12 +38,10 @@ SOURCES += $$PWD/environment.cpp \
     $$PWD/fancylineedit.cpp \
     $$PWD/qtcolorbutton.cpp \
     $$PWD/savedaction.cpp \
-    $$PWD/submiteditorwidget.cpp \
     $$PWD/synchronousprocess.cpp \
     $$PWD/savefile.cpp \
     $$PWD/fileutils.cpp \
     $$PWD/textfileformat.cpp \
-    $$PWD/submitfieldwidget.cpp \
     $$PWD/consoleprocess.cpp \
     $$PWD/uncommentselection.cpp \
     $$PWD/parameteraction.cpp \
@@ -82,7 +78,13 @@ SOURCES += $$PWD/environment.cpp \
     $$PWD/qtcassert.cpp \
     $$PWD/elfreader.cpp \
     $$PWD/bracematcher.cpp \
-    $$PWD/proxyaction.cpp
+    $$PWD/proxyaction.cpp \
+    $$PWD/elidinglabel.cpp \
+    $$PWD/hostosinfo.cpp \
+    $$PWD/tooltip/tooltip.cpp \
+    $$PWD/tooltip/tips.cpp \
+    $$PWD/tooltip/tipcontents.cpp \
+    $$PWD/unixutils.cpp
 
 win32 {
     SOURCES += \
@@ -92,10 +94,6 @@ win32 {
 }
 else:SOURCES += $$PWD/consoleprocess_unix.cpp
 
-unix:!macx {
-    HEADERS += $$PWD/unixutils.h
-    SOURCES += $$PWD/unixutils.cpp
-}
 HEADERS += \
     $$PWD/environment.h \
     $$PWD/environmentmodel.h \
@@ -123,14 +121,12 @@ HEADERS += \
     $$PWD/fancylineedit.h \
     $$PWD/qtcolorbutton.h \
     $$PWD/savedaction.h \
-    $$PWD/submiteditorwidget.h \
     $$PWD/consoleprocess.h \
     $$PWD/consoleprocess_p.h \
     $$PWD/synchronousprocess.h \
     $$PWD/savefile.h \
     $$PWD/fileutils.h \
     $$PWD/textfileformat.h \
-    $$PWD/submitfieldwidget.h \
     $$PWD/uncommentselection.h \
     $$PWD/parameteraction.h \
     $$PWD/treewidgetcolumnstretcher.h \
@@ -170,11 +166,17 @@ HEADERS += \
     $$PWD/elfreader.h \
     $$PWD/bracematcher.h \
     $$PWD/proxyaction.h \
-    $$PWD/hostosinfo.h
+    $$PWD/hostosinfo.h \
+    $$PWD/elidinglabel.h \
+    $$PWD/tooltip/tooltip.h \
+    $$PWD/tooltip/tips.h \
+    $$PWD/tooltip/tipcontents.h \
+    $$PWD/tooltip/reuse.h \
+    $$PWD/tooltip/effects.h \
+    $$PWD/unixutils.h
 
 FORMS += $$PWD/filewizardpage.ui \
     $$PWD/projectintropage.ui \
-    $$PWD/newclasswidget.ui \
-    $$PWD/submiteditorwidget.ui
+    $$PWD/newclasswidget.ui
 
 RESOURCES += $$PWD/utils.qrc

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -151,6 +151,18 @@ void BaseTreeView::reset()
     if (header() && m_alwaysAdjustColumnsAction
             && m_alwaysAdjustColumnsAction->isChecked())
         resizeColumnsToContents();
+}
+
+QModelIndexList BaseTreeView::activeRows() const
+{
+    QItemSelectionModel *selection = selectionModel();
+    QModelIndexList indices = selection->selectedRows();
+    if (indices.isEmpty()) {
+        QModelIndex current = selection->currentIndex();
+        if (current.isValid())
+            indices.append(current);
+    }
+    return indices;
 }
 
 } // namespace Utils

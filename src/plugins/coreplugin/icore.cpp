@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -530,11 +530,6 @@ QStatusBar *ICore::statusBar()
 void ICore::updateAdditionalContexts(const Context &remove, const Context &add)
 {
     m_mainwindow->updateAdditionalContexts(remove, add);
-}
-
-bool ICore::hasContext(int context)
-{
-    return m_mainwindow->hasContext(context);
 }
 
 void ICore::addContextObject(IContext *context)

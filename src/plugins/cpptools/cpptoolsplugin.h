@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -74,9 +74,8 @@ public:
 
 private slots:
     void switchHeaderSource();
-#ifdef WITH_TESTS
 
-    // codegen tests
+#ifdef WITH_TESTS
     void test_codegen_public_in_empty_class();
     void test_codegen_public_in_nonempty_class();
     void test_codegen_public_before_protected();
@@ -101,6 +100,7 @@ private slots:
     void test_completion_template_6();
     void test_completion_template_7();
     void test_completion_type_of_pointer_is_typedef();
+    void test_completion_instantiate_full_specialization();
     void test_completion_template_as_base();
     void test_completion_template_as_base_data();
     void test_completion_use_global_identifier_as_base_class();
@@ -113,8 +113,23 @@ private slots:
     void test_completion_enclosing_template_class_data();
     void test_completion_instantiate_nested_class_when_enclosing_is_template();
     void test_completion_instantiate_nested_of_nested_class_when_enclosing_is_template();
+    void test_completion_instantiate_template_with_default_argument_type();
+    void test_completion_instantiate_template_with_default_argument_type_as_template();
+    void test_completion_member_access_operator_1();
+    void test_completion_typedef_of_type_and_replace_access_operator();
+    void test_completion_typedef_of_pointer_of_type_and_replace_access_operator();
+
+    void test_format_pointerdeclaration_in_simpledeclarations();
+    void test_format_pointerdeclaration_in_simpledeclarations_data();
+    void test_format_pointerdeclaration_in_controlflowstatements();
+    void test_format_pointerdeclaration_in_controlflowstatements_data();
+    void test_format_pointerdeclaration_multiple_declarators();
+    void test_format_pointerdeclaration_multiple_declarators_data();
+    void test_format_pointerdeclaration_multiple_matches();
+    void test_format_pointerdeclaration_multiple_matches_data();
 
     void test_modelmanager_paths();
+    void test_modelmanager_framework_headers();
 
 private:
     void test_completion();

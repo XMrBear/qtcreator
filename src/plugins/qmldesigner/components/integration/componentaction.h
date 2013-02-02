@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -48,16 +48,17 @@ class ComponentAction : public QWidgetAction
     Q_OBJECT
 public:
     ComponentAction(ComponentView  *componentView);
-    void setCurrentIndex(int);
+    void setCurrentIndex(int index);
+
 
 protected:
     QWidget  *createWidget(QWidget *parent);
 
 signals:
     void currentComponentChanged(const ModelNode &node);
-    void currentIndexChanged(int);
+    void currentIndexChanged(int index);
 
-private slots:
+public slots:
     void emitCurrentComponentChanged(int index);
 
 private:

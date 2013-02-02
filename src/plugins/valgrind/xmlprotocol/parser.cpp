@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 ** Author: Frank Osterfeld, KDAB (frank.osterfeld@kdab.com)
 **
@@ -221,9 +221,8 @@ QXmlStreamReader::TokenType Parser::Private::blockingReadNext()
                 QIODevice *dev = reader.device();
                 QAbstractSocket *sock = qobject_cast<QAbstractSocket *>(dev);
 
-                if (!sock || sock->state() != QAbstractSocket::ConnectedState) {
+                if (!sock || sock->state() != QAbstractSocket::ConnectedState)
                     throw ParserException(dev->errorString());
-                }
             }
         } else if (reader.hasError()) {
             throw ParserException(reader.errorString()); //TODO add line, column?

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Nicolas Arnaud-Cormos
+** Copyright (c) 2013 Nicolas Arnaud-Cormos
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -47,10 +47,6 @@ class MacroLocatorFilter : public Locator::ILocatorFilter
 public:
     MacroLocatorFilter();
     ~MacroLocatorFilter();
-
-    QString displayName() const { return tr("Macros"); }
-    QString id() const { return QLatin1String("Macros"); }
-    Priority priority() const { return Medium; }
 
     QList<Locator::FilterEntry> matchesFor(QFutureInterface<Locator::FilterEntry> &future, const QString &entry);
     void accept(Locator::FilterEntry selection) const;

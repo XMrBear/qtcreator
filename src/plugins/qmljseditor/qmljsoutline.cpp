@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -64,9 +64,8 @@ bool QmlJSOutlineFilterModel::filterAcceptsRow(int sourceRow,
     if (m_filterBindings) {
         QModelIndex sourceIndex = sourceModel()->index(sourceRow, 0, sourceParent);
         QVariant itemType = sourceIndex.data(QmlOutlineModel::ItemTypeRole);
-        if (itemType == QmlOutlineModel::NonElementBindingType) {
+        if (itemType == QmlOutlineModel::NonElementBindingType)
             return false;
-        }
     }
     return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 }

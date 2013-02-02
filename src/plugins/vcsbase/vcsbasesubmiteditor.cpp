@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -30,10 +30,13 @@
 #include "vcsbasesubmiteditor.h"
 
 #include "commonvcssettings.h"
-#include "vcsbaseoutputwindow.h"
-#include "vcsplugin.h"
 #include "nicknamedialog.h"
 #include "submiteditorfile.h"
+#include "submiteditorwidget.h"
+#include "submitfieldwidget.h"
+#include "submitfilemodel.h"
+#include "vcsbaseoutputwindow.h"
+#include "vcsplugin.h"
 
 #include <aggregation/aggregate.h>
 #include <cplusplus/Control.h>
@@ -51,11 +54,10 @@
 #include <coreplugin/actionmanager/actionmanager.h>
 #include <coreplugin/editormanager/editormanager.h>
 #include <utils/completingtextedit.h>
-#include <utils/submiteditorwidget.h>
 #include <utils/checkablemessagebox.h>
 #include <utils/synchronousprocess.h>
-#include <utils/submitfieldwidget.h>
 #include <utils/fileutils.h>
+#include <utils/qtcassert.h>
 #include <find/basetextfind.h>
 #include <texteditor/fontsettings.h>
 #include <texteditor/texteditorsettings.h>
@@ -119,7 +121,7 @@ static const char *belongingClassName(const CPlusPlus::Function *function)
 /*!
     \class  VcsBase::VcsBaseSubmitEditor
 
-    \brief Base class for a submit editor based on the Utils::SubmitEditorWidget.
+    \brief Base class for a submit editor based on the SubmitEditorWidget.
 
     Presents the commit message in a text editor and an
     checkable list of modified files in a list window. The user can delete
@@ -208,7 +210,7 @@ VcsBaseSubmitEditor::VcsBaseSubmitEditor(const VcsBaseSubmitEditorParameters *pa
     connect(d->m_file, SIGNAL(saveMe(QString*,QString,bool)),
             this, SLOT(save(QString*,QString,bool)));
 
-    connect(d->m_widget, SIGNAL(diffSelected(QStringList)), this, SLOT(slotDiffSelectedVcsFiles(QStringList)));
+    connect(d->m_widget, SIGNAL(diffSelected(QList<int>)), this, SLOT(slotDiffSelectedVcsFiles(QList<int>)));
     connect(d->m_widget->descriptionEdit(), SIGNAL(textChanged()), this, SLOT(slotDescriptionChanged()));
 
     const CommonVcsSettings settings = VcsPlugin::instance()->settings();
@@ -316,16 +318,6 @@ void VcsBaseSubmitEditor::unregisterActions(QAction *editorUndoAction,  QAction 
 {
     d->m_widget->unregisterActions(editorUndoAction, editorRedoAction, submitAction, diffAction);
     d->m_diffAction = d->m_submitAction = 0;
-}
-
-int VcsBaseSubmitEditor::fileNameColumn() const
-{
-    return d->m_widget->fileNameColumn();
-}
-
-void VcsBaseSubmitEditor::setFileNameColumn(int c)
-{
-    d->m_widget->setFileNameColumn(c);
 }
 
 QAbstractItemView::SelectionMode VcsBaseSubmitEditor::fileListSelectionMode() const
@@ -486,17 +478,21 @@ QStringList VcsBaseSubmitEditor::checkedFiles() const
     return d->m_widget->checkedFiles();
 }
 
-void VcsBaseSubmitEditor::setFileModel(QAbstractItemModel *m, const QString &repositoryDirectory)
+void VcsBaseSubmitEditor::setFileModel(SubmitFileModel *model, const QString &repositoryDirectory)
 {
-    d->m_widget->setFileModel(m);
+    QTC_ASSERT(model, return);
+    if (SubmitFileModel *oldModel = d->m_widget->fileModel()) {
+        model->updateSelections(oldModel);
+        delete oldModel;
+    }
+    d->m_widget->setFileModel(model);
 
     QSet<QString> uniqueSymbols;
     const CPlusPlus::Snapshot cppSnapShot = CPlusPlus::CppModelManagerInterface::instance()->snapshot();
 
     // Iterate over the files and get interesting symbols
-    for (int row = 0; row < m->rowCount(); ++row) {
-        const QString fileName = m->data(m->index(row, d->m_widget->fileNameColumn())).toString();
-        const QFileInfo fileInfo(repositoryDirectory, fileName);
+    for (int row = 0; row < model->rowCount(); ++row) {
+        const QFileInfo fileInfo(repositoryDirectory, model->file(row));
 
         // Add file name
         uniqueSymbols.insert(fileInfo.fileName());
@@ -539,14 +535,30 @@ void VcsBaseSubmitEditor::setFileModel(QAbstractItemModel *m, const QString &rep
     }
 }
 
-QAbstractItemModel *VcsBaseSubmitEditor::fileModel() const
+SubmitFileModel *VcsBaseSubmitEditor::fileModel() const
 {
     return d->m_widget->fileModel();
 }
 
-void VcsBaseSubmitEditor::slotDiffSelectedVcsFiles(const QStringList &rawList)
+QStringList VcsBaseSubmitEditor::rowsToFiles(const QList<int> &rows) const
 {
-     emit diffSelectedFiles(rawList);
+    if (rows.empty())
+        return QStringList();
+
+    QStringList rc;
+    const SubmitFileModel *model = fileModel();
+    const int count = rows.size();
+    for (int i = 0; i < count; i++)
+        rc.push_back(model->file(rows.at(i)));
+    return rc;
+}
+
+void VcsBaseSubmitEditor::slotDiffSelectedVcsFiles(const QList<int> &rawList)
+{
+    if (d->m_parameters->diffType == VcsBaseSubmitEditorParameters::DiffRows)
+        emit diffSelectedFiles(rawList);
+    else
+        emit diffSelectedFiles(rowsToFiles(rawList));
 }
 
 bool VcsBaseSubmitEditor::save(QString *errorString, const QString &fileName, bool autoSave)
@@ -811,11 +823,10 @@ void VcsBaseSubmitEditor::filterUntrackedFilesOfProject(const QString &repositor
     const QDir repoDir(repositoryDirectory);
     for (QStringList::iterator it = untrackedFiles->begin(); it != untrackedFiles->end(); ) {
         const QString path = QDir::toNativeSeparators(repoDir.absoluteFilePath(*it));
-        if (nativeProjectFiles.contains(path)) {
+        if (nativeProjectFiles.contains(path))
             ++it;
-        } else {
+        else
             it = untrackedFiles->erase(it);
-        }
     }
 }
 

@@ -59,6 +59,7 @@ Project {
         "src/plugins/mercurial/mercurial.qbs",
         "src/plugins/perforce/perforce.qbs",
         "src/plugins/projectexplorer/projectexplorer.qbs",
+        "src/plugins/qbsprojectmanager/qbsprojectmanager.qbs",
 //        "src/plugins/qmldesigner/qmldesigner.qbs",
         "src/plugins/qmljseditor/qmljseditor.qbs",
         "src/plugins/qmljstools/qmljstools.qbs",
@@ -136,10 +137,8 @@ Project {
         }
     }
 
-    Product {
+    Application {
         name: "qtcreator"
-        type: ["application", "installed_content"]
-        destination: "bin"
         consoleApplication: qbs.debugInformation
 
         cpp.rpaths: ["$ORIGIN/../lib/qtcreator"]
@@ -177,7 +176,7 @@ Project {
         Group {
             condition: qbs.targetOS == "linux" || qbs.targetOS == "macx"
             files: "bin/qtcreator.sh"
-            fileTags: "install"
+            qbs.install: true
             qbs.installDir: "bin"
         }
 
@@ -194,6 +193,11 @@ Project {
                "src/shared/qtlockedfile/qtlockedfile_win.cpp"
            ]
         }
+
+        Group {
+            fileTagsFilter: product.type
+            qbs.install: true
+            qbs.installDir: "bin"
+        }
     }
 }
-

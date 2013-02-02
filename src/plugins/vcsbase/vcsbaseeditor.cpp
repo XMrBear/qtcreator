@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -184,31 +184,6 @@ VcsBaseEditor::VcsBaseEditor(VcsBaseEditorWidget *widget,
     setContext(Core::Context(type->context, TextEditor::Constants::C_TEXTEDITOR));
 }
 
-// Diff editor: creates a browse combo in the toolbar for diff output.
-class VcsBaseDiffEditor : public VcsBaseEditor
-{
-public:
-    VcsBaseDiffEditor(VcsBaseEditorWidget *, const VcsBaseEditorParameters *type);
-
-    QComboBox *diffFileBrowseComboBox() const { return m_diffFileBrowseComboBox; }
-
-private:
-    QComboBox *m_diffFileBrowseComboBox;
-};
-
-VcsBaseDiffEditor::VcsBaseDiffEditor(VcsBaseEditorWidget *w, const VcsBaseEditorParameters *type) :
-    VcsBaseEditor(w, type),
-    m_diffFileBrowseComboBox(new QComboBox)
-{
-    m_diffFileBrowseComboBox->setMinimumContentsLength(20);
-    // Make the combo box prefer to expand
-    QSizePolicy policy = m_diffFileBrowseComboBox->sizePolicy();
-    policy.setHorizontalPolicy(QSizePolicy::Expanding);
-    m_diffFileBrowseComboBox->setSizePolicy(policy);
-
-    insertExtraToolBarWidget(Left, m_diffFileBrowseComboBox);
-}
-
 // ----------- VcsBaseEditorPrivate
 
 namespace Internal {
@@ -365,6 +340,7 @@ void ChangeTextCursorHandler::fillContextMenu(QMenu *menu, EditorContentType typ
     default:
         break;
     }
+    widget->addChangeActions(menu, m_currentChange);
 }
 
 QString ChangeTextCursorHandler::currentContents() const
@@ -384,7 +360,7 @@ void ChangeTextCursorHandler::slotCopyRevision()
 
 QAction *ChangeTextCursorHandler::createDescribeAction(const QString &change) const
 {
-    QAction *a = new QAction(VcsBaseEditorWidget::tr("Describe change %1").arg(change), 0);
+    QAction *a = new QAction(VcsBaseEditorWidget::tr("Describe Change %1").arg(change), 0);
     connect(a, SIGNAL(triggered()), this, SLOT(slotDescribe()));
     return a;
 }
@@ -589,6 +565,9 @@ public:
     VcsBaseEditorWidgetPrivate(VcsBaseEditorWidget* editorWidget, const VcsBaseEditorParameters *type);
 
     AbstractTextCursorHandler *findTextCursorHandler(const QTextCursor &cursor);
+    // creates a browse combo in the toolbar for quick access to entries.
+    // Can be used for diff and log. Combo created on first call.
+    QComboBox *entriesComboBox();
 
     const VcsBaseEditorParameters *m_parameters;
 
@@ -596,7 +575,8 @@ public:
     QString m_diffBaseDirectory;
 
     QRegExp m_diffFilePattern;
-    QList<int> m_diffSections; // line number where this section starts
+    QRegExp m_logEntryPattern;
+    QList<int> m_entrySections; // line number where this section starts
     int m_cursorLine;
     QString m_annotateRevisionTextFormat;
     QString m_annotatePreviousRevisionTextFormat;
@@ -608,6 +588,9 @@ public:
     QList<AbstractTextCursorHandler *> m_textCursorHandlers;
 
     QColor m_backgroundColor;
+
+private:
+    QComboBox *m_entriesComboBox;
 };
 
 VcsBaseEditorWidgetPrivate::VcsBaseEditorWidgetPrivate(VcsBaseEditorWidget *editorWidget,
@@ -619,7 +602,8 @@ VcsBaseEditorWidgetPrivate::VcsBaseEditorWidgetPrivate(VcsBaseEditorWidget *edit
     m_fileLogAnnotateEnabled(false),
     m_editor(0),
     m_configurationWidget(0),
-    m_mouseDragging(false)
+    m_mouseDragging(false),
+    m_entriesComboBox(0)
 {
     m_textCursorHandlers.append(new ChangeTextCursorHandler(editorWidget));
     m_textCursorHandlers.append(new UrlTextCursorHandler(editorWidget));
@@ -633,6 +617,21 @@ AbstractTextCursorHandler *VcsBaseEditorWidgetPrivate::findTextCursorHandler(con
             return handler;
     }
     return 0;
+}
+
+QComboBox *VcsBaseEditorWidgetPrivate::entriesComboBox()
+{
+    if (m_entriesComboBox)
+        return m_entriesComboBox;
+    m_entriesComboBox = new QComboBox;
+    m_entriesComboBox->setMinimumContentsLength(20);
+    // Make the combo box prefer to expand
+    QSizePolicy policy = m_entriesComboBox->sizePolicy();
+    policy.setHorizontalPolicy(QSizePolicy::Expanding);
+    m_entriesComboBox->setSizePolicy(policy);
+
+    m_editor->insertExtraToolBarWidget(TextEditor::BaseTextEditor::Left, m_entriesComboBox);
+    return m_entriesComboBox;
 }
 
 } // namespace Internal
@@ -668,24 +667,43 @@ VcsBaseEditorWidget::VcsBaseEditorWidget(const VcsBaseEditorParameters *type, QW
     setMimeType(QLatin1String(d->m_parameters->mimeType));
 }
 
+void VcsBaseEditorWidget::setDiffFilePattern(const QRegExp &pattern)
+{
+    QTC_ASSERT(pattern.isValid() && pattern.captureCount() >= 1, return);
+    d->m_diffFilePattern = pattern;
+}
+
+void VcsBaseEditorWidget::setLogEntryPattern(const QRegExp &pattern)
+{
+    QTC_ASSERT(pattern.isValid() && pattern.captureCount() >= 1, return);
+    d->m_logEntryPattern = pattern;
+}
+
 void VcsBaseEditorWidget::init()
 {
+    d->m_editor = editor();
     switch (d->m_parameters->type) {
     case RegularCommandOutput:
     case LogOutput:
+        connect(d->entriesComboBox(), SIGNAL(activated(int)), this, SLOT(slotJumpToEntry(int)));
+        connect(this, SIGNAL(textChanged()), this, SLOT(slotPopulateLogBrowser()));
+        connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(slotCursorPositionChanged()));
+        break;
     case AnnotateOutput:
         // Annotation highlighting depends on contents, which is set later on
         connect(this, SIGNAL(textChanged()), this, SLOT(slotActivateAnnotation()));
         break;
-    case DiffOutput: {
-        DiffHighlighter *dh = createDiffHighlighter();
+    case DiffOutput:
+        // Diff: set up diff file browsing
+        connect(d->entriesComboBox(), SIGNAL(activated(int)), this, SLOT(slotJumpToEntry(int)));
+        connect(this, SIGNAL(textChanged()), this, SLOT(slotPopulateDiffBrowser()));
+        connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(slotCursorPositionChanged()));
+        break;
+    }
+    if (hasDiff()) {
+        DiffHighlighter *dh = new DiffHighlighter(d->m_diffFilePattern);
         setCodeFoldingSupported(true);
         baseTextDocument()->setSyntaxHighlighter(dh);
-        d->m_diffFilePattern = dh->filePattern();
-        connect(this, SIGNAL(textChanged()), this, SLOT(slotPopulateDiffBrowser()));
-        connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(slotDiffCursorPositionChanged()));
-    }
-        break;
     }
     TextEditor::TextEditorSettings::instance()->initializeEditor(this);
     // override revisions display (green or red bar on the left, marking changes):
@@ -772,11 +790,10 @@ QTextCodec *VcsBaseEditorWidget::codec() const
 
 void VcsBaseEditorWidget::setCodec(QTextCodec *c)
 {
-    if (c) {
+    if (c)
         baseTextDocument()->setCodec(c);
-    } else {
+    else
         qWarning("%s: Attempt to set 0 codec.", Q_FUNC_INFO);
-    }
 }
 
 EditorContentType VcsBaseEditorWidget::contentType() const
@@ -791,17 +808,7 @@ bool VcsBaseEditorWidget::isModified() const
 
 TextEditor::BaseTextEditor *VcsBaseEditorWidget::createEditor()
 {
-    TextEditor::BaseTextEditor *editor = 0;
-    if (d->m_parameters->type == DiffOutput) {
-        // Diff: set up diff file browsing
-        VcsBaseDiffEditor *de = new VcsBaseDiffEditor(this, d->m_parameters);
-        QComboBox *diffBrowseComboBox = de->diffFileBrowseComboBox();
-        connect(diffBrowseComboBox, SIGNAL(activated(int)), this, SLOT(slotDiffBrowse(int)));
-        editor = de;
-    } else {
-        editor = new VcsBaseEditor(this, d->m_parameters);
-    }
-    d->m_editor = editor;
+    TextEditor::BaseTextEditor *editor = new VcsBaseEditor(this, d->m_parameters);
 
     // Pass on signals.
     connect(this, SIGNAL(describeRequested(QString,QString)),
@@ -813,10 +820,9 @@ TextEditor::BaseTextEditor *VcsBaseEditorWidget::createEditor()
 
 void VcsBaseEditorWidget::slotPopulateDiffBrowser()
 {
-    VcsBaseDiffEditor *de = static_cast<VcsBaseDiffEditor*>(editor());
-    QComboBox *diffBrowseComboBox = de->diffFileBrowseComboBox();
-    diffBrowseComboBox->clear();
-    d->m_diffSections.clear();
+    QComboBox *entriesComboBox = d->entriesComboBox();
+    entriesComboBox->clear();
+    d->m_entrySections.clear();
     // Create a list of section line numbers (diffed files)
     // and populate combo with filenames.
     const QTextBlock cend = document()->end();
@@ -825,24 +831,52 @@ void VcsBaseEditorWidget::slotPopulateDiffBrowser()
     for (QTextBlock it = document()->begin(); it != cend; it = it.next(), lineNumber++) {
         const QString text = it.text();
         // Check for a new diff section (not repeating the last filename)
-        if (d->m_diffFilePattern.exactMatch(text)) {
+        if (d->m_diffFilePattern.indexIn(text) == 0) {
             const QString file = fileNameFromDiffSpecification(it);
             if (!file.isEmpty() && lastFileName != file) {
                 lastFileName = file;
                 // ignore any headers
-                d->m_diffSections.push_back(d->m_diffSections.empty() ? 0 : lineNumber);
-                diffBrowseComboBox->addItem(QFileInfo(file).fileName());
+                d->m_entrySections.push_back(d->m_entrySections.empty() ? 0 : lineNumber);
+                entriesComboBox->addItem(QFileInfo(file).fileName());
             }
         }
     }
 }
 
-void VcsBaseEditorWidget::slotDiffBrowse(int index)
+void VcsBaseEditorWidget::slotPopulateLogBrowser()
 {
-    // goto diffed file as indicated by index/line number
-    if (index < 0 || index >= d->m_diffSections.size())
+    QComboBox *entriesComboBox = d->entriesComboBox();
+    entriesComboBox->clear();
+    d->m_entrySections.clear();
+    // Create a list of section line numbers (log entries)
+    // and populate combo with subjects (if any).
+    const QTextBlock cend = document()->end();
+    int lineNumber = 0;
+    for (QTextBlock it = document()->begin(); it != cend; it = it.next(), lineNumber++) {
+        const QString text = it.text();
+        // Check for a new log section (not repeating the last filename)
+        if (d->m_logEntryPattern.indexIn(text) != -1) {
+            d->m_entrySections.push_back(d->m_entrySections.empty() ? 0 : lineNumber);
+            QString entry = d->m_logEntryPattern.cap(1);
+            QString subject = revisionSubject(it);
+            if (!subject.isEmpty()) {
+                if (subject.length() > 100) {
+                    subject.truncate(97);
+                    subject.append(QLatin1String("..."));
+                }
+                entry.append(QLatin1String(" - ")).append(subject);
+            }
+            entriesComboBox->addItem(entry);
+        }
+    }
+}
+
+void VcsBaseEditorWidget::slotJumpToEntry(int index)
+{
+    // goto diff/log entry as indicated by index/line number
+    if (index < 0 || index >= d->m_entrySections.size())
         return;
-    const int lineNumber = d->m_diffSections.at(index) + 1; // TextEdit uses 1..n convention
+    const int lineNumber = d->m_entrySections.at(index) + 1; // TextEdit uses 1..n convention
     // check if we need to do something, especially to avoid messing up navigation history
     int currentLine, currentColumn;
     convertPosition(position(), &currentLine, &currentColumn);
@@ -867,24 +901,22 @@ static int sectionOfLine(int line, const QList<int> &sections)
     return sectionCount - 1;
 }
 
-void VcsBaseEditorWidget::slotDiffCursorPositionChanged()
+void VcsBaseEditorWidget::slotCursorPositionChanged()
 {
-    // Adapt diff file browse combo to new position
+    // Adapt entries combo to new position
     // if the cursor goes across a file line.
-    QTC_ASSERT(d->m_parameters->type == DiffOutput, return);
     const int newCursorLine = textCursor().blockNumber();
     if (newCursorLine == d->m_cursorLine)
         return;
     // Which section does it belong to?
     d->m_cursorLine = newCursorLine;
-    const int section = sectionOfLine(d->m_cursorLine, d->m_diffSections);
+    const int section = sectionOfLine(d->m_cursorLine, d->m_entrySections);
     if (section != -1) {
-        VcsBaseDiffEditor *de = static_cast<VcsBaseDiffEditor*>(editor());
-        QComboBox *diffBrowseComboBox = de->diffFileBrowseComboBox();
-        if (diffBrowseComboBox->currentIndex() != section) {
-            const bool blocked = diffBrowseComboBox->blockSignals(true);
-            diffBrowseComboBox->setCurrentIndex(section);
-            diffBrowseComboBox->blockSignals(blocked);
+        QComboBox *entriesComboBox = d->entriesComboBox();
+        if (entriesComboBox->currentIndex() != section) {
+            const bool blocked = entriesComboBox->blockSignals(true);
+            entriesComboBox->setCurrentIndex(section);
+            entriesComboBox->blockSignals(blocked);
         }
     }
 }
@@ -900,7 +932,9 @@ void VcsBaseEditorWidget::contextMenuEvent(QContextMenuEvent *e)
         Internal::AbstractTextCursorHandler *handler = d->findTextCursorHandler(cursor);
         if (handler != 0)
             handler->fillContextMenu(menu, d->m_parameters->type);
-        break;
+        // Fall-through for log (might have diff)
+        if (d->m_parameters->type != LogOutput)
+            break;
     }
     case DiffOutput: {
         menu->addSeparator();
@@ -909,23 +943,22 @@ void VcsBaseEditorWidget::contextMenuEvent(QContextMenuEvent *e)
         menu->addSeparator();
         // Apply/revert diff chunk.
         const DiffChunk chunk = diffChunk(cursorForPosition(e->pos()));
-        const bool canApply = canApplyDiffChunk(chunk);
+        if (!canApplyDiffChunk(chunk))
+            break;
         // Apply a chunk from a diff loaded into the editor. This typically will
         // not have the 'source' property set and thus will only work if the working
         // directory matches that of the patch (see findDiffFile()). In addition,
         // the user has "Open With" and choose the right diff editor so that
         // fileNameFromDiffSpecification() works.
         QAction *applyAction = menu->addAction(tr("Apply Chunk..."));
-        applyAction->setEnabled(canApply);
         applyAction->setData(qVariantFromValue(Internal::DiffChunkAction(chunk, false)));
         connect(applyAction, SIGNAL(triggered()), this, SLOT(slotApplyDiffChunk()));
         // Revert a chunk from a VCS diff, which might be linked to reloading the diff.
         QAction *revertAction = menu->addAction(tr("Revert Chunk..."));
-        revertAction->setEnabled(canApply);
         revertAction->setData(qVariantFromValue(Internal::DiffChunkAction(chunk, true)));
         connect(revertAction, SIGNAL(triggered()), this, SLOT(slotApplyDiffChunk()));
-    }
         break;
+    }
     default:
         break;
     }
@@ -984,11 +1017,9 @@ void VcsBaseEditorWidget::mouseReleaseEvent(QMouseEvent *e)
 
 void VcsBaseEditorWidget::mouseDoubleClickEvent(QMouseEvent *e)
 {
-    if (d->m_parameters->type == DiffOutput) {
-        if (e->button() == Qt::LeftButton &&!(e->modifiers() & Qt::ShiftModifier)) {
-            QTextCursor cursor = cursorForPosition(e->pos());
-            jumpToChangeFromDiff(cursor);
-        }
+    if (hasDiff() && e->button() == Qt::LeftButton && !(e->modifiers() & Qt::ShiftModifier)) {
+        QTextCursor cursor = cursorForPosition(e->pos());
+        jumpToChangeFromDiff(cursor);
     }
     TextEditor::BaseTextEditorWidget::mouseDoubleClickEvent(e);
 }
@@ -996,8 +1027,7 @@ void VcsBaseEditorWidget::mouseDoubleClickEvent(QMouseEvent *e)
 void VcsBaseEditorWidget::keyPressEvent(QKeyEvent *e)
 {
     // Do not intercept return in editable patches.
-    if (d->m_parameters->type == DiffOutput && isReadOnly()
-        && (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return)) {
+    if (hasDiff() && isReadOnly() && (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return)) {
         jumpToChangeFromDiff(textCursor());
         return;
     }
@@ -1104,7 +1134,7 @@ void VcsBaseEditorWidget::jumpToChangeFromDiff(QTextCursor cursor)
 DiffChunk VcsBaseEditorWidget::diffChunk(QTextCursor cursor) const
 {
     DiffChunk rc;
-    QTC_ASSERT(d->m_parameters->type == DiffOutput, return rc);
+    QTC_ASSERT(hasDiff(), return rc);
     // Search back for start of chunk.
     QTextBlock block = cursor.block();
     if (block.isValid() && TextEditor::BaseTextDocumentLayout::foldingIndent(block) <= 1)
@@ -1113,9 +1143,8 @@ DiffChunk VcsBaseEditorWidget::diffChunk(QTextCursor cursor) const
 
     int chunkStart = 0;
     for ( ; block.isValid() ; block = block.previous()) {
-        if (checkChunkLine(block.text(), &chunkStart)) {
+        if (checkChunkLine(block.text(), &chunkStart))
             break;
-        }
     }
     if (!chunkStart || !block.isValid())
         return rc;
@@ -1142,11 +1171,10 @@ DiffChunk VcsBaseEditorWidget::diffChunk(QTextCursor cursor) const
 
 void VcsBaseEditorWidget::setPlainTextData(const QByteArray &data)
 {
-    if (data.size() > Core::EditorManager::maxTextFileSize()) {
+    if (data.size() > Core::EditorManager::maxTextFileSize())
         setPlainText(msgTextTooLarge(data.size()));
-    } else {
+    else
         setPlainText(codec()->toUnicode(data));
-    }
 }
 
 void VcsBaseEditorWidget::setFontSettings(const TextEditor::FontSettings &fs)
@@ -1155,7 +1183,12 @@ void VcsBaseEditorWidget::setFontSettings(const TextEditor::FontSettings &fs)
     d->m_backgroundColor = fs.toTextCharFormat(TextEditor::C_TEXT)
             .brushProperty(QTextFormat::BackgroundBrush).color();
 
-    if (d->m_parameters->type == DiffOutput) {
+    if (d->m_parameters->type == AnnotateOutput) {
+        if (BaseAnnotationHighlighter *highlighter = qobject_cast<BaseAnnotationHighlighter *>(baseTextDocument()->syntaxHighlighter())) {
+            highlighter->setBackgroundColor(d->m_backgroundColor);
+            highlighter->rehighlight();
+        }
+    } else if (hasDiff()) {
         if (DiffHighlighter *highlighter = qobject_cast<DiffHighlighter*>(baseTextDocument()->syntaxHighlighter())) {
             static QVector<TextEditor::TextStyle> categories;
             if (categories.isEmpty()) {
@@ -1166,11 +1199,6 @@ void VcsBaseEditorWidget::setFontSettings(const TextEditor::FontSettings &fs)
                            << TextEditor::C_DIFF_LOCATION;
             }
             highlighter->setFormats(fs.toTextCharFormats(categories));
-            highlighter->rehighlight();
-        }
-    } else if (d->m_parameters->type == AnnotateOutput) {
-        if (BaseAnnotationHighlighter *highlighter = qobject_cast<BaseAnnotationHighlighter *>(baseTextDocument()->syntaxHighlighter())) {
-            highlighter->setBackgroundColor(d->m_backgroundColor);
             highlighter->rehighlight();
         }
     }
@@ -1432,6 +1460,24 @@ bool VcsBaseEditorWidget::applyDiffChunk(const DiffChunk &dc, bool revert) const
     return VcsBasePlugin::runPatch(dc.asPatch(), QString(), 0, revert);
 }
 
+QString VcsBaseEditorWidget::fileNameFromDiffSpecification(const QTextBlock &inBlock) const
+{
+    // Go back chunks
+    for (QTextBlock block = inBlock; block.isValid(); block = block.previous()) {
+        const QString line = block.text();
+        if (d->m_diffFilePattern.indexIn(line) != -1) {
+            QString cap = d->m_diffFilePattern.cap(1);
+            if (!cap.isEmpty())
+                return findDiffFile(cap);
+        }
+    }
+    return QString();
+}
+
+void VcsBaseEditorWidget::addChangeActions(QMenu *, const QString &)
+{
+}
+
 QString VcsBaseEditorWidget::decorateVersion(const QString &revision) const
 {
     return revision;
@@ -1441,6 +1487,23 @@ bool VcsBaseEditorWidget::isValidRevision(const QString &revision) const
 {
     Q_UNUSED(revision);
     return true;
+}
+
+QString VcsBaseEditorWidget::revisionSubject(const QTextBlock &inBlock) const
+{
+    Q_UNUSED(inBlock);
+    return QString();
+}
+
+bool VcsBaseEditorWidget::hasDiff() const
+{
+    switch (d->m_parameters->type) {
+    case DiffOutput:
+    case LogOutput:
+        return true;
+    default:
+        return false;
+    }
 }
 
 void VcsBaseEditorWidget::slotApplyDiffChunk()
@@ -1455,11 +1518,10 @@ void VcsBaseEditorWidget::slotApplyDiffChunk()
         return;
 
     if (applyDiffChunk(chunkAction.chunk, chunkAction.revert)) {
-        if (chunkAction.revert) {
+        if (chunkAction.revert)
             emit diffChunkReverted(chunkAction.chunk);
-        } else {
+        else
             emit diffChunkApplied(chunkAction.chunk);
-        }
     }
 }
 
@@ -1505,5 +1567,29 @@ Core::IEditor* VcsBaseEditorWidget::locateEditorByTag(const QString &tag)
 }
 
 } // namespace VcsBase
+
+#ifdef WITH_TESTS
+#include <QTest>
+
+void VcsBase::VcsBaseEditorWidget::testDiffFileResolving()
+{
+    QFETCH(QByteArray, header);
+    QFETCH(QByteArray, fileName);
+    QTextDocument doc(QString::fromLatin1(header));
+    init();
+    QTextBlock block = doc.lastBlock();
+    QVERIFY(fileNameFromDiffSpecification(block).endsWith(QString::fromLatin1(fileName)));
+}
+
+void VcsBase::VcsBaseEditorWidget::testLogResolving(QByteArray &data,
+                                                    const QByteArray &entry1,
+                                                    const QByteArray &entry2)
+{
+    init();
+    setPlainText(QLatin1String(data));
+    QCOMPARE(d->entriesComboBox()->itemText(0), QString::fromLatin1(entry1));
+    QCOMPARE(d->entriesComboBox()->itemText(1), QString::fromLatin1(entry2));
+}
+#endif
 
 #include "vcsbaseeditor.moc"

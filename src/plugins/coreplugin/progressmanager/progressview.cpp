@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -69,11 +69,10 @@ FutureProgress *ProgressView::addTask(const QFuture<void> &future,
     m_layout->insertWidget(0, progress);
     m_taskList.append(progress);
     progress->setType(type);
-    if (flags.testFlag(ProgressManager::KeepOnFinish)) {
+    if (flags.testFlag(ProgressManager::KeepOnFinish))
         progress->setKeepOnFinish(FutureProgress::KeepOnFinishTillUserInteraction);
-    } else {
+    else
         progress->setKeepOnFinish(FutureProgress::HideOnFinish);
-    }
     connect(progress, SIGNAL(removeMe()), this, SLOT(slotRemoveTask()));
     return progress;
 }

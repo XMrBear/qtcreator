@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -174,7 +174,7 @@ void NavigationSubWidget::restoreSettings()
 Core::Command *NavigationSubWidget::command(const QString &title) const
 {
     const QHash<Id, Command *> commandMap = m_parentWidget->commandMap();
-    QHash<Id, Command *>::const_iterator r = commandMap.find(Id(title));
+    QHash<Id, Command *>::const_iterator r = commandMap.find(Id::fromString(title));
     if (r != commandMap.end())
         return r.value();
     return 0;

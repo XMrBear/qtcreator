@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Hugues Delorme
+** Copyright (c) 2013 Hugues Delorme
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -108,7 +108,8 @@ static const VcsBase::VcsBaseSubmitEditorParameters submitEditorParameters = {
     Constants::COMMITMIMETYPE,
     Constants::COMMIT_ID,
     Constants::COMMIT_DISPLAY_NAME,
-    Constants::COMMIT_ID
+    Constants::COMMIT_ID,
+    VcsBase::VcsBaseSubmitEditorParameters::DiffFiles
 };
 
 
@@ -163,7 +164,7 @@ bool BazaarPlugin::initialize(const QStringList &arguments, QString *errorMessag
     addAutoReleasedObject(new CloneWizard);
 
     const QString prefix = QLatin1String("bzr");
-    m_commandLocator = new Locator::CommandLocator(QLatin1String("Bazaar"), prefix, prefix);
+    m_commandLocator = new Locator::CommandLocator("Bazaar", prefix, prefix);
     addAutoReleasedObject(m_commandLocator);
 
     createMenu();
@@ -589,6 +590,65 @@ void BazaarPlugin::diffFromEditorSelected(const QStringList &files)
 {
     m_client->diff(m_submitRepository, files);
 }
+
+#ifdef WITH_TESTS
+#include <QTest>
+
+void BazaarPlugin::testDiffFileResolving_data()
+{
+    QTest::addColumn<QByteArray>("header");
+    QTest::addColumn<QByteArray>("fileName");
+
+    QTest::newRow("New") << QByteArray(
+            "=== added file 'src/plugins/bazaar/bazaareditor.cpp'\n"
+            "--- src/plugins/bazaar/bazaareditor.cpp\t1970-01-01 00:00:00 +0000\n"
+            "+++ src/plugins/bazaar/bazaareditor.cpp\t2013-01-20 21:39:47 +0000\n"
+            "@@ -0,0 +1,121 @@\n\n")
+        << QByteArray("src/plugins/bazaar/bazaareditor.cpp");
+    QTest::newRow("Deleted") << QByteArray(
+            "=== removed file 'src/plugins/bazaar/bazaareditor.cpp'\n"
+            "--- src/plugins/bazaar/bazaareditor.cpp\t2013-01-20 21:39:47 +0000\n"
+            "+++ src/plugins/bazaar/bazaareditor.cpp\t1970-01-01 00:00:00 +0000\n"
+            "@@ -1,121 +0,0 @@\n\n")
+        << QByteArray("src/plugins/bazaar/bazaareditor.cpp");
+    QTest::newRow("Modified") << QByteArray(
+            "=== modified file 'src/plugins/bazaar/bazaareditor.cpp'\n"
+            "--- src/plugins/bazaar/bazaareditor.cpp\t2010-08-27 14:12:44 +0000\n"
+            "+++ src/plugins/bazaar/bazaareditor.cpp\t2011-02-28 21:24:19 +0000\n"
+            "@@ -727,6 +727,9 @@\n\n")
+        << QByteArray("src/plugins/bazaar/bazaareditor.cpp");
+}
+
+void BazaarPlugin::testDiffFileResolving()
+{
+    BazaarEditor editor(editorParameters + 3, 0);
+    editor.testDiffFileResolving();
+}
+
+void BazaarPlugin::testLogResolving()
+{
+    QByteArray data(
+                "------------------------------------------------------------\n"
+                "revno: 6572 [merge]\n"
+                "committer: Patch Queue Manager <pqm@pqm.ubuntu.com>\n"
+                "branch nick: +trunk\n"
+                "timestamp: Mon 2012-12-10 10:18:33 +0000\n"
+                "message:\n"
+                "  (vila) Fix LC_ALL=C test failures related to utf8 stderr encoding (Vincent\n"
+                "   Ladeuil)\n"
+                "------------------------------------------------------------\n"
+                "revno: 6571 [merge]\n"
+                "committer: Patch Queue Manager <pqm@pqm.ubuntu.com>\n"
+                "branch nick: +trunk\n"
+                "timestamp: Thu 2012-10-25 11:13:27 +0000\n"
+                "message:\n"
+                "  (gz) Set approved revision and vote \"Approve\" when using lp-propose\n"
+                "   --approve (Jonathan Lange)\n"
+                );
+    BazaarEditor editor(editorParameters + 1, 0);
+    editor.testLogResolving(data, "6572", "6571");
+}
+#endif
 
 void BazaarPlugin::commitFromEditor()
 {

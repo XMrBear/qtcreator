@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -89,7 +89,7 @@ public:
     { return !this->operator==(other); }
 
     bool operator==(const char *other) const
-    { return qstrncmp(m_start, other, qstrlen(other)) == 0; }
+    { return m_length == (int) qstrlen(other) && !qstrncmp(m_start, other, m_length); }
     bool operator!=(const char *other) const
     { return !this->operator==(other); }
 

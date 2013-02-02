@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -778,51 +778,28 @@ void GitClient::blame(const QString &workingDirectory,
     executeGit(workingDirectory, arguments, editor, false, VcsBase::Command::NoReport, lineNumber);
 }
 
-void GitClient::checkoutBranch(const QString &workingDirectory, const QString &branch)
-{
-    QStringList arguments(QLatin1String("checkout"));
-    arguments <<  branch;
-    VcsBase::Command *cmd = executeGit(workingDirectory, arguments, 0, true);
-    connectRepositoryChanged(workingDirectory, cmd);
-}
-
-bool GitClient::synchronousCheckoutBranch(const QString &workingDirectory,
-                                          const QString &branch,
+bool GitClient::synchronousCheckout(const QString &workingDirectory,
+                                          const QString &ref,
                                           QString *errorMessage /* = 0 */)
 {
     QByteArray outputText;
     QByteArray errorText;
     QStringList arguments;
-    arguments << QLatin1String("checkout") << branch;
+    arguments << QLatin1String("checkout") << ref;
     const bool rc = fullySynchronousGit(workingDirectory, arguments, &outputText, &errorText);
     const QString output = commandOutputFromLocal8Bit(outputText);
     outputWindow()->append(output);
     if (!rc) {
         const QString stdErr = commandOutputFromLocal8Bit(errorText);
         //: Meaning of the arguments: %1: Branch, %2: Repository, %3: Error message
-        const QString msg = tr("Cannot checkout \"%1\" of \"%2\": %3").arg(branch, workingDirectory, stdErr);
-        if (errorMessage) {
+        const QString msg = tr("Cannot checkout \"%1\" of \"%2\": %3").arg(ref, workingDirectory, stdErr);
+        if (errorMessage)
             *errorMessage = msg;
-        } else {
+        else
             outputWindow()->appendError(msg);
-        }
         return false;
     }
     return true;
-}
-
-void GitClient::checkout(const QString &workingDirectory, const QString &fileName)
-{
-    // Passing an empty argument as the file name is very dangereous, since this makes
-    // git checkout apply to all files. Almost looks like a bug in git.
-    if (fileName.isEmpty())
-        return;
-
-    QStringList arguments;
-    arguments << QLatin1String("checkout") << QLatin1String("HEAD") << QLatin1String("--")
-            << fileName;
-
-    executeGit(workingDirectory, arguments, 0, true);
 }
 
 void GitClient::hardReset(const QString &workingDirectory, const QString &commit)
@@ -831,6 +808,18 @@ void GitClient::hardReset(const QString &workingDirectory, const QString &commit
     arguments << QLatin1String("reset") << QLatin1String("--hard");
     if (!commit.isEmpty())
         arguments << commit;
+
+    VcsBase::Command *cmd = executeGit(workingDirectory, arguments, 0, true);
+    connectRepositoryChanged(workingDirectory, cmd);
+}
+
+void GitClient::softReset(const QString &workingDirectory, const QString &commit)
+{
+    if (commit.isEmpty())
+        return;
+
+    QStringList arguments;
+    arguments << QLatin1String("reset") << QLatin1String("--soft") << commit;
 
     VcsBase::Command *cmd = executeGit(workingDirectory, arguments, 0, true);
     connectRepositoryChanged(workingDirectory, cmd);
@@ -859,11 +848,10 @@ bool GitClient::synchronousLog(const QString &workingDirectory, const QStringLis
         const QString errorMessage = tr("Cannot obtain log of \"%1\": %2").
                                      arg(QDir::toNativeSeparators(workingDirectory),
                                          commandOutputFromLocal8Bit(errorText));
-        if (errorMessageIn) {
+        if (errorMessageIn)
             *errorMessageIn = errorMessage;
-        } else {
+        else
             outputWindow()->appendError(errorMessage);
-        }
     }
     return rc;
 }
@@ -954,11 +942,10 @@ bool GitClient::synchronousReset(const QString &workingDirectory,
                             tr("Cannot reset \"%1\": %2").arg(QDir::toNativeSeparators(workingDirectory), stdErr) :
                             tr("Cannot reset %n file(s) in \"%1\": %2", 0, files.size()).
                             arg(QDir::toNativeSeparators(workingDirectory), stdErr);
-        if (errorMessage) {
+        if (errorMessage)
             *errorMessage = msg;
-        } else {
+        else
             outputWindow()->appendError(msg);
-        }
         return false;
     }
     return true;
@@ -1010,11 +997,10 @@ bool GitClient::synchronousCheckoutFiles(const QString &workingDirectory,
         //: %4: Error message
         const QString msg = tr("Cannot checkout \"%1\" of %2 in \"%3\": %4").
                             arg(revision, fileArg, workingDirectory, commandOutputFromLocal8Bit(errorText));
-        if (errorMessage) {
+        if (errorMessage)
             *errorMessage = msg;
-        } else {
+        else
             outputWindow()->appendError(msg);
-        }
         return false;
     }
     return true;
@@ -1270,22 +1256,22 @@ QString GitClient::synchronousStash(const QString &workingDirectory, const QStri
     QString errorMessage;
     switch (gitStatus(workingDirectory, StatusMode(NoUntracked | NoSubmodules), 0, &errorMessage)) {
     case  StatusChanged: {
-            message = creatorStashMessage(messageKeyword);
-            do {
-                if ((flags & StashPromptDescription)) {
-                    if (!inputText(Core::ICore::mainWindow(),
-                                   tr("Stash Description"), tr("Description:"), &message))
-                        break;
-                }
-                if (!executeSynchronousStash(workingDirectory, message))
+        message = creatorStashMessage(messageKeyword);
+        do {
+            if ((flags & StashPromptDescription)) {
+                if (!inputText(Core::ICore::mainWindow(),
+                               tr("Stash Description"), tr("Description:"), &message))
                     break;
-                if ((flags & StashImmediateRestore)
-                    && !synchronousStashRestore(workingDirectory, QLatin1String("stash@{0}")))
-                    break;
-                success = true;
-            } while (false);
-        }
+            }
+            if (!executeSynchronousStash(workingDirectory, message))
+                break;
+            if ((flags & StashImmediateRestore)
+                && !synchronousStashRestore(workingDirectory, QLatin1String("stash@{0}")))
+                break;
+            success = true;
+        } while (false);
         break;
+    }
     case StatusUnchanged:
         if (unchanged)
             *unchanged = true;
@@ -1316,11 +1302,10 @@ bool GitClient::executeSynchronousStash(const QString &workingDirectory,
         const QString msg = tr("Cannot stash in \"%1\": %2").
                             arg(QDir::toNativeSeparators(workingDirectory),
                                 commandOutputFromLocal8Bit(errorText));
-        if (errorMessage) {
+        if (errorMessage)
             *errorMessage = msg;
-        } else {
-            outputWindow()->append(msg);
-        }
+        else
+            outputWindow()->appendError(msg);
         return false;
     }
     return true;
@@ -1348,11 +1333,10 @@ bool GitClient::stashNameFromMessage(const QString &workingDirectory,
     }
     //: Look-up of a stash via its descriptive message failed.
     const QString msg = tr("Cannot resolve stash message \"%1\" in \"%2\".").arg(message, workingDirectory);
-    if (errorMessage) {
+    if (errorMessage)
         *errorMessage = msg;
-    } else {
+    else
         outputWindow()->append(msg);
-    }
     return  false;
 }
 
@@ -1363,11 +1347,11 @@ bool GitClient::synchronousBranchCmd(const QString &workingDirectory, QStringLis
     QByteArray outputText;
     QByteArray errorText;
     const bool rc = fullySynchronousGit(workingDirectory, branchArgs, &outputText, &errorText);
+    *output = commandOutputFromLocal8Bit(outputText);
     if (!rc) {
         *errorMessage = tr("Cannot run \"git branch\" in \"%1\": %2").arg(QDir::toNativeSeparators(workingDirectory), commandOutputFromLocal8Bit(errorText));
         return false;
     }
-    *output = commandOutputFromLocal8Bit(outputText);
     return true;
 }
 
@@ -1561,44 +1545,42 @@ static inline int askWithDetailedText(QWidget *parent,
     return msgBox.exec();
 }
 
-// Convenience that pops up an msg box.
-GitClient::StashResult GitClient::ensureStash(const QString &workingDirectory)
-{
-    QString errorMessage;
-    const StashResult sr = ensureStash(workingDirectory, &errorMessage);
-    if (sr == StashFailed)
-        outputWindow()->appendError(errorMessage);
-    return sr;
-}
-
 // Ensure that changed files are stashed before a pull or similar
-GitClient::StashResult GitClient::ensureStash(const QString &workingDirectory, QString *errorMessage)
+GitClient::StashResult GitClient::ensureStash(const QString &workingDirectory,
+                                              const QString &keyword,
+                                              bool askUser,
+                                              QString *message,
+                                              QString *errorMessage)
 {
     QString statusOutput;
     switch (gitStatus(workingDirectory, StatusMode(NoUntracked | NoSubmodules),
                       &statusOutput, errorMessage)) {
-        case StatusChanged:
+    case StatusChanged:
         break;
-        case StatusUnchanged:
+    case StatusUnchanged:
         return StashUnchanged;
-        case StatusFailed:
+    case StatusFailed:
         return StashFailed;
     }
 
-    const int answer = askWithDetailedText(Core::ICore::mainWindow(), tr("Changes"),
-                             tr("Would you like to stash your changes?"),
-                             statusOutput, QMessageBox::Yes, QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
-    switch (answer) {
+    if (askUser) {
+        const int answer = askWithDetailedText(Core::ICore::mainWindow(), tr("Changes"),
+                                 tr("Would you like to stash your changes?"),
+                                 statusOutput, QMessageBox::Yes, QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+        switch (answer) {
         case QMessageBox::Cancel:
             return StashCanceled;
-        case QMessageBox::Yes:
-            if (!executeSynchronousStash(workingDirectory, creatorStashMessage(QLatin1String("push")), errorMessage))
-                return StashFailed;
-            break;
         case QMessageBox::No: // At your own risk, so.
             return NotStashed;
+        default:
+            break;
         }
-
+    }
+    const QString stashMessage = creatorStashMessage(keyword);
+    if (!executeSynchronousStash(workingDirectory, stashMessage, errorMessage))
+        return StashFailed;
+    if (message)
+        *message = stashMessage;
     return Stashed;
  }
 
@@ -1627,6 +1609,8 @@ GitClient::StatusResult GitClient::gitStatus(const QString &workingDirectory, St
     QStringList statusArgs(QLatin1String("status"));
     if (mode & NoUntracked)
         statusArgs << QLatin1String("--untracked-files=no");
+    else
+        statusArgs << QLatin1String("--untracked-files=normal");
     if (mode & NoSubmodules)
         statusArgs << QLatin1String("--ignore-submodules=all");
     statusArgs << QLatin1String("-s") << QLatin1String("-b");
@@ -1657,8 +1641,10 @@ GitClient::StatusResult GitClient::gitStatus(const QString &workingDirectory, St
 // Quietly retrieve branch list of remote repository URL
 //
 // The branch HEAD is pointing to is always returned first.
-QStringList GitClient::synchronousRepositoryBranches(const QString &repositoryURL)
+QStringList GitClient::synchronousRepositoryBranches(const QString &repositoryURL, bool *isDetached)
 {
+    if (isDetached)
+        *isDetached = true;
     QStringList arguments(QLatin1String("ls-remote"));
     arguments << repositoryURL << QLatin1String("HEAD") << QLatin1String("refs/heads/*");
     const unsigned flags =
@@ -1669,23 +1655,24 @@ QStringList GitClient::synchronousRepositoryBranches(const QString &repositoryUR
     QStringList branches;
     branches << tr("<Detached HEAD>");
     QString headSha;
-    if (resp.result == Utils::SynchronousProcessResponse::Finished) {
-        // split "82bfad2f51d34e98b18982211c82220b8db049b<tab>refs/heads/master"
-        foreach (const QString &line, resp.stdOut.split(QLatin1Char('\n'))) {
-            if (line.endsWith(QLatin1String("\tHEAD"))) {
-                QTC_CHECK(headSha.isNull());
-                headSha = line.left(line.indexOf(QLatin1Char('\t')));
-                continue;
-            }
+    // split "82bfad2f51d34e98b18982211c82220b8db049b<tab>refs/heads/master"
+    foreach (const QString &line, resp.stdOut.split(QLatin1Char('\n'))) {
+        if (line.endsWith(QLatin1String("\tHEAD"))) {
+            QTC_CHECK(headSha.isNull());
+            headSha = line.left(line.indexOf(QLatin1Char('\t')));
+            continue;
+        }
 
-            const QString pattern = QLatin1String("\trefs/heads/");
-            const int pos = line.lastIndexOf(pattern);
-            if (pos != -1) {
-                const QString branchName = line.mid(pos + pattern.count());
-                if (line.startsWith(headSha))
-                    branches[0] = branchName;
-                else
-                    branches.push_back(branchName);
+        const QString pattern = QLatin1String("\trefs/heads/");
+        const int pos = line.lastIndexOf(pattern);
+        if (pos != -1) {
+            const QString branchName = line.mid(pos + pattern.count());
+            if (line.startsWith(headSha)) {
+                branches[0] = branchName;
+                if (isDetached)
+                    *isDetached = false;
+            } else {
+                branches.push_back(branchName);
             }
         }
     }
@@ -2096,7 +2083,7 @@ bool GitClient::synchronousFetch(const QString &workingDirectory, const QString 
     return resp.result == Utils::SynchronousProcessResponse::Finished;
 }
 
-bool GitClient::synchronousPullOrRebase(const QString &workingDirectory, const QStringList &arguments, bool rebase)
+bool GitClient::executeAndHandleConflicts(const QString &workingDirectory, const QStringList &arguments, const QString &abortCommand)
 {
     // Disable UNIX terminals to suppress SSH prompting.
     const unsigned flags = VcsBase::VcsBasePlugin::SshPasswordPrompt|VcsBase::VcsBasePlugin::ShowStdOutInLogWindow;
@@ -2105,43 +2092,60 @@ bool GitClient::synchronousPullOrRebase(const QString &workingDirectory, const Q
     const bool ok = resp.result == Utils::SynchronousProcessResponse::Finished;
     if (ok)
         GitPlugin::instance()->gitVersionControl()->emitRepositoryChanged(workingDirectory);
-    else if (resp.stdOut.contains(QLatin1String("CONFLICT")))
-        handleMergeConflicts(workingDirectory, rebase);
+    else if (resp.stdOut.contains(QLatin1String("CONFLICT"))
+             || resp.stdErr.contains(QLatin1String("conflict")))
+        handleMergeConflicts(workingDirectory, abortCommand);
     return ok;
 }
 
 bool GitClient::synchronousPull(const QString &workingDirectory, bool rebase)
 {
+    QString abortCommand;
     QStringList arguments(QLatin1String("pull"));
-    if (rebase)
+    if (rebase) {
         arguments << QLatin1String("--rebase");
-    return synchronousPullOrRebase(workingDirectory, arguments, rebase);
+        abortCommand = QLatin1String("rebase");
+    } else {
+        abortCommand = QLatin1String("merge");
+    }
+
+    return executeAndHandleConflicts(workingDirectory, arguments, abortCommand);
 }
 
-bool GitClient::synchronousRebaseContinue(const QString &workingDirectory)
+bool GitClient::synchronousCommandContinue(const QString &workingDirectory, const QString &command)
 {
-    QStringList arguments(QLatin1String("rebase"));
-    arguments << QLatin1String("--continue");
-    return synchronousPullOrRebase(workingDirectory, arguments, true);
+    QStringList arguments;
+    arguments << command << QLatin1String("--continue");
+    return executeAndHandleConflicts(workingDirectory, arguments, command);
 }
 
-void GitClient::handleMergeConflicts(const QString &workingDir, bool rebase)
+void GitClient::synchronousAbortCommand(const QString &workingDir, const QString &abortCommand)
+{
+    // Abort to clean if something goes wrong
+    if (abortCommand.isEmpty()) {
+        // no abort command - checkout index to clean working copy.
+        synchronousCheckoutFiles(findRepositoryForDirectory(workingDir), QStringList(), QString(), 0, false);
+        return;
+    }
+    VcsBase::VcsBaseOutputWindow *outwin = VcsBase::VcsBaseOutputWindow::instance();
+    QStringList arguments;
+    arguments << abortCommand << QLatin1String("--abort");
+    QByteArray stdOut;
+    QByteArray stdErr;
+    const bool rc = fullySynchronousGit(workingDir, arguments, &stdOut, &stdErr, true);
+    outwin->append(commandOutputFromLocal8Bit(stdOut));
+    if (!rc)
+        outwin->appendError(commandOutputFromLocal8Bit(stdErr));
+}
+
+void GitClient::handleMergeConflicts(const QString &workingDir, const QString &abortCommand)
 {
     QMessageBox mergeOrAbort(QMessageBox::Question, tr("Conflicts detected"),
                              tr("Conflicts detected"), QMessageBox::Ignore | QMessageBox::Abort);
     mergeOrAbort.addButton(tr("Run Merge Tool"), QMessageBox::ActionRole);
     switch (mergeOrAbort.exec()) {
     case QMessageBox::Abort: {
-        // Abort merge/rebase to clean if something goes wrong
-        VcsBase::VcsBaseOutputWindow *outwin = VcsBase::VcsBaseOutputWindow::instance();
-        QStringList arguments;
-        arguments << QLatin1String(rebase ? "rebase" : "merge") << QLatin1String("--abort");
-        QByteArray stdOut;
-        QByteArray stdErr;
-        const bool rc = fullySynchronousGit(workingDir, arguments, &stdOut, &stdErr, true);
-        outwin->append(commandOutputFromLocal8Bit(stdOut));
-        if (!rc)
-            outwin->appendError(commandOutputFromLocal8Bit(stdErr));
+        synchronousAbortCommand(workingDir, abortCommand);
         break;
     }
     case QMessageBox::Ignore:
@@ -2196,27 +2200,75 @@ bool GitClient::synchronousPush(const QString &workingDirectory, const QString &
     return resp.result == Utils::SynchronousProcessResponse::Finished;
 }
 
+bool GitClient::synchronousMerge(const QString &workingDirectory, const QString &branch)
+{
+    QString command = QLatin1String("merge");
+    QStringList arguments;
+
+    arguments << command << branch;
+    return executeAndHandleConflicts(workingDirectory, arguments, command);
+}
+
+bool GitClient::synchronousRebase(const QString &workingDirectory, const QString &baseBranch,
+                                  const QString &topicBranch)
+{
+    QString command = QLatin1String("rebase");
+    QStringList arguments;
+
+    arguments << command << baseBranch;
+    if (!topicBranch.isEmpty())
+        arguments << topicBranch;
+
+    return executeAndHandleConflicts(workingDirectory, arguments, command);
+}
+
+bool GitClient::revertCommit(const QString &workingDirectory, const QString &commit)
+{
+    QStringList arguments;
+    QString command = QLatin1String("revert");
+    arguments << command << QLatin1String("--no-edit") << commit;
+
+    return executeAndHandleConflicts(workingDirectory, arguments, command);
+}
+
+bool GitClient::cherryPickCommit(const QString &workingDirectory, const QString &commit)
+{
+    QStringList arguments;
+    QString command = QLatin1String("cherry-pick");
+    arguments << command << commit;
+
+    return executeAndHandleConflicts(workingDirectory, arguments, command);
+}
+
 QString GitClient::msgNoChangedFiles()
 {
     return tr("There are no modified files.");
 }
 
-void GitClient::stashPop(const QString &workingDirectory)
+void GitClient::stashPop(const QString &workingDirectory, const QString &stash)
 {
     QStringList arguments(QLatin1String("stash"));
     arguments << QLatin1String("pop");
+    if (!stash.isEmpty())
+        arguments << stash;
     VcsBase::Command *cmd = executeGit(workingDirectory, arguments, 0, true);
     connectRepositoryChanged(workingDirectory, cmd);
 }
 
+void GitClient::stashPop(const QString &workingDirectory)
+{
+    stashPop(workingDirectory, QString());
+}
+
 bool GitClient::synchronousStashRestore(const QString &workingDirectory,
                                         const QString &stash,
+                                        bool pop,
                                         const QString &branch /* = QString()*/,
                                         QString *errorMessage)
 {
     QStringList arguments(QLatin1String("stash"));
     if (branch.isEmpty())
-        arguments << QLatin1String("apply") << stash;
+        arguments << QLatin1String(pop ? "pop" : "apply") << stash;
     else
         arguments << QLatin1String("branch") << branch << stash;
     QByteArray outputText;
@@ -2248,11 +2300,10 @@ bool GitClient::synchronousStashRemove(const QString &workingDirectory,
                             QString *errorMessage /* = 0 */)
 {
     QStringList arguments(QLatin1String("stash"));
-    if (stash.isEmpty()) {
+    if (stash.isEmpty())
         arguments << QLatin1String("clear");
-    } else {
+    else
         arguments << QLatin1String("drop") << stash;
-    }
     QByteArray outputText;
     QByteArray errorText;
     const bool rc = fullySynchronousGit(workingDirectory, arguments, &outputText, &errorText);
@@ -2304,11 +2355,10 @@ bool GitClient::synchronousStashList(const QString &workingDirectory,
         const QString msg = tr("Cannot retrieve stash list of \"%1\": %2").
                             arg(QDir::toNativeSeparators(workingDirectory),
                                 commandOutputFromLocal8Bit(errorText));
-        if (errorMessage) {
+        if (errorMessage)
             *errorMessage = msg;
-        } else {
+        else
             outputWindow()->append(msg);
-        }
         return false;
     }
     Stash stash;
@@ -2456,6 +2506,41 @@ unsigned GitClient::synchronousGitVersion(QString *errorMessage) const
     const unsigned minor = versionPattern.cap(2).toUInt(0, 16);
     const unsigned patch = versionPattern.cap(3).toUInt(0, 16);
     return version(major, minor, patch);
+}
+
+GitClient::StashGuard::StashGuard(const QString &workingDirectory, const QString &keyword, bool askUser) :
+    pop(true),
+    workingDir(workingDirectory)
+{
+    client = GitPlugin::instance()->gitClient();
+    QString errorMessage;
+    stashResult = client->ensureStash(workingDir, keyword, askUser, &message, &errorMessage);
+    if (stashResult == GitClient::StashFailed)
+        VcsBase::VcsBaseOutputWindow::instance()->appendError(errorMessage);
+}
+
+GitClient::StashGuard::~StashGuard()
+{
+    if (pop && stashResult == GitClient::Stashed)
+        client->stashPop(workingDir, message);
+}
+
+void GitClient::StashGuard::preventPop()
+{
+    pop = false;
+}
+
+bool GitClient::StashGuard::stashingFailed(bool includeNotStashed) const
+{
+    switch (stashResult) {
+    case GitClient::StashCanceled:
+    case GitClient::StashFailed:
+        return true;
+    case GitClient::NotStashed:
+        return includeNotStashed;
+    default:
+        return false;
+    }
 }
 
 } // namespace Internal

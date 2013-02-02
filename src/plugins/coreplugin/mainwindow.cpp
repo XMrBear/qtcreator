@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -430,11 +430,10 @@ static bool isDesktopFileManagerDrop(const QMimeData *d, QStringList *files = 0)
         const QString fileName = it->toLocalFile();
         if (!fileName.isEmpty()) {
             hasFiles = true;
-            if (files) {
+            if (files)
                 files->push_back(fileName);
-            } else {
+            else
                 break; // No result list, sufficient for checking
-            }
         }
     }
     return hasFiles;
@@ -442,11 +441,10 @@ static bool isDesktopFileManagerDrop(const QMimeData *d, QStringList *files = 0)
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (isDesktopFileManagerDrop(event->mimeData()) && m_filesToOpenDelayed.isEmpty()) {
+    if (isDesktopFileManagerDrop(event->mimeData()) && m_filesToOpenDelayed.isEmpty())
         event->accept();
-    } else {
+    else
         event->ignore();
-    }
 }
 
 void MainWindow::dropEvent(QDropEvent *event)
@@ -992,11 +990,10 @@ void MainWindow::openFileWith()
         const Id editorId = editorManager()->getOpenWithEditorId(fileName, &isExternal);
         if (!editorId.isValid())
             continue;
-        if (isExternal) {
+        if (isExternal)
             EditorManager::openExternalEditor(fileName, editorId);
-        } else {
+        else
             EditorManager::openEditor(fileName, editorId, Core::EditorManager::ModeSwitch);
-        }
     }
 }
 
@@ -1178,9 +1175,8 @@ void MainWindow::readSettings()
                                   QColor(Utils::StyleHelper::DEFAULT_BASE_COLOR)).value<QColor>());
     }
 
-    if (!restoreGeometry(m_settings->value(QLatin1String(windowGeometryKey)).toByteArray())) {
+    if (!restoreGeometry(m_settings->value(QLatin1String(windowGeometryKey)).toByteArray()))
         resize(1008, 700); // size without window decoration
-    }
     restoreState(m_settings->value(QLatin1String(windowStateKey)).toByteArray());
 
     m_settings->endGroup();
@@ -1210,29 +1206,24 @@ void MainWindow::writeSettings()
 
 void MainWindow::updateAdditionalContexts(const Context &remove, const Context &add)
 {
-    foreach (const int context, remove) {
-        if (context == 0)
+    foreach (const Id id, remove) {
+        if (!id.isValid())
             continue;
 
-        int index = m_additionalContexts.indexOf(context);
+        int index = m_additionalContexts.indexOf(id);
         if (index != -1)
             m_additionalContexts.removeAt(index);
     }
 
-    foreach (const int context, add) {
-        if (context == 0)
+    foreach (const Id id, add) {
+        if (!id.isValid())
             continue;
 
-        if (!m_additionalContexts.contains(context))
-            m_additionalContexts.prepend(context);
+        if (!m_additionalContexts.contains(id))
+            m_additionalContexts.prepend(id);
     }
 
     updateContext();
-}
-
-bool MainWindow::hasContext(int context) const
-{
-    return ActionManager::hasContext(context);
 }
 
 void MainWindow::updateContext()
@@ -1246,9 +1237,9 @@ void MainWindow::updateContext()
 
     Context uniquecontexts;
     for (int i = 0; i < contexts.size(); ++i) {
-        const int c = contexts.at(i);
-        if (!uniquecontexts.contains(c))
-            uniquecontexts.add(c);
+        const Id id = contexts.at(i);
+        if (!uniquecontexts.contains(id))
+            uniquecontexts.add(id);
     }
 
     m_actionManager->d->setContext(uniquecontexts);

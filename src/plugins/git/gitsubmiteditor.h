@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -64,7 +64,7 @@ protected:
     void updateFileModel();
 
 private slots:
-    void slotDiffSelected(const QStringList &);
+    void slotDiffSelected(const QList<int> &rows);
 
 private:
     inline GitSubmitEditorWidget *submitEditorWidget();

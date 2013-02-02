@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -53,6 +53,7 @@ public:
     const QTextCodec *codec() const;
     void setCodec(const QTextCodec *);
     void switchUtf8Bom();
+    virtual bool supportsUtf8Bom() { return true; }
 
     ReadResult read(const QString &fileName, QStringList *plainTextList, QString *errorString);
     ReadResult read(const QString &fileName, QString *plainText, QString *errorString);

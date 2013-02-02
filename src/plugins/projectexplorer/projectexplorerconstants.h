@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -170,7 +170,7 @@ const char C_HEADER_MIMETYPE[]    = "text/x-chdr";
 const char CPP_SOURCE_MIMETYPE[]  = "text/x-c++src";
 const char CPP_HEADER_MIMETYPE[]  = "text/x-c++hdr";
 const char FORM_MIMETYPE[]        = "application/x-designer";
-const char QML_MIMETYPE[]         = "application/x-qml";
+const char QML_MIMETYPE[]         = "application/x-qml"; // separate def also in qmljstoolsconstants.h
 const char RESOURCE_MIMETYPE[]    = "application/vnd.nokia.xml.qt.resource";
 
 // Settings page
@@ -182,7 +182,7 @@ const char TOOLCHAIN_SETTINGS_PAGE_ID[] = "M.ProjectExplorer.ToolChainOptions";
 const char KITS_SETTINGS_PAGE_ID[] = "D.ProjectExplorer.KitsOptions";
 
 // Device settings page
-const char DEVICE_SETTINGS_CATEGORY[] = "X.Devices";
+const char DEVICE_SETTINGS_CATEGORY[] = "XW.Devices";
 const char DEVICE_SETTINGS_PAGE_ID[] = "AA.Device Settings";
 
 // Task categories
@@ -224,6 +224,7 @@ const char LINUXICC_TOOLCHAIN_ID[] = "ProjectExplorer.ToolChain.LinuxIcc";
 const char MINGW_TOOLCHAIN_ID[] = "ProjectExplorer.ToolChain.Mingw";
 const char MSVC_TOOLCHAIN_ID[] = "ProjectExplorer.ToolChain.Msvc";
 const char WINCE_TOOLCHAIN_ID[] = "ProjectExplorer.ToolChain.WinCE";
+const char CUSTOM_TOOLCHAIN_ID[] = "ProjectExplorer.ToolChain.Custom";
 
 // Run Configuration defaults:
 const int QML_DEFAULT_DEBUG_SERVER_PORT = 3768;

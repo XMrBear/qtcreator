@@ -36,7 +36,7 @@ static void parse(QFutureInterface<void> &future,
     foreach (const QString &file, files) {
         QFileInfo info(file);
 
-        preproc->snapshot.remove(file);
+        preproc->m_snapshot.remove(file);
 
         if (suffixes.contains(info.suffix()))
             sources.append(file);
@@ -200,7 +200,7 @@ QFuture<void> BuiltinIndexingSupport::refreshSourceFiles(const QStringList &sour
 
     if (sourceFiles.count() > 1) {
         Core::ICore::progressManager()->addTask(result,
-                                                QCoreApplication::translate("IndexingSupport", "Parsing"),
+                                                QCoreApplication::translate("CppTools::Internal::BuiltinIndexingSupport", "Parsing"),
                                                 QLatin1String(CppTools::Constants::TASK_INDEX));
     }
 

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -30,12 +30,10 @@
 #ifndef ARGUMENTSCOLLECTOR_H
 #define ARGUMENTSCOLLECTOR_H
 
-#include <QCoreApplication>
 #include <QStringList>
 
 class ArgumentsCollector
 {
-    Q_DECLARE_TR_FUNCTIONS(ArgumentsCollector)
 public:
     ArgumentsCollector(const QStringList &availableProtocols);
     bool collect(const QStringList &args); // Application is already removed.

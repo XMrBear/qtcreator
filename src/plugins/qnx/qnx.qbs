@@ -4,7 +4,7 @@ import "../QtcPlugin.qbs" as QtcPlugin
 
 QtcPlugin {
     name: "Qnx"
-    provider: "RIM"
+    provider: "BlackBerry"
 
     Depends { name: "Core" }
     Depends { name: "Debugger" }
@@ -12,15 +12,30 @@ QtcPlugin {
     Depends { name: "QtSupport" }
     Depends { name: "Qt4ProjectManager" }
     Depends { name: "RemoteLinux" }
+    Depends { name: "TextEditor" }
     Depends { name: "Qt"; submodules: ["widgets", "xml", "network"] }
 
-    cpp.defines: base.concat(["QT_NO_CAST_TO_ASCII", "QT_NO_CAST_FROM_ASCII"])
     cpp.includePaths: base.concat("../../shared")
 
     files: [
+        "bardescriptordocument.cpp",
+        "bardescriptordocument.h",
+        "bardescriptordocumentnodehandlers.cpp",
+        "bardescriptordocumentnodehandlers.h",
+        "bardescriptoreditor.cpp",
+        "bardescriptoreditor.h",
+        "bardescriptoreditorfactory.cpp",
+        "bardescriptoreditorfactory.h",
+        "bardescriptoreditorwidget.cpp",
+        "bardescriptoreditorwidget.h",
+        "bardescriptoreditorwidget.ui",
         "bardescriptorfileimagewizardpage.cpp",
         "bardescriptorfileimagewizardpage.h",
         "bardescriptorfileimagewizardpage.ui",
+        "bardescriptormagicmatcher.cpp",
+        "bardescriptormagicmatcher.h",
+        "bardescriptorpermissionsmodel.cpp",
+        "bardescriptorpermissionsmodel.h",
         "blackberryabstractdeploystep.cpp",
         "blackberryabstractdeploystep.h",
         "blackberryapplicationrunner.cpp",
@@ -78,6 +93,13 @@ QtcPlugin {
         "blackberryruncontrol.h",
         "blackberryruncontrolfactory.cpp",
         "blackberryruncontrolfactory.h",
+        "blackberryndksettingswidget.cpp",
+        "blackberryndksettingswidget.h",
+        "blackberryndksettingswidget.ui",
+        "blackberryndksettingspage.cpp",
+        "blackberryndksettingspage.h",
+        "blackberryconfiguration.cpp",
+        "blackberryconfiguration.h",
         "blackberrywizardextension.cpp",
         "blackberrywizardextension.h",
         "pathchooserdelegate.cpp",

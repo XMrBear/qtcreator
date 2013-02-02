@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -63,7 +63,8 @@ public:
     // Roles to be implemented by all models that are exported via model()
     enum ModelRoles {
         // Absolute file path
-        FilePathRole = QFileSystemModel::FilePathRole
+        FilePathRole = QFileSystemModel::FilePathRole,
+        EnabledRole
     };
 
     Project();

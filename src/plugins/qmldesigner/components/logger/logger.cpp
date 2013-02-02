@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -140,9 +140,8 @@ QLogger::~QLogger()
 
 QLogger* QLogger::instance()
 {
-    if (!m_instance) {
+    if (!m_instance)
         m_instance = new QLogger();
-    }
     return m_instance;
 }
 

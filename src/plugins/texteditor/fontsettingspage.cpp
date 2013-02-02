@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -117,13 +117,13 @@ class FontSettingsPagePrivate
 {
 public:
     FontSettingsPagePrivate(const TextEditor::FormatDescriptions &fd,
-                            const QString &id,
+                            Core::Id id,
                             const QString &displayName,
                             const QString &category);
     ~FontSettingsPagePrivate();
 
 public:
-    const QString m_id;
+    const Core::Id m_id;
     const QString m_displayName;
     const QString m_settingsGroup;
 
@@ -174,7 +174,7 @@ static QString createColorSchemeFileName(const QString &pattern)
 
 // ------- FontSettingsPagePrivate
 FontSettingsPagePrivate::FontSettingsPagePrivate(const TextEditor::FormatDescriptions &fd,
-                                                 const QString &id,
+                                                 Core::Id id,
                                                  const QString &displayName,
                                                  const QString &category) :
     m_id(id),
@@ -248,18 +248,16 @@ QColor FormatDescription::foreground() const
 {
     if (m_id == C_LINE_NUMBER) {
         const QColor bg = QApplication::palette().background().color();
-        if (bg.value() < 128) {
+        if (bg.value() < 128)
             return QApplication::palette().foreground().color();
-        } else {
+        else
             return QApplication::palette().dark().color();
-        }
     } else if (m_id == C_CURRENT_LINE_NUMBER) {
         const QColor bg = QApplication::palette().background().color();
-        if (bg.value() < 128) {
+        if (bg.value() < 128)
             return QApplication::palette().foreground().color();
-        } else {
+        else
             return m_format.foreground();
-        }
     } else if (m_id == C_OCCURRENCES_UNUSED) {
         return Qt::darkYellow;
     } else if (m_id == C_PARENTHESES) {
@@ -315,7 +313,7 @@ QColor FormatDescription::background() const
 
 //  ------------ FontSettingsPage
 FontSettingsPage::FontSettingsPage(const FormatDescriptions &fd,
-                                   const QString &id,
+                                   Core::Id id,
                                    QObject *parent) :
     TextEditorOptionsPage(parent),
     d_ptr(new FontSettingsPagePrivate(fd, id, tr("Font && Colors"), category().toString()))

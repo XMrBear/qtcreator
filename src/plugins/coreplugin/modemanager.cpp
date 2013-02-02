@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -198,7 +198,7 @@ void ModeManager::objectAdded(QObject *obj)
     d->m_modeStack->setTabEnabled(index, mode->isEnabled());
 
     // Register mode shortcut
-    const Id shortcutId(QLatin1String("QtCreator.Mode.") + mode->id().toString());
+    const Id shortcutId = mode->id().withPrefix("QtCreator.Mode.");
     QShortcut *shortcut = new QShortcut(d->m_mainWindow);
     shortcut->setWhatsThis(tr("Switch to <b>%1</b> mode").arg(mode->displayName()));
     Command *cmd = ActionManager::registerShortcut(shortcut, shortcutId, Context(Constants::C_GLOBAL));

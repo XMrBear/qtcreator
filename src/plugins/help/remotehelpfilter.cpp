@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -80,8 +80,11 @@ void RemoteFilterOptions::updateRemoveButton()
 
 RemoteHelpFilter::RemoteHelpFilter()
 {
+    setId("RemoteHelpFilter");
+    setDisplayName(tr("Web Search"));
     setIncludedByDefault(false);
     setShortcutString(QLatin1String("r"));
+
     m_remoteUrls.append(QLatin1String("http://www.bing.com/search?q=%1"));
     m_remoteUrls.append(QLatin1String("http://www.google.com/search?q=%1"));
     m_remoteUrls.append(QLatin1String("http://search.yahoo.com/search?p=%1"));
@@ -91,21 +94,6 @@ RemoteHelpFilter::RemoteHelpFilter()
 
 RemoteHelpFilter::~RemoteHelpFilter()
 {
-}
-
-QString RemoteHelpFilter::displayName() const
-{
-    return tr("Web Search");
-}
-
-QString RemoteHelpFilter::id() const
-{
-    return QLatin1String("RemoteHelpFilter");
-}
-
-Locator::ILocatorFilter::Priority RemoteHelpFilter::priority() const
-{
-    return Medium;
 }
 
 QList<Locator::FilterEntry> RemoteHelpFilter::matchesFor(QFutureInterface<Locator::FilterEntry> &future, const QString &pattern)
@@ -124,9 +112,8 @@ QList<Locator::FilterEntry> RemoteHelpFilter::matchesFor(QFutureInterface<Locato
 void RemoteHelpFilter::accept(Locator::FilterEntry selection) const
 {
     const QString &url = selection.displayName;
-    if (!url.isEmpty()) {
+    if (!url.isEmpty())
         emit linkActivated(url);
-    }
 }
 
 void RemoteHelpFilter::refresh(QFutureInterface<void> &future)

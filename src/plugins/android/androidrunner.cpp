@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 BogDan Vatra <bog_dan_ro@yahoo.com>
+** Copyright (c) 2013 BogDan Vatra <bog_dan_ro@yahoo.com>
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -55,6 +55,7 @@ AndroidRunner::AndroidRunner(QObject *parent, AndroidRunConfiguration *runConfig
     if ((m_useLocalQtLibs = ds->useLocalQtLibs())) {
         m_localLibs = AndroidManager::loadLocalLibs(target, ds->deviceAPILevel());
         m_localJars = AndroidManager::loadLocalJars(target, ds->deviceAPILevel());
+        m_localJarsInitClasses = AndroidManager::loadLocalJarsInitClasses(target, ds->deviceAPILevel());
     }
     m_intentName = AndroidManager::intentName(target);
     m_packageName = m_intentName.left(m_intentName.indexOf(QLatin1Char('/')));
@@ -195,9 +196,11 @@ void AndroidRunner::asyncStart()
 
     if (m_useLocalQtLibs) {
         extraParams += QLatin1String(" -e use_local_qt_libs true");
-        extraParams += QLatin1String(" -e libs_prefix /data/local/qt/");
+        extraParams += QLatin1String(" -e libs_prefix /data/local/tmp/qt/");
         extraParams += QLatin1String(" -e load_local_libs ") + m_localLibs;
         extraParams += QLatin1String(" -e load_local_jars ") + m_localJars;
+        if (!m_localJarsInitClasses.isEmpty())
+            extraParams += QLatin1String(" -e static_init_classes ") + m_localJarsInitClasses;
     }
 
     extraParams = extraParams.trimmed();
@@ -251,13 +254,14 @@ void AndroidRunner::startLogcat()
 void AndroidRunner::stop()
 {
     QMutexLocker locker(&m_mutex);
+    m_checkPIDTimer.stop();
+    if (m_processPID == -1) {
+        m_adbLogcatProcess.kill();
+        return; // don't emit another signal
+    }
+    killPID();
     m_adbLogcatProcess.kill();
     m_adbLogcatProcess.waitForFinished(-1);
-    m_checkPIDTimer.stop();
-    if (m_processPID == -1)
-        return; // don't emit another signal
-    killPID();
-    emit remoteProcessFinished(tr("\n\n'%1' killed.").arg(m_packageName));
 }
 
 void AndroidRunner::logcatReadStandardError()

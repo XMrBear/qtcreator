@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -208,17 +208,17 @@ bool GitVersionControl::vcsRestoreSnapshot(const QString &topLevel, const QStrin
             const QString revision = tokens.at(2);
             success = m_client->synchronousReset(topLevel);
             if (success && !branch.isEmpty()) {
-                success = m_client->synchronousCheckoutBranch(topLevel, branch) &&
+                success = m_client->synchronousCheckout(topLevel, branch) &&
                         m_client->synchronousCheckoutFiles(topLevel, QStringList(), revision);
             } else {
-                success = m_client->synchronousCheckoutBranch(topLevel, revision);
+                success = m_client->synchronousCheckout(topLevel, revision);
             }
         } else {
             // Restore stash if it can be resolved.
             QString stashName;
             success = m_client->stashNameFromMessage(topLevel, name, &stashName)
                       && m_client->synchronousReset(topLevel)
-                      && m_client->synchronousStashRestore(topLevel, stashName);
+                      && m_client->synchronousStashRestore(topLevel, stashName, true);
         }
     }  while (false);
     return success;

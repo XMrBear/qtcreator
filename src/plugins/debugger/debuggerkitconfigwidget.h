@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -61,8 +61,7 @@ class DebuggerKitConfigWidget : public ProjectExplorer::KitConfigWidget
     Q_OBJECT
 
 public:
-    DebuggerKitConfigWidget(ProjectExplorer::Kit *workingCopy,
-                            const DebuggerKitInformation *ki);
+    DebuggerKitConfigWidget(ProjectExplorer::Kit *workingCopy);
 
     QString displayName() const;
     QString toolTip() const;
@@ -79,7 +78,6 @@ private slots:
     void showDialog();
 
 private:
-    const DebuggerKitInformation *m_info;
     QLabel *m_label;
     QPushButton *m_button;
 };

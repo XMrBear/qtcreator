@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -55,6 +55,7 @@ class GlobalDebuggerOptions;
 
 class CommonOptionsPageWidget : public QWidget
 {
+    Q_OBJECT
 public:
     explicit CommonOptionsPageWidget(const QSharedPointer<Utils::SavedActionSet> &group, QWidget *parent = 0);
 

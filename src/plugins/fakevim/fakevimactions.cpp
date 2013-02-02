@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -70,9 +70,8 @@ void FakeVimSettings::insertItem(int code, SavedAction *item,
         m_nameToCode[longName] = code;
         m_codeToName[code] = longName;
     }
-    if (!shortName.isEmpty()) {
+    if (!shortName.isEmpty())
         m_nameToCode[shortName] = code;
-    }
 }
 
 void FakeVimSettings::readSettings(QSettings *settings)

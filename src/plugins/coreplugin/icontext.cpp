@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -28,26 +28,3 @@
 ****************************************************************************/
 
 #include "icontext.h"
-
-#include "id.h"
-
-#include <QString>
-
-namespace Core {
-
-Context::Context(const char *id, int offset)
-{
-    d.append(Id(QLatin1String(id) + QString::number(offset)).uniqueIdentifier());
-}
-
-void Context::add(const char *id)
-{
-    d.append(Id(QByteArray(id)).uniqueIdentifier());
-}
-
-bool Context::contains(const char *id) const
-{
-    return d.contains(Id(QByteArray(id)).uniqueIdentifier());
-}
-
-} // namespace Core

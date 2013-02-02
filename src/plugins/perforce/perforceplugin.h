@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -137,9 +137,12 @@ private slots:
     void slotTopLevelFound(const QString &);
     void slotTopLevelFailed(const QString &);
 
+#ifdef WITH_TESTS
+    void testLogResolving();
+#endif
 protected:
-    virtual void updateActions(VcsBase::VcsBasePlugin::ActionState);
-    virtual bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
+    void updateActions(VcsBase::VcsBasePlugin::ActionState);
+    bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
 
 
 private:

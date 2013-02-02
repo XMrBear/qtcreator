@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -82,6 +82,7 @@ static inline QByteArray format(Protocol::ContentType ct)
         break;
     case Protocol::Cpp:
         format += "cpp-qt";
+        break;
     case Protocol::JavaScript:
         format += "javascript";
         break;
@@ -130,11 +131,10 @@ void PasteBinDotComProtocol::paste(const QString &text,
 
 void PasteBinDotComProtocol::pasteFinished()
 {
-    if (m_pasteReply->error()) {
+    if (m_pasteReply->error())
         qWarning("Pastebin.com protocol error: %s", qPrintable(m_pasteReply->errorString()));
-    } else {
+    else
         emit pasteDone(QString::fromLatin1(m_pasteReply->readAll()));
-    }
 
     m_pasteReply->deleteLater();
     m_pasteReply = 0;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -95,9 +95,8 @@ void QmlAdapter::closeConnection()
     if (m_connectionTimer.isActive()) {
         m_connectionTimer.stop();
     } else {
-        if (m_conn) {
+        if (m_conn)
             m_conn->close();
-        }
     }
 }
 

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -103,9 +103,8 @@ QString BlackBerryRunConfiguration::barPackage() const
 
     QList<BarPackageDeployInformation> packages = dc->deploymentInfo()->enabledPackages();
     foreach (const BarPackageDeployInformation package, packages) {
-        if (package.proFilePath == proFilePath()) {
+        if (package.proFilePath == proFilePath())
             return package.packagePath;
-        }
     }
     return QString();
 }

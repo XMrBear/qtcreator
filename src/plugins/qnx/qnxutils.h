@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -34,6 +34,11 @@
 
 #include "qnxconstants.h"
 
+#include <utils/environment.h>
+#include <utils/qtcassert.h>
+#include <utils/fileutils.h>
+
+#include <QTextStream>
 #include <QString>
 
 namespace Qnx {
@@ -47,6 +52,11 @@ public:
     static QString addQuotes(const QString &string);
     static Qnx::QnxArchitecture cpudirToArch(const QString &cpuDir);
     static QStringList searchPaths(QnxAbstractQtVersion *qtVersion);
+    static QMultiMap<QString, QString> parseEnvironmentFile(const QString &fileName);
+    static bool isValidNdkPath(const QString & ndkPath);
+    static QString envFilePath(const QString & ndkPath);
+    static void prependQnxMapToEnvironment(const QMultiMap<QString, QString> &qnxMap, Utils::Environment &env);
+    static Utils::FileName executableWithExtension(const Utils::FileName &fileName);
 };
 
 } // namespace Internal

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -419,6 +419,8 @@ static inline NewClassWidget::ClassType classTypeForBaseClass(const QString &bas
     // Declarative Items
     if (baseClass == QLatin1String("QDeclarativeItem"))
         return NewClassWidget::ClassInheritsQDeclarativeItem;
+    if (baseClass == QLatin1String("QQuickItem"))
+        return NewClassWidget::ClassInheritsQQuickItem;
     return NewClassWidget::NoClassType;
 }
 

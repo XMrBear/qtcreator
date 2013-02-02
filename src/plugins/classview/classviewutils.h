@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Denis Mingulov
+** Copyright (c) 2013 Denis Mingulov
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -82,7 +82,7 @@ public:
 
     /*!
        \brief Set symbol information to the \a QStandardItem
-       \param information
+       \param information Provides name, type and icon
        \param item Item
        \return Filled item
      */

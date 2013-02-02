@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -60,7 +60,7 @@ ShortcutSettings::ShortcutSettings(QObject *parent)
 {
     connect(ActionManager::instance(), SIGNAL(commandListChanged()), this, SLOT(initialize()));
 
-    setId(QLatin1String(Core::Constants::SETTINGS_ID_SHORTCUTS));
+    setId(Core::Constants::SETTINGS_ID_SHORTCUTS);
     setDisplayName(tr("Keyboard"));
     setCategory(Core::Constants::SETTINGS_CATEGORY_CORE);
     setDisplayCategory(QCoreApplication::translate("Core", Core::Constants::SETTINGS_TR_CATEGORY_CORE));
@@ -362,7 +362,7 @@ void ShortcutSettings::markPossibleCollisions(ShortcutItem *item)
     if (item->m_key.isEmpty())
         return;
 
-    int globalId = Context(Constants::C_GLOBAL).at(0);
+    Id globalId = Context(Constants::C_GLOBAL).at(0);
 
     foreach (ShortcutItem *currentItem, m_scitems) {
 
@@ -371,11 +371,10 @@ void ShortcutSettings::markPossibleCollisions(ShortcutItem *item)
             continue;
         }
 
-        foreach (int context, currentItem->m_cmd->context()) {
-
+        foreach (Id id, currentItem->m_cmd->context()) {
             // conflict if context is identical, OR if one
             // of the contexts is the global context
-            if (item->m_cmd->context().contains(context) ||
+            if (item->m_cmd->context().contains(id) ||
                (item->m_cmd->context().contains(globalId) &&
                 !currentItem->m_cmd->context().isEmpty()) ||
                 (currentItem->m_cmd->context().contains(globalId) &&

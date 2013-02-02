@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -63,7 +63,7 @@ public:
                                     QWidget *parent = 0);
     ~GitoriousProjectWidget();
 
-    virtual bool isValid() const;
+    bool isValid() const;
 
     QSharedPointer<GitoriousProject> project() const;
 

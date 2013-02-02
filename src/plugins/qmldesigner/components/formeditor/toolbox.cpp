@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -44,19 +44,19 @@ namespace QmlDesigner {
 ToolBox::ToolBox(QWidget *parentWidget)
     : Utils::StyledBar(parentWidget),
   m_leftToolBar(new QToolBar("LeftSidebar", this)),
-  m_rightToolBar(new QToolBar("RightSidebar", this))
+  m_rightToolBar(new QToolBar("RightSidebar", this)),
+  m_formEditorCrumbleBar(new FormEditorCrumbleBar(this))
 {
     setMaximumHeight(44);
     setSingleRow(false);
     QFrame *frame = new QFrame(this);
-    m_crumblePath = new Utils::CrumblePath(frame);
     frame->setStyleSheet("background-color: #4e4e4e;");
     frame->setFrameShape(QFrame::NoFrame);
     QHBoxLayout *layout = new QHBoxLayout(frame);
     layout->setMargin(0);
     layout->setSpacing(0);
     frame->setLayout(layout);
-    layout->addWidget(m_crumblePath);
+    layout->addWidget(m_formEditorCrumbleBar->crumblePath());
     frame->setProperty("panelwidget", true);
     frame->setProperty("panelwidget_singlerow", false);
     QVBoxLayout *verticalLayout = new QVBoxLayout(this);
@@ -126,9 +126,9 @@ QList<QAction*> ToolBox::actions() const
     return QList<QAction*>() << m_leftToolBar->actions() << m_rightToolBar->actions();
 }
 
-Utils::CrumblePath *ToolBox::crumblePath() const
+FormEditorCrumbleBar *ToolBox::formEditorCrumbleBar() const
 {
-    return m_crumblePath;
+    return m_formEditorCrumbleBar;
 }
 
 } // namespace QmlDesigner

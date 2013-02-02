@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -38,6 +38,7 @@
 #include "debuggeractions.h"
 #include "debuggercore.h"
 #include "debuggerinternalconstants.h"
+#include "debuggerprotocol.h"
 #include "debuggerrunner.h"
 #include "debuggerstartparameters.h"
 #include "debuggertooltipmanager.h"
@@ -51,10 +52,10 @@
 #include "threadshandler.h"
 #include "watchhandler.h"
 #include "watchutils.h"
-#include "gdb/gdbmi.h"
 #include "shared/cdbsymbolpathlisteditor.h"
 #include "shared/hostutils.h"
 #include "procinterrupt.h"
+#include "sourceutils.h"
 
 #include <TranslationUnit.h>
 
@@ -545,7 +546,7 @@ bool CdbEngine::startConsole(const DebuggerStartParameters &sp, QString *errorMe
             SLOT(consoleStubError(QString)));
     connect(m_consoleStub.data(), SIGNAL(processStarted()),
             SLOT(consoleStubProcessStarted()));
-    connect(m_consoleStub.data(), SIGNAL(wrapperStopped()),
+    connect(m_consoleStub.data(), SIGNAL(stubStopped()),
             SLOT(consoleStubExited()));
     m_consoleStub->setWorkingDirectory(sp.workingDirectory);
     if (sp.environment.size())
@@ -782,6 +783,11 @@ void CdbEngine::setupInferior()
     }
     postCommand("sxn 0x4000001f", 0); // Do not break on WowX86 exceptions.
     postCommand(".asm source_line", 0); // Source line in assembly
+    postCommand(m_extensionCommandPrefixBA + "setparameter maxStringLength="
+                + debuggerCore()->action(MaximalStringLength)->value().toByteArray()
+                + " maxStackDepth="
+                + debuggerCore()->action(MaximalStackDepth)->value().toByteArray()
+                , 0);
     postExtensionCommand("pid", QByteArray(), 0, &CdbEngine::handlePid);
 }
 
@@ -957,11 +963,10 @@ void CdbEngine::processFinished()
                m_process.exitStatus(), m_process.exitCode());
 
     const bool crashed = m_process.exitStatus() == QProcess::CrashExit;
-    if (crashed) {
+    if (crashed)
         showMessage(tr("CDB crashed"), LogError); // not in your life.
-    } else {
+    else
         showMessage(tr("CDB exited (%1)").arg(m_process.exitCode()), LogMisc);
-    }
 
     if (m_notifyEngineShutdownOnTermination) {
         if (crashed) {
@@ -1155,11 +1160,10 @@ void CdbEngine::interruptInferior()
         qDebug() << "CdbEngine::interruptInferior()" << stateName(state());
 
     bool ok = false;
-    if (!canInterruptInferior()) {
+    if (!canInterruptInferior())
         showMessage(tr("Interrupting is not possible in remote sessions."), LogError);
-    } else {
+    else
         ok = doInterruptInferior(NoSpecialStop);
-    }
     // Restore running state if stop failed.
     if (!ok) {
         STATE_DEBUG(state(), Q_FUNC_INFO, __LINE__, "notifyInferiorStopOk")
@@ -1445,7 +1449,10 @@ void CdbEngine::activateFrame(int index)
     if (index < 0)
         return;
     const StackFrames &frames = stackHandler()->frames();
-    QTC_ASSERT(index < frames.size(), return);
+    if (index >= frames.size()) {
+        reloadFullStack(); // Clicked on "More...".
+        return;
+    }
 
     const StackFrame frame = frames.at(index);
     if (debug || debugLocals)
@@ -1456,11 +1463,10 @@ void CdbEngine::activateFrame(int index)
     if (showAssembler) { // Assembly code: Clean out model and force instruction mode.
         watchHandler()->removeAllData();
         QAction *assemblerAction = theAssemblerAction();
-        if (assemblerAction->isChecked()) {
+        if (assemblerAction->isChecked())
             gotoLocation(frame);
-        } else {
+        else
             assemblerAction->trigger(); // Seems to trigger update
-        }
     } else {
         gotoLocation(frame);
         updateLocals(true);
@@ -1751,11 +1757,10 @@ void CdbEngine::fetchMemory(MemoryAgent *agent, QObject *editor, quint64 addr, q
     if (debug)
         qDebug("CdbEngine::fetchMemory %llu bytes from 0x%llx", length, addr);
     const MemoryViewCookie cookie(agent, editor, addr, length);
-    if (m_accessible) {
+    if (m_accessible)
         postFetchMemory(cookie);
-    } else {
+    else
         doInterruptInferiorCustomSpecialStop(qVariantFromValue(cookie));
-    }
 }
 
 void CdbEngine::postFetchMemory(const MemoryViewCookie &cookie)
@@ -1920,9 +1925,8 @@ void CdbEngine::handleLocals(const CdbExtensionCommandPtr &reply)
         GdbMi root;
         root.fromString(reply->reply);
         QTC_ASSERT(root.isList(), return);
-        if (debugLocals) {
+        if (debugLocals)
             qDebug() << root.toString(true, 4);
-        }
         // Courtesy of GDB engine
         foreach (const GdbMi &child, root.children()) {
             WatchData dummy;
@@ -2093,13 +2097,12 @@ unsigned CdbEngine::examineStopReason(const GdbMi &stopReason,
             }
         }
         QString tid = QString::number(threadId);
-        if (id && breakHandler()->type(id) == WatchpointAtAddress) {
+        if (id && breakHandler()->type(id) == WatchpointAtAddress)
             *message = msgWatchpointByAddressTriggered(id, number, breakHandler()->address(id), tid);
-        } else if (id && breakHandler()->type(id) == WatchpointAtExpression) {
+        else if (id && breakHandler()->type(id) == WatchpointAtExpression)
             *message = msgWatchpointByExpressionTriggered(id, number, breakHandler()->expression(id), tid);
-        } else {
+        else
             *message = msgBreakpointTriggered(id, number, tid);
-        }
         rc |= StopReportStatusMessage|StopNotifyStop;
         return rc;
     }
@@ -2337,11 +2340,10 @@ void CdbEngine::handleExtensionMessage(char t, int token, const QByteArray &what
         QDebug nospace = qDebug().nospace();
         nospace << "handleExtensionMessage " << t << ' ' << token << ' ' << what
                 << ' ' << stateName(state());
-        if (t == 'N' || debug > 1) {
+        if (t == 'N' || debug > 1)
             nospace << ' ' << message;
-        } else {
+        else
             nospace << ' ' << message.size() << " bytes";
-        }
     }
 
     // Is there a reply expected, some command queued?
@@ -2841,13 +2843,20 @@ CdbEngine::NormalizedSourceFileName CdbEngine::sourceMapNormalizeFileNameFromDeb
 
 // Parse frame from GDBMI. Duplicate of the gdb code, but that
 // has more processing.
-static StackFrames parseFrames(const GdbMi &gdbmi)
+static StackFrames parseFrames(const GdbMi &gdbmi, bool *incomplete = 0)
 {
+    if (incomplete)
+        *incomplete = false;
     StackFrames rc;
     const int count = gdbmi.childCount();
     rc.reserve(count);
     for (int i = 0; i  < count; i++) {
         const GdbMi &frameMi = gdbmi.childAt(i);
+        if (!frameMi.childCount()) { // Empty item indicates "More...".
+            if (incomplete)
+                *incomplete = true;
+            break;
+        }
         StackFrame frame;
         frame.level = i;
         const GdbMi fullName = frameMi.findChild("fullname");
@@ -2872,7 +2881,8 @@ unsigned CdbEngine::parseStackTrace(const GdbMi &data, bool sourceStepInto)
     // 'ILT+'). If that is the case, execute another 't' to step into the actual function.    .
     // Note that executing 't 2' does not work since it steps 2 instructions on a non-call code line.
     int current = -1;
-    StackFrames frames = parseFrames(data);
+    bool incomplete;
+    StackFrames frames = parseFrames(data, &incomplete);
     const int count = frames.size();
     for (int i = 0; i < count; i++) {
         const bool hasFile = !frames.at(i).file.isEmpty();
@@ -2892,7 +2902,7 @@ unsigned CdbEngine::parseStackTrace(const GdbMi &data, bool sourceStepInto)
     if (count && current == -1) // No usable frame, use assembly.
         current = 0;
     // Set
-    stackHandler()->setFrames(frames);
+    stackHandler()->setFrames(frames, incomplete);
     activateFrame(current);
     return 0;
 }
@@ -2912,11 +2922,10 @@ void CdbEngine::handleStackTrace(const CdbExtensionCommandPtr &command)
 void CdbEngine::handleExpression(const CdbExtensionCommandPtr &command)
 {
     int value = 0;
-    if (command->success) {
+    if (command->success)
         value = command->reply.toInt();
-    } else {
+    else
         showMessage(QString::fromLocal8Bit(command->errorMessage), LogError);
-    }
     // Is this a conditional breakpoint?
     if (command->cookie.isValid() && command->cookie.canConvert<ConditionalBreakPointCookie>()) {
         const ConditionalBreakPointCookie cookie = qvariant_cast<ConditionalBreakPointCookie>(command->cookie);
@@ -2927,11 +2936,10 @@ void CdbEngine::handleExpression(const CdbExtensionCommandPtr &command)
             arg(cookie.id.toString());
         showMessage(message, LogMisc);
         // Stop if evaluation is true, else continue
-        if (value) {
+        if (value)
             processStop(cookie.stopReason, true);
-        } else {
+        else
             postCommand("g", 0);
-        }
     }
 }
 
@@ -2962,7 +2970,7 @@ void CdbEngine::postCommandSequence(unsigned mask)
         return;
     }
     if (mask & CommandListStack) {
-        postExtensionCommand("stack", QByteArray(), 0, &CdbEngine::handleStackTrace, mask & ~CommandListStack);
+        postExtensionCommand("stack", "unlimited", 0, &CdbEngine::handleStackTrace, mask & ~CommandListStack);
         return;
     }
     if (mask & CommandListRegisters) {
@@ -3087,11 +3095,10 @@ void CdbEngine::handleBreakPoints(const GdbMi &value)
             }
         } // not pending reported
     } // foreach
-    if (m_pendingBreakpointMap.empty()) {
+    if (m_pendingBreakpointMap.empty())
         str << QLatin1String("All breakpoints have been resolved.\n");
-    } else {
+    else
         str << QString::fromLatin1("%1 breakpoint(s) pending...\n").arg(m_pendingBreakpointMap.size());
-    }
     showMessage(message, LogMisc);
 }
 

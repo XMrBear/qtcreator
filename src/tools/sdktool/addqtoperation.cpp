@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -131,21 +131,17 @@ bool AddQtOperation::setArguments(const QStringList &args)
         m_extra << pair;
     }
 
-    if (m_id.isEmpty()) {
+    if (m_id.isEmpty())
         std::cerr << "Error no id was passed." << std::endl << std::endl;
-    }
 
-    if (m_displayName.isEmpty()) {
+    if (m_displayName.isEmpty())
         std::cerr << "Error no display name was passed." << std::endl << std::endl;
-    }
 
-    if (m_qmake.isEmpty()) {
+    if (m_qmake.isEmpty())
         std::cerr << "Error no qmake was passed." << std::endl << std::endl;
-    }
 
-    if (m_type.isEmpty()) {
+    if (m_type.isEmpty())
         std::cerr << "Error no type was passed." << std::endl << std::endl;
-    }
 
     return !m_id.isEmpty() && !m_displayName.isEmpty() && !m_qmake.isEmpty() && !m_type.isEmpty();
 }
@@ -199,7 +195,7 @@ bool AddQtOperation::test() const
             || !version0.contains(QLatin1String(AUTODETECTED))
             || version0.value(QLatin1String(AUTODETECTED)).toBool() != true
             || !version0.contains(QLatin1String(AUTODETECTION_SOURCE))
-            || version0.value(QLatin1String(AUTODETECTION_SOURCE)).toString() != QLatin1String("testId")
+            || version0.value(QLatin1String(AUTODETECTION_SOURCE)).toString() != QLatin1String("SDK.testId")
             || !version0.contains(QLatin1String(TYPE))
             || version0.value(QLatin1String(TYPE)).toString() != QLatin1String("testType")
             || !version0.contains(QLatin1String(QMAKE))
@@ -238,7 +234,7 @@ bool AddQtOperation::test() const
             || !version1.contains(QLatin1String(AUTODETECTED))
             || version1.value(QLatin1String(AUTODETECTED)).toBool() != true
             || !version1.contains(QLatin1String(AUTODETECTION_SOURCE))
-            || version1.value(QLatin1String(AUTODETECTION_SOURCE)).toString() != QLatin1String("testId2")
+            || version1.value(QLatin1String(AUTODETECTION_SOURCE)).toString() != QLatin1String("SDK.testId2")
             || !version1.contains(QLatin1String(TYPE))
             || version1.value(QLatin1String(TYPE)).toString() != QLatin1String("testType3")
             || !version1.contains(QLatin1String(QMAKE))

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Nicolas Arnaud-Cormos
+** Copyright (c) 2013 Nicolas Arnaud-Cormos
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -46,7 +46,7 @@ using namespace Macros::Internal;
 MacroOptionsPage::MacroOptionsPage(QObject *parent)
     : Core::IOptionsPage(parent)
 {
-    setId(QLatin1String(Constants::M_OPTIONS_PAGE));
+    setId(Constants::M_OPTIONS_PAGE);
     setDisplayName(QCoreApplication::translate("Macros", Constants::M_OPTIONS_TR_PAGE));
     setCategory(TextEditor::Constants::TEXT_EDITOR_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("TextEditor",

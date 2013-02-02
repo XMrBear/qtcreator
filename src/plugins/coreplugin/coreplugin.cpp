@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -37,8 +37,10 @@
 #include "mainwindow.h"
 #include "mimedatabase.h"
 #include "modemanager.h"
+#include "infobar.h"
 
 #include <extensionsystem/pluginmanager.h>
+#include <utils/savefile.h>
 
 #include <QtPlugin>
 #include <QDebug>
@@ -47,7 +49,7 @@ using namespace Core;
 using namespace Core::Internal;
 
 CorePlugin::CorePlugin() :
-    m_mainWindow(new MainWindow), m_editMode(0)
+    m_mainWindow(new MainWindow), m_editMode(0), m_designMode(0)
 {
 }
 
@@ -92,7 +94,12 @@ bool CorePlugin::initialize(const QStringList &arguments, QString *errorMessage)
         addObject(m_editMode);
         ModeManager::activateMode(m_editMode->id());
         m_designMode = new DesignMode;
+        InfoBar::initializeGloballySuppressed();
     }
+
+    // Make sure we respect the process's umask when creating new files
+    Utils::SaveFile::initializeUmask();
+
     return success;
 }
 

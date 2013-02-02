@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -244,10 +244,9 @@ static void addFileInfo(const QString &fileName, IDocument *document, bool isLin
         state.modified = fi.lastModified();
         state.permissions = fi.permissions();
         // Add watcher if we don't have that already
-        if (!d->m_states.contains(fileName)) {
+        if (!d->m_states.contains(fileName))
             d->m_states.insert(fileName, FileState());
 
-        }
         QFileSystemWatcher *watcher = 0;
         if (isLink)
             watcher = d->linkWatcher();
@@ -860,9 +859,8 @@ void DocumentManager::changedFile(const QString &fileName)
     if (d->m_states.contains(fileName))
         d->m_changedFiles.insert(fileName);
 
-    if (wasempty && !d->m_changedFiles.isEmpty()) {
+    if (wasempty && !d->m_changedFiles.isEmpty())
         QTimer::singleShot(200, this, SLOT(checkForReload()));
-    }
 }
 
 void DocumentManager::mainWindowActivated()
@@ -963,11 +961,10 @@ void DocumentManager::checkForReload()
 
             // find out the type
             IDocument::ChangeType fileChange = changeTypes.value(fileName);
-            if (fileChange == IDocument::TypeRemoved) {
+            if (fileChange == IDocument::TypeRemoved)
                 type = IDocument::TypeRemoved;
-            } else if (fileChange == IDocument::TypeContents && type == IDocument::TypePermissions) {
+            else if (fileChange == IDocument::TypeContents && type == IDocument::TypePermissions)
                 type = IDocument::TypeContents;
-            }
         }
 
         if (!changed) // probably because the change was blocked with (un)blockFileChange
@@ -1186,7 +1183,7 @@ void readSettings()
             editorId = ids.next();
         if (QFileInfo(fileName).isFile())
             d->m_recentFiles.append(DocumentManager::RecentFile(QDir::fromNativeSeparators(fileName), // from native to guard against old settings
-                                               Id(editorId)));
+                                               Id::fromString(editorId)));
     }
 
     s->beginGroup(QLatin1String(directoryGroupC));

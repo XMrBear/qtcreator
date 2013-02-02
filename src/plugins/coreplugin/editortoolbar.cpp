@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -337,9 +337,8 @@ void EditorToolBar::listContextMenu(QPoint pos)
     menu.addSeparator();
     EditorManager::instance()->addNativeDirActions(&menu, index);
     QAction *result = menu.exec(d->m_editorList->mapToGlobal(pos));
-    if (result == copyPath) {
+    if (result == copyPath)
         QApplication::clipboard()->setText(QDir::toNativeSeparators(fileName));
-    }
 }
 
 void EditorToolBar::makeEditorWritable()

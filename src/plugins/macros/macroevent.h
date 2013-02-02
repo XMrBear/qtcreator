@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Nicolas Arnaud-Cormos
+** Copyright (c) 2013 Nicolas Arnaud-Cormos
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -32,6 +32,8 @@
 
 #include "macros_global.h"
 
+#include <coreplugin/id.h>
+
 #include <QMap>
 
 QT_BEGIN_NAMESPACE
@@ -50,13 +52,11 @@ public:
     virtual ~MacroEvent();
     MacroEvent& operator=(const MacroEvent &other);
 
-    const QByteArray &id() const;
-    void setId(const char *id);
+    Core::Id id() const;
+    void setId(Core::Id id);
 
     QVariant value(quint8 id) const;
     void setValue(quint8 id, const QVariant &value);
-
-    QMap<quint8, QVariant> values() const;
 
     void load(QDataStream &stream);
     void save(QDataStream &stream) const;

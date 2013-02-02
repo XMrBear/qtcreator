@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -30,14 +30,14 @@
 
 #include "subversionsubmiteditor.h"
 
-#include <utils/submiteditorwidget.h>
+#include <vcsbase/submiteditorwidget.h>
 #include <vcsbase/submitfilemodel.h>
 
 using namespace Subversion::Internal;
 
 SubversionSubmitEditor::SubversionSubmitEditor(const VcsBase::VcsBaseSubmitEditorParameters *parameters,
                                                QWidget *parentWidget) :
-    VcsBase::VcsBaseSubmitEditor(parameters, new Utils::SubmitEditorWidget(parentWidget))
+    VcsBase::VcsBaseSubmitEditor(parameters, new VcsBase::SubmitEditorWidget(parentWidget))
 {
     setDisplayName(tr("Subversion Submit"));
     setDescriptionMandatory(false);

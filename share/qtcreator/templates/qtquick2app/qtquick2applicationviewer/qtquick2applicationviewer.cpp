@@ -26,7 +26,10 @@ QString QtQuick2ApplicationViewerPrivate::adjustPath(const QString &path)
     if (!QDir::isAbsolutePath(path))
         return QString::fromLatin1("%1/../Resources/%2")
                 .arg(QCoreApplication::applicationDirPath(), path);
-#elif defined(Q_OS_UNIX)
+#elif defined(Q_OS_QNX)
+    if (!QDir::isAbsolutePath(path))
+        return QString::fromLatin1("app/native/%1").arg(path);
+#elif defined(Q_OS_UNIX) && !defined(Q_OS_ANDROID)
     const QString pathInInstallDir =
             QString::fromLatin1("%1/../%2").arg(QCoreApplication::applicationDirPath(), path);
     if (QFileInfo(pathInInstallDir).exists())
@@ -51,7 +54,11 @@ QtQuick2ApplicationViewer::~QtQuick2ApplicationViewer()
 void QtQuick2ApplicationViewer::setMainQmlFile(const QString &file)
 {
     d->mainQmlFile = QtQuick2ApplicationViewerPrivate::adjustPath(file);
+#ifdef Q_OS_ANDROID
+    setSource(QUrl(QLatin1String("assets:/")+d->mainQmlFile));
+#else
     setSource(QUrl::fromLocalFile(d->mainQmlFile));
+#endif
 }
 
 void QtQuick2ApplicationViewer::addImportPath(const QString &path)
@@ -61,7 +68,7 @@ void QtQuick2ApplicationViewer::addImportPath(const QString &path)
 
 void QtQuick2ApplicationViewer::showExpanded()
 {
-#if defined(Q_WS_SIMULATOR)
+#if defined(Q_WS_SIMULATOR) || defined(Q_OS_QNX)
     showFullScreen();
 #else
     show();

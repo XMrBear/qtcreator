@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -32,6 +32,8 @@
 
 #include <utils/stylehelper.h>
 #include <utils/stringutils.h>
+#include <utils/tooltip/tooltip.h>
+#include <utils/tooltip/tipcontents.h>
 
 #include <coreplugin/icore.h>
 #include <coreplugin/imode.h>
@@ -87,6 +89,12 @@ bool FancyToolButton::event(QEvent *e)
             animation->start(QAbstractAnimation::DeleteWhenStopped);
         }
         break;
+    case QEvent::ToolTip:
+        {
+            QHelpEvent *he = static_cast<QHelpEvent *>(e);
+            Utils::ToolTip::instance()->show(mapToGlobal(he->pos()), Utils::TextContent(toolTip()), this);
+            return true;
+        }
     default:
         return QToolButton::event(e);
     }
@@ -109,11 +117,10 @@ static QVector<QString> splitInTwoLines(const QString &text, const QFontMetrics 
                                       nextSplitPos - text.length() - 1);
         if (nextSplitPos != -1) {
             int splitCandidate = nextSplitPos + rx.matchedLength();
-            if (fontMetrics.width(text.mid(splitCandidate)) <= availableWidth) {
+            if (fontMetrics.width(text.mid(splitCandidate)) <= availableWidth)
                 splitPos = splitCandidate;
-            } else {
+            else
                 break;
-            }
         }
     } while (nextSplitPos > 0 && fontMetrics.width(text.left(nextSplitPos)) > availableWidth);
     // check if we could split at white space at all

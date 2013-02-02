@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -89,9 +89,8 @@ protected:
     bool preVisit(Symbol *s)
     {
         if (s->asBlock()) {
-            if (s->line() < line || (s->line() == line && s->column() <= column)) {
+            if (s->line() < line || (s->line() == line && s->column() <= column))
                 return true;
-            }
             // skip blocks
         } if (s->line() < line || (s->line() == line && s->column() <= column)) {
             symbol = s;
@@ -594,13 +593,14 @@ void Document::check(CheckMode mode)
     if (! _translationUnit->ast())
         return; // nothing to do.
 
-    if (TranslationUnitAST *ast = _translationUnit->ast()->asTranslationUnit()) {
+    if (TranslationUnitAST *ast = _translationUnit->ast()->asTranslationUnit())
         semantic(ast, _globalNamespace);
-    } else if (ExpressionAST *ast = _translationUnit->ast()->asExpression()) {
+    else if (StatementAST *ast = _translationUnit->ast()->asStatement())
         semantic(ast, _globalNamespace);
-    } else if (DeclarationAST *ast = translationUnit()->ast()->asDeclaration()) {
+    else if (ExpressionAST *ast = _translationUnit->ast()->asExpression())
         semantic(ast, _globalNamespace);
-    }
+    else if (DeclarationAST *ast = translationUnit()->ast()->asDeclaration())
+        semantic(ast, _globalNamespace);
 }
 
 void Document::keepSourceAndAST()

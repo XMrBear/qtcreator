@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -53,7 +53,7 @@ namespace Internal {
 class GitoriousCloneWizardPage : public Git::CloneWizardPage {
 public:
     explicit GitoriousCloneWizardPage(const GitoriousRepositoryWizardPage *rp, QWidget *parent = 0);
-    virtual void initializePage();
+    void initializePage();
 
 private:
     const GitoriousRepositoryWizardPage *m_repositoryPage;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -154,11 +154,10 @@ void PlainTextEditModifier::commitGroup()
 
 void PlainTextEditModifier::textEditChanged()
 {
-    if (!m_ongoingTextChange && m_changeSignalsEnabled) {
+    if (!m_ongoingTextChange && m_changeSignalsEnabled)
         emit textChanged();
-    } else {
+    else
         m_pendingChangeSignal = true;
-    }
 }
 
 void PlainTextEditModifier::runRewriting(ChangeSet *changeSet)

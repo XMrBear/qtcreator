@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -209,26 +209,30 @@ inline char toHexDigit(unsigned v)
 }
 
 // Strings from raw data.
-std::wstring quotedWStringFromCharData(const unsigned char *data, size_t size)
+std::wstring quotedWStringFromCharData(const unsigned char *data, size_t size, bool truncated)
 {
     std::wstring rc;
-    rc.reserve(size + 2);
+    rc.reserve(size + (truncated ? 5 : 2));
     rc.push_back(L'"');
     const unsigned char *end = data + size;
     for ( ; data < end; data++)
         rc.push_back(wchar_t(*data));
+    if (truncated)
+        rc.append(L"...");
     rc.push_back(L'"');
     return rc;
 }
 
-std::wstring quotedWStringFromWCharData(const unsigned char *dataIn, size_t sizeIn)
+std::wstring quotedWStringFromWCharData(const unsigned char *dataIn, size_t sizeIn, bool truncated)
 {
     std::wstring rc;
     const wchar_t *data = reinterpret_cast<const wchar_t *>(dataIn);
     const size_t size = sizeIn / sizeof(wchar_t);
-    rc.reserve(size + 2);
+    rc.reserve(size + (truncated ? 5 : 2));
     rc.push_back(L'"');
     rc.append(data, data + size);
+    if (truncated)
+        rc.append(L"...");
     rc.push_back(L'"');
     return rc;
 }
@@ -268,11 +272,10 @@ std::string dumpMemory(const unsigned char *p, size_t size,
         case '\n':
             str << "\\n";
         default:
-            if (u >= 32 && u < 128) {
+            if (u >= 32 && u < 128)
                 str << (char(u));
-            } else {
+            else
                 str  << '\\' << std::setw(3) << unsigned(u);
-            }
         }
     }
     if (wantQuotes)

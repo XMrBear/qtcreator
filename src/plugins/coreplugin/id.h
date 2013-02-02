@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -34,6 +34,7 @@
 
 #include <QMetaType>
 #include <QString>
+#include <QVariant>
 
 namespace Core {
 
@@ -41,14 +42,21 @@ namespace Core {
 class CORE_EXPORT Id
 {
 public:
+    enum { IdsPerPlugin = 10000, ReservedPlugins = 1000 };
+
     Id() : m_id(0) {}
     Id(int uid) : m_id(uid) {}
     Id(const char *name);
-    explicit Id(const QByteArray &name);
-    // FIXME: Remove
     explicit Id(const QString &name);
+    explicit Id(const QByteArray &name);
+
+    Id withSuffix(int suffix) const;
+    Id withSuffix(const char *name) const;
+    Id withPrefix(const char *name) const;
+
     QByteArray name() const;
-    QString toString() const;
+    QString toString() const; // Avoid.
+    QVariant toSetting() const; // Good to use.
     bool isValid() const { return m_id; }
     bool operator==(Id id) const { return m_id == id.m_id; }
     bool operator==(const char *name) const;
@@ -56,8 +64,12 @@ public:
     bool operator!=(const char *name) const { return !operator==(name); }
     bool operator<(Id id) const { return m_id < id.m_id; }
     bool operator>(Id id) const { return m_id > id.m_id; }
+    bool alphabeticallyBefore(Id other) const;
     int uniqueIdentifier() const { return m_id; }
     static Id fromUniqueIdentifier(int uid) { return Id(uid); }
+    static Id fromString(const QString &str); // FIXME: avoid.
+    static Id fromName(const QByteArray &ba); // FIXME: avoid.
+    static Id fromSetting(const QVariant &variant); // Good to use.
     static void registerId(int uid, const char *name);
 
 private:

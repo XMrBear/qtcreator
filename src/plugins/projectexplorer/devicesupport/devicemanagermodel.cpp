@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -93,9 +93,7 @@ IDevice::ConstPtr DeviceManagerModel::device(int pos) const
 Core::Id DeviceManagerModel::deviceId(int pos) const
 {
     IDevice::ConstPtr dev = device(pos);
-    if (dev.isNull())
-        return IDevice::invalidId();
-    return dev->id();
+    return dev ? dev->id() : Core::Id();
 }
 
 int DeviceManagerModel::indexOf(IDevice::ConstPtr dev) const

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -227,7 +227,7 @@ QByteArray QtQuickApp::generateFileExtended(int fileType,
 
 int QtQuickApp::stubVersionMinor() const
 {
-    return m_componentSet == QtQuick20Components ? 1 : 22;
+    return m_componentSet == QtQuick20Components ? 2 : 22;
 }
 
 QList<AbstractGeneratedFileInfo> QtQuickApp::updateableFiles(const QString &mainProFile) const

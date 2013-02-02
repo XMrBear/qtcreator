@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Denis Mingulov
+** Copyright (c) 2013 Denis Mingulov
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -82,9 +82,8 @@ QSet<SymbolLocation> Utils::roleToLocations(const QList<QVariant> &locationsVar)
 {
     QSet<SymbolLocation> locations;
     foreach (const QVariant &loc, locationsVar) {
-        if (loc.canConvert<SymbolLocation>()) {
+        if (loc.canConvert<SymbolLocation>())
             locations.insert(loc.value<SymbolLocation>());
-        }
     }
 
     return locations;

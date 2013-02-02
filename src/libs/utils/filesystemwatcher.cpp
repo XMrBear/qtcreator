@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -284,9 +284,8 @@ void FileSystemWatcher::removeFiles(const QStringList &files)
         const int count = --(d->m_staticData->m_fileCount[file]);
         Q_ASSERT(count >= 0);
 
-        if (!count) {
+        if (!count)
             toRemove << file;
-        }
     }
 
     if (!toRemove.isEmpty())
@@ -362,9 +361,8 @@ void FileSystemWatcher::removeDirectories(const QStringList &directories)
         const int count = --d->m_staticData->m_directoryCount[directory];
         Q_ASSERT(count >= 0);
 
-        if (!count) {
+        if (!count)
             toRemove << directory;
-        }
     }
     if (!toRemove.isEmpty())
         d->m_staticData->m_watcher->removePaths(toRemove);

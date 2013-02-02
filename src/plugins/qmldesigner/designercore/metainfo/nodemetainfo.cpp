@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -151,11 +151,10 @@ public:
                 TypeId typeId;
                 QString typeName = typeId(value);
                 if (typeName == QLatin1String("number")) {
-                    if (value->asRealValue()) {
+                    if (value->asRealValue())
                         typeName = "real";
-                    } else {
+                    else
                         typeName = "int";
-                    }
                 }
                 m_properties.append(qMakePair(name, typeName));
             }
@@ -206,11 +205,10 @@ QStringList prototypes(const ObjectValue *ov, const ContextPtr &context, bool ve
                 list << qmlValue->moduleName() + QLatin1Char('.') + qmlValue->className();
             }
         } else {
-            if (versions) {
+            if (versions)
                 list << ov->className() + " -1.-1";
-            } else {
+            else
                 list << ov->className();
-            }
         }
         ov = ov->prototype(context);
     }
@@ -268,11 +266,10 @@ QList<PropertyInfo> getQmlTypes(const CppComponentValue *ov, const ContextPtr &c
 
         const CppComponentValue * qmlObjectValue = value_cast<CppComponentValue>(prototype);
 
-        if (qmlObjectValue) {
+        if (qmlObjectValue)
             list << getQmlTypes(qmlObjectValue, context);
-        } else {
+        else
             list << getObjectTypes(prototype, context);
-        }
     }
 
     return list;
@@ -284,11 +281,10 @@ QList<PropertyInfo> getTypes(const ObjectValue *ov, const ContextPtr &context, b
 
     const CppComponentValue * qmlObjectValue = value_cast<CppComponentValue>(ov);
 
-    if (qmlObjectValue) {
+    if (qmlObjectValue)
         list << getQmlTypes(qmlObjectValue, context, local);
-    } else {
+    else
         list << getObjectTypes(ov, context, local);
-    }
 
     return list;
 }
@@ -314,11 +310,10 @@ QList<PropertyInfo> getObjectTypes(const ObjectValue *ov, const ContextPtr &cont
 
         const CppComponentValue * qmlObjectValue = value_cast<CppComponentValue>(prototype);
 
-        if (qmlObjectValue) {
+        if (qmlObjectValue)
             list << getQmlTypes(qmlObjectValue, context);
-        } else {
+        else
             list << getObjectTypes(prototype, context);
-        }
     }
 
     return list;
@@ -332,29 +327,10 @@ public:
     ~NodeMetaInfoPrivate() {}
 
     bool isValid() const;
-
-    bool isComponent() const
-    {
-        return m_isComponent;
-    }
-
-    QStringList properties() const
-    {
-        return m_properties;
-    }
-
-    QStringList localProperties() const
-    {
-        return m_localProperties;
-    }
-
-    QString defaultPropertyName() const
-    {
-        if (!m_defaultPropertyName.isEmpty())
-            return m_defaultPropertyName;
-        return QLatin1String("data");
-    }
-
+    bool isFileComponent() const;
+    QStringList properties() const;
+    QStringList localProperties() const;
+    QString defaultPropertyName() const;
     QString propertyType(const QString &propertyName) const;
 
     void setupPrototypes();
@@ -369,17 +345,10 @@ public:
     bool cleverCheckType(const QString &otherType) const;
     QVariant::Type variantTypeId(const QString &properyName) const;
 
-    int majorVersion() const
-    { return m_majorVersion; }
-
-    int minorVersion() const
-    { return m_minorVersion; }
-
-    QString qualfiedTypeName() const
-    { return m_qualfiedTypeName; }
-
-    Model *model() const
-    { return m_model; }
+    int majorVersion() const;
+    int minorVersion() const;
+    QString qualfiedTypeName() const;
+    Model *model() const;
 
     QString cppPackageName() const;
 
@@ -389,20 +358,11 @@ public:
 
     static Pointer create(Model *model, const QString &type, int maj = -1, int min = -1);
 
-     QSet<QString> &prototypeCachePositives()
-     {
-         return m_prototypeCachePositives;
-     }
+    QSet<QString> &prototypeCachePositives();
+    QSet<QString> &prototypeCacheNegatives();
 
-     QSet<QString> &prototypeCacheNegatives()
-     {
-         return m_prototypeCacheNegatives;
-     }
+    static void clearCache();
 
-     static void clearCache()
-     {
-         m_nodeMetaInfoCache.clear();
-     }
 
 private:
     NodeMetaInfoPrivate(Model *model, QString type, int maj = -1, int min = -1);
@@ -420,7 +380,7 @@ private:
     int m_majorVersion;
     int m_minorVersion;
     bool m_isValid;
-    bool m_isComponent;
+    bool m_isFileComponent;
     QStringList m_properties;
     QStringList m_propertyTypes;
     QStringList m_localProperties;
@@ -439,6 +399,42 @@ private:
 
 QHash<QString, NodeMetaInfoPrivate::Pointer> NodeMetaInfoPrivate::m_nodeMetaInfoCache;
 
+bool NodeMetaInfoPrivate::isFileComponent() const
+{
+    return m_isFileComponent;
+}
+
+QStringList NodeMetaInfoPrivate::properties() const
+{
+    return m_properties;
+}
+
+QStringList NodeMetaInfoPrivate::localProperties() const
+{
+    return m_localProperties;
+}
+
+QSet<QString> &NodeMetaInfoPrivate::prototypeCachePositives()
+{
+    return m_prototypeCachePositives;
+}
+
+QSet<QString> &NodeMetaInfoPrivate::prototypeCacheNegatives()
+{
+    return m_prototypeCacheNegatives;
+}
+
+void NodeMetaInfoPrivate::clearCache()
+{
+    m_nodeMetaInfoCache.clear();
+}
+
+QString NodeMetaInfoPrivate::defaultPropertyName() const
+{
+    if (!m_defaultPropertyName.isEmpty())
+        return m_defaultPropertyName;
+    return QLatin1String("data");
+}
 
 static inline QString stringIdentifier( const QString &type, int maj, int min)
 {
@@ -449,11 +445,10 @@ NodeMetaInfoPrivate::Pointer NodeMetaInfoPrivate::create(Model *model, const QSt
 {
     if (m_nodeMetaInfoCache.contains(stringIdentifier(type, maj, min))) {
         const Pointer &info = m_nodeMetaInfoCache.value(stringIdentifier(type, maj, min));
-        if (info->model() == model) {
+        if (info->model() == model)
             return info;
-        } else {
+        else
             m_nodeMetaInfoCache.clear();
-        }
     }
 
     Pointer newData(new NodeMetaInfoPrivate(model, type, maj, min));
@@ -469,7 +464,7 @@ NodeMetaInfoPrivate::NodeMetaInfoPrivate() : m_isValid(false)
 
 NodeMetaInfoPrivate::NodeMetaInfoPrivate(Model *model, QString type, int maj, int min) :
                                         m_qualfiedTypeName(type), m_majorVersion(maj),
-                                        m_minorVersion(min), m_isValid(false), m_isComponent(false),
+                                        m_minorVersion(min), m_isValid(false), m_isFileComponent(false),
                                         m_model(model)
 {
     if (context()) {
@@ -482,8 +477,8 @@ NodeMetaInfoPrivate::NodeMetaInfoPrivate(Model *model, QString type, int maj, in
             setupPropertyInfo(getTypes(objectValue, context()));
             setupLocalPropertyInfo(getTypes(objectValue, context(), true));
             m_defaultPropertyName = objectValue->defaultPropertyName();
-            setupPrototypes();
             m_isValid = true;
+            setupPrototypes();
         } else {
             const ObjectValue *objectValue = getObjectValue();
             if (objectValue) {
@@ -499,13 +494,19 @@ NodeMetaInfoPrivate::NodeMetaInfoPrivate(Model *model, QString type, int maj, in
                         return;
                     }
                 } else {
-                    m_isComponent = true;
+                    m_isFileComponent = true;
+                    const Imports *imports = context()->imports(document());
+                    ImportInfo importInfo = imports->info(lookupNameComponent().last(), context().data());
+                    if (importInfo.isValid() && importInfo.type() == ImportInfo::LibraryImport) {
+                        m_majorVersion = importInfo.version().majorVersion();
+                        m_minorVersion = importInfo.version().minorVersion();
+                    }
                 }
                 setupPropertyInfo(getTypes(objectValue, context()));
                 setupLocalPropertyInfo(getTypes(objectValue, context(), true));
                 m_defaultPropertyName = context()->defaultPropertyName(objectValue);
-                setupPrototypes();
                 m_isValid = true;
+                setupPrototypes();
             }
         }
     }
@@ -553,17 +554,15 @@ const QmlJS::ObjectValue *NodeMetaInfoPrivate::getObjectValue() const
 
 QmlJS::ContextPtr NodeMetaInfoPrivate::context() const
 {
-    if (m_model && m_model->rewriterView() && m_model->rewriterView()->scopeChain()) {
+    if (m_model && m_model->rewriterView() && m_model->rewriterView()->scopeChain())
         return m_model->rewriterView()->scopeChain()->context();
-    }
     return QmlJS::ContextPtr(0);
 }
 
 const QmlJS::Document *NodeMetaInfoPrivate::document() const
 {
-    if (m_model && m_model->rewriterView()) {
+    if (m_model && m_model->rewriterView())
         return m_model->rewriterView()->document();
-    }
     return 0;
 }
 
@@ -593,9 +592,8 @@ bool NodeMetaInfoPrivate::isPropertyWritable(const QString &propertyName) const
         const QString rawPropertyName = parts.last();
         const QString objectType = propertyType(objectName);
 
-        if (isValueType(objectType)) {
+        if (isValueType(objectType))
             return true;
-        }
 
         QSharedPointer<NodeMetaInfoPrivate> objectInfo(create(m_model, objectType));
         if (objectInfo->isValid())
@@ -625,9 +623,8 @@ bool NodeMetaInfoPrivate::isPropertyList(const QString &propertyName) const
         const QString rawPropertyName = parts.last();
         const QString objectType = propertyType(objectName);
 
-        if (isValueType(objectType)) {
+        if (isValueType(objectType))
             return false;
-        }
 
         QSharedPointer<NodeMetaInfoPrivate> objectInfo(create(m_model, objectType));
         if (objectInfo->isValid())
@@ -653,9 +650,8 @@ bool NodeMetaInfoPrivate::isPropertyPointer(const QString &propertyName) const
         const QString rawPropertyName = parts.last();
         const QString objectType = propertyType(objectName);
 
-        if (isValueType(objectType)) {
+        if (isValueType(objectType))
             return false;
-        }
 
         QSharedPointer<NodeMetaInfoPrivate> objectInfo(create(m_model, objectType));
         if (objectInfo->isValid())
@@ -681,9 +677,8 @@ bool NodeMetaInfoPrivate::isPropertyEnum(const QString &propertyName) const
         const QString rawPropertyName = parts.last();
         const QString objectType = propertyType(objectName);
 
-        if (isValueType(objectType)) {
+        if (isValueType(objectType))
             return false;
-        }
 
         QSharedPointer<NodeMetaInfoPrivate> objectInfo(create(m_model, objectType));
         if (objectInfo->isValid())
@@ -709,9 +704,8 @@ QString NodeMetaInfoPrivate::propertyEnumScope(const QString &propertyName) cons
         const QString rawPropertyName = parts.last();
         const QString objectType = propertyType(objectName);
 
-        if (isValueType(objectType)) {
+        if (isValueType(objectType))
             return QString();
-        }
 
         QSharedPointer<NodeMetaInfoPrivate> objectInfo(create(m_model, objectType));
         if (objectInfo->isValid())
@@ -744,7 +738,7 @@ bool NodeMetaInfoPrivate::cleverCheckType(const QString &otherType) const
     if (otherType == qualfiedTypeName())
             return true;
 
-    if (isComponent())
+    if (isFileComponent())
         return false;
 
     QStringList split = otherType.split('.');
@@ -806,6 +800,26 @@ QVariant::Type NodeMetaInfoPrivate::variantTypeId(const QString &properyName) co
     return QVariant::nameToType(typeName.toLatin1().data());
 }
 
+int NodeMetaInfoPrivate::majorVersion() const
+{
+    return m_majorVersion;
+}
+
+int NodeMetaInfoPrivate::minorVersion() const
+{
+    return m_minorVersion;
+}
+
+QString NodeMetaInfoPrivate::qualfiedTypeName() const
+{
+    return m_qualfiedTypeName;
+}
+
+Model *NodeMetaInfoPrivate::model() const
+{
+    return m_model;
+}
+
 
 QStringList NodeMetaInfoPrivate::keysForEnum(const QString &enumName) const
 {
@@ -820,7 +834,7 @@ QStringList NodeMetaInfoPrivate::keysForEnum(const QString &enumName) const
 
 QString NodeMetaInfoPrivate::cppPackageName() const
 {
-    if (!isComponent()) {
+    if (!isFileComponent()) {
         if (const CppComponentValue *qmlObject = getCppComponentValue())
             return qmlObject->moduleName();
     }
@@ -829,7 +843,7 @@ QString NodeMetaInfoPrivate::cppPackageName() const
 
 QString NodeMetaInfoPrivate::componentSource() const
 {
-    if (isComponent()) {
+    if (isFileComponent()) {
         const ASTObjectValue * astObjectValue = value_cast<ASTObjectValue>(getObjectValue());
         if (astObjectValue)
             return astObjectValue->document()->source().mid(astObjectValue->typeName()->identifierToken.begin(),
@@ -840,7 +854,7 @@ QString NodeMetaInfoPrivate::componentSource() const
 
 QString NodeMetaInfoPrivate::componentFileName() const
 {
-    if (isComponent()) {
+    if (isFileComponent()) {
         const ASTObjectValue * astObjectValue = value_cast<ASTObjectValue>(getObjectValue());
         if (astObjectValue) {
             QString fileName;
@@ -903,10 +917,22 @@ QString NodeMetaInfoPrivate::propertyType(const QString &propertyName) const
 void NodeMetaInfoPrivate::setupPrototypes()
 {
     QList<const ObjectValue *> objects;
-    if (m_isComponent)
-        objects = PrototypeIterator(getObjectValue(), context()).all();
+
+    const ObjectValue *ov;
+
+    if (m_isFileComponent)
+        ov = getObjectValue();
     else
-        objects = PrototypeIterator(getCppComponentValue(), context()).all();
+        ov = getCppComponentValue();
+
+    PrototypeIterator prototypeIterator(ov, context());
+
+    objects = prototypeIterator.all();
+
+    if (prototypeIterator.error() != PrototypeIterator::NoError) {
+        m_isValid = false;
+        return;
+    }
 
     foreach (const ObjectValue *ov, objects) {
         TypeDescription description;
@@ -918,13 +944,12 @@ void NodeMetaInfoPrivate::setupPrototypes()
             description.majorVersion = qmlValue->componentVersion().majorVersion();
             LanguageUtils::FakeMetaObject::Export qtquickExport = qmlValue->metaObject()->exportInPackage("QtQuick");
             LanguageUtils::FakeMetaObject::Export cppExport = qmlValue->metaObject()->exportInPackage("<cpp>");
-            if (qtquickExport.isValid()) {
+            if (qtquickExport.isValid())
                 description.className = qtquickExport.package + '.' + qtquickExport.type;
-            } else if (qmlValue->moduleName().isEmpty() && cppExport.isValid()) {
+            else if (qmlValue->moduleName().isEmpty() && cppExport.isValid())
                 description.className = cppExport.package + '.' + cppExport.type;
-            } else if (!qmlValue->moduleName().isEmpty()) {
+            else if (!qmlValue->moduleName().isEmpty())
                 description.className = qmlValue->moduleName() + '.' + description.className;
-            }
             m_prototypes.append(description);
         } else {
             if (context()->lookupType(document(), QStringList() << ov->className()))
@@ -941,7 +966,7 @@ QList<TypeDescription> NodeMetaInfoPrivate::prototypes() const
 
 const QmlJS::CppComponentValue *NodeMetaInfoPrivate::getNearestCppComponentValue() const
 {
-    if (m_isComponent)
+    if (m_isFileComponent)
         return findQmlPrototype(getObjectValue(), context());
     return getCppComponentValue();
 }
@@ -987,9 +1012,9 @@ bool NodeMetaInfo::isValid() const
     return m_privateData->isValid();
 }
 
-bool NodeMetaInfo::isComponent() const
+bool NodeMetaInfo::isFileComponent() const
 {
-    return m_privateData->isComponent();
+    return m_privateData->isFileComponent();
 }
 
 bool NodeMetaInfo::hasProperty(const QString &propertyName) const
@@ -1051,9 +1076,8 @@ QVariant NodeMetaInfo::propertyCastedValue(const QString &propertyName, const QV
 {
 
     QVariant variant = value;
-    if (propertyIsEnumType(propertyName)) {
+    if (propertyIsEnumType(propertyName))
         return variant;
-    }
 
     const QString typeName = propertyTypeName(propertyName);
 

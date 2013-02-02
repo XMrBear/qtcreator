@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -98,11 +98,10 @@ int ExpressionUnderCursor::startOfExpression_helper(BackwardsScanner &tk, int in
         return index - 1;
     } else if (tk[index - 1].is(T_IDENTIFIER)) {
         if (tk[index - 2].is(T_TILDE)) {
-            if (tk[index - 3].is(T_COLON_COLON)) {
+            if (tk[index - 3].is(T_COLON_COLON))
                 return startOfExpression(tk, index - 3);
-            } else if (tk[index - 3].is(T_DOT) || tk[index - 3].is(T_ARROW)) {
+            else if (tk[index - 3].is(T_DOT) || tk[index - 3].is(T_ARROW))
                 return startOfExpression(tk, index - 3);
-            }
             return index - 2;
         } else if (tk[index - 2].is(T_COLON_COLON)) {
             return startOfExpression(tk, index - 1);

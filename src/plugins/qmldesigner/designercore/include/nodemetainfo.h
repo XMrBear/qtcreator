@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -68,7 +68,7 @@ public:
     NodeMetaInfo &operator=(const NodeMetaInfo &other);
 
     bool isValid() const;
-    bool isComponent() const;
+    bool isFileComponent() const;
     bool hasProperty(const QString &propertyName) const;
     QStringList propertyNames() const;
     QStringList directPropertyNames() const;

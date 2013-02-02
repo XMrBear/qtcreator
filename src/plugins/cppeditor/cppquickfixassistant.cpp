@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -104,6 +104,7 @@ CppQuickFixAssistInterface::CppQuickFixAssistInterface(CPPEditorWidget *editor,
     , m_currentFile(CppRefactoringChanges::file(editor, m_semanticInfo.doc))
     , m_context(m_semanticInfo.doc, m_snapshot)
 {
+    Q_ASSERT(!m_semanticInfo.doc.isNull());
     CPlusPlus::ASTPath astPath(m_semanticInfo.doc);
     m_path = astPath(editor->textCursor());
 }

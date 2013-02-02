@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Brian McGillion
+** Copyright (c) 2013 Brian McGillion
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -61,7 +61,7 @@ class MercurialSubmitHighlighter : QSyntaxHighlighter
 {
 public:
     explicit MercurialSubmitHighlighter(QTextEdit *parent);
-    virtual void highlightBlock(const QString &text);
+    void highlightBlock(const QString &text);
 
 private:
     enum State { Header, Comment, Other };
@@ -114,7 +114,7 @@ void MercurialSubmitHighlighter::highlightBlock(const QString &text)
 
 
 MercurialCommitWidget::MercurialCommitWidget(QWidget *parent) :
-        Utils::SubmitEditorWidget(parent),
+        VcsBase::SubmitEditorWidget(parent),
         mercurialCommitPanel(new QWidget)
 {
     mercurialCommitPanelUi.setupUi(mercurialCommitPanel);

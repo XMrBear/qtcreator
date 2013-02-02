@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -63,8 +63,6 @@ public:
 private slots:
     void markAsChanged();
     void build();
-private:
-    bool m_infoBarShown;
 };
 
 class CMakeEditorWidget : public TextEditor::BaseTextEditorWidget

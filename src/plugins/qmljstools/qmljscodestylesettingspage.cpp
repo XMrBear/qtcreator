@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -166,7 +166,7 @@ QmlJSCodeStyleSettingsPage::QmlJSCodeStyleSettingsPage(/*QSharedPointer<CppFileS
     Core::IOptionsPage(parent),
     m_pageTabPreferences(0)
 {
-    setId(QLatin1String(Constants::QML_JS_CODE_STYLE_SETTINGS_ID));
+    setId(Constants::QML_JS_CODE_STYLE_SETTINGS_ID);
     setDisplayName(QCoreApplication::translate("QmlJSTools", Constants::QML_JS_CODE_STYLE_SETTINGS_NAME));
     setCategory(QmlJSEditor::Constants::SETTINGS_CATEGORY_QML);
     setDisplayCategory(QCoreApplication::translate("QmlJSEditor", QmlJSEditor::Constants::SETTINGS_TR_CATEGORY_QML));

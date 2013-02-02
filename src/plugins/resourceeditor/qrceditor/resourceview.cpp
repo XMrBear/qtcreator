@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -314,9 +314,8 @@ void ResourceView::addFiles(int prefixIndex, const QStringList &fileNames, int c
 
     // Expand prefix node
     const QModelIndex prefixModelIndex = m_qrcModel->index(prefixIndex, 0, QModelIndex());
-    if (prefixModelIndex.isValid()) {
+    if (prefixModelIndex.isValid())
         this->setExpanded(prefixModelIndex, true);
-    }
 }
 
 void ResourceView::removeFiles(int prefixIndex, int firstFileIndex, int lastFileIndex)

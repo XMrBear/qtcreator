@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -59,9 +59,6 @@ public:
                                         QString *errorMessage);
 
     QString displayName() const;
-
-    ProjectExplorer::RunConfigWidget *createConfigurationWidget(
-            ProjectExplorer::RunConfiguration *runConfiguration);
 
 private:
     static Debugger::DebuggerStartParameters startParameters( const BlackBerryRunConfiguration *runConfig);

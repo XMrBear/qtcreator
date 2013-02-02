@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -52,7 +52,7 @@
 #include <projectexplorer/project.h>
 #include <projectexplorer/target.h>
 #include <projectexplorer/session.h>
-#include <projectexplorer/applicationrunconfiguration.h>
+#include <projectexplorer/localapplicationrunconfiguration.h>
 
 #include <remotelinux/remotelinuxrunconfiguration.h>
 #include <remotelinux/linuxdevice.h>
@@ -250,9 +250,8 @@ IAnalyzerEngine *QmlProfilerTool::createEngine(const AnalyzerStartParameters &sp
     }
 
     // FIXME: Check that there's something sensible in sp.connParams
-    if (isTcpConnection) {
+    if (isTcpConnection)
         d->m_profilerConnections->setTcpConnection(sp.connParams.host, sp.connParams.port);
-    }
 
     d->m_runConfiguration = runConfiguration;
 
@@ -404,9 +403,8 @@ void QmlProfilerTool::populateFileFinder(QString projectDirectory, QString activ
         sourceFiles << project->files(Project::ExcludeGeneratedFiles);
 
     if (!projects.isEmpty()) {
-        if (projectDirectory.isEmpty()) {
+        if (projectDirectory.isEmpty())
             projectDirectory = projects.first()->projectDirectory();
-        }
 
         if (activeSysroot.isEmpty()) {
             if (Target *target = projects.first()->activeTarget())
@@ -711,9 +709,8 @@ void QmlProfilerTool::clientRecordingChanged()
 {
     // if application is running, display server record changes
     // if application is stopped, display client record changes
-    if (d->m_profilerState->currentState() != QmlProfilerStateManager::AppRunning) {
+    if (d->m_profilerState->currentState() != QmlProfilerStateManager::AppRunning)
         setRecording(d->m_profilerState->clientRecording());
-    }
 }
 
 void QmlProfilerTool::serverRecordingChanged()

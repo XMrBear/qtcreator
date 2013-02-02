@@ -8,7 +8,7 @@ TARGET = Debugger
 include(../../qtcreatorplugin.pri)
 include(debugger_dependencies.pri)
 
-DEFINES += DEBUGGER_LIBRARY QT_NO_CAST_FROM_ASCII
+DEFINES += DEBUGGER_LIBRARY
 
 INCLUDEPATH += $$PWD/../../libs/utils
 
@@ -34,6 +34,7 @@ HEADERS += \
     debuggerengine.h \
     debuggermainwindow.h \
     debuggerplugin.h \
+    debuggerprotocol.h \
     debuggerrunner.h \
     debuggerstartparameters.h \
     debuggerstreamops.h \
@@ -56,6 +57,7 @@ HEADERS += \
     sourceagent.h \
     sourcefileshandler.h \
     sourcefileswindow.h \
+    sourceutils.h \
     stackframe.h \
     stackhandler.h \
     stackwindow.h \
@@ -70,7 +72,8 @@ HEADERS += \
     debuggertooltipmanager.h \
     debuggersourcepathmappingwidget.h \
     memoryview.h \
-    localsandexpressionswindow.h
+    localsandexpressionswindow.h \
+    imageviewer.h
 
 SOURCES += \
     basewindow.cpp \
@@ -84,6 +87,7 @@ SOURCES += \
     debuggerengine.cpp \
     debuggermainwindow.cpp \
     debuggerplugin.cpp \
+    debuggerprotocol.cpp \
     debuggerrunner.cpp \
     debuggerstreamops.cpp \
     debuggerkitconfigwidget.cpp \
@@ -104,6 +108,7 @@ SOURCES += \
     sourceagent.cpp \
     sourcefileshandler.cpp \
     sourcefileswindow.cpp \
+    sourceutils.cpp \
     stackhandler.cpp \
     stackwindow.cpp \
     threadshandler.cpp \
@@ -117,7 +122,8 @@ SOURCES += \
     debuggertooltipmanager.cpp \
     debuggersourcepathmappingwidget.cpp \
     memoryview.cpp \
-    localsandexpressionswindow.cpp
+    localsandexpressionswindow.cpp \
+    imageviewer.cpp
 
 FORMS += \
     localsandexpressionsoptionspage.ui

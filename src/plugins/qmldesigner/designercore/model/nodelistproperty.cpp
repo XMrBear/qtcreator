@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -76,9 +76,8 @@ const QList<ModelNode> NodeListProperty::toModelNodeList() const
 
     if (internalNode()->hasProperty(name())) {
         Internal::InternalProperty::Pointer internalProperty = internalNode()->property(name());
-        if (internalProperty->isNodeListProperty()) {
+        if (internalProperty->isNodeListProperty())
             return internalNodesToModelNodes(internalProperty->toNodeListProperty()->nodeList(), model(), view());
-        }
     }
 
     return QList<ModelNode>();

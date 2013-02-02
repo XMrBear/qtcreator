@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -83,7 +83,7 @@ QVariantMap AbstractRemoteLinuxDeployStep::toMap() const
 bool AbstractRemoteLinuxDeployStep::init()
 {
     QString error;
-    deployService()->setBuildConfiguration(target()->activeBuildConfiguration());
+    deployService()->setTarget(target());
     const bool canDeploy = initInternal(&error);
     if (!canDeploy)
         emit addOutput(tr("Cannot deploy: %1").arg(error), ErrorMessageOutput);

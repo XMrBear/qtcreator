@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -30,8 +30,8 @@
 import Qt 4.7
 
 Rectangle {
-    x: 640
-    y: 480
+    width: 640
+    height: 480
     Component {
         id: redSquare
         Rectangle {

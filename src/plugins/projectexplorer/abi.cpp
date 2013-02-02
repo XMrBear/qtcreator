@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -676,7 +676,9 @@ QList<Abi> Abi::abisOfBinary(const Utils::FileName &path)
     if (!f.exists())
         return tmp;
 
-    f.open(QFile::ReadOnly);
+    if (!f.open(QFile::ReadOnly))
+        return tmp;
+
     QByteArray data = f.read(1024);
     if (data.size() >= 67
             && getUint8(data, 0) == '!' && getUint8(data, 1) == '<' && getUint8(data, 2) == 'a'

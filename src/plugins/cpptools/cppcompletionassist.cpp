@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -58,7 +58,6 @@
 #include <coreplugin/mimedatabase.h>
 #include <cppeditor/cppeditorconstants.h>
 #include <texteditor/codeassist/basicproposalitem.h>
-#include <texteditor/codeassist/basicproposalitemlistmodel.h>
 #include <texteditor/codeassist/genericproposal.h>
 #include <texteditor/codeassist/ifunctionhintproposalmodel.h>
 #include <texteditor/codeassist/functionhintproposal.h>
@@ -89,29 +88,6 @@ struct CompleteFunctionDeclaration
     {}
 
     Function *function;
-};
-
-// ----------------------
-// CppAssistProposalModel
-// ----------------------
-class CppAssistProposalModel : public TextEditor::BasicProposalItemListModel
-{
-public:
-    CppAssistProposalModel()
-        : TextEditor::BasicProposalItemListModel()
-        , m_completionOperator(T_EOF_SYMBOL)
-        , m_replaceDotForArrow(false)
-        , m_typeOfExpression(new TypeOfExpression)
-    {
-        m_typeOfExpression->setExpandTemplates(true);
-    }
-
-    virtual bool isSortable(const QString &prefix) const;
-    virtual IAssistProposalItem *proposalItem(int index) const;
-
-    unsigned m_completionOperator;
-    bool m_replaceDotForArrow;
-    QSharedPointer<TypeOfExpression> m_typeOfExpression;
 };
 
 // ---------------------
@@ -264,9 +240,8 @@ void CppAssistProposalItem::applyContextualContent(TextEditor::BaseTextEditor *e
 #if 0
                 } else if (function->templateParameterCount() != 0 && typedChar != QLatin1Char('(')) {
                     // If there are no arguments, then we need the template specification
-                    if (function->argumentCount() == 0) {
+                    if (function->argumentCount() == 0)
                         extraChars += QLatin1Char('<');
-                    }
 #endif
                 } else if (!isDereferenced(editor, basePosition) && ! function->isAmbiguous()) {
                     // When the user typed the opening parenthesis, he'll likely also type the closing one,
@@ -344,7 +319,7 @@ void CppAssistProposalItem::applyContextualContent(TextEditor::BaseTextEditor *e
     if (!inEditor.isEmpty()) {
         preserveLength = toInsert.length() - (editor->position() - basePosition);
         const int inEditorLength = inEditor.length();
-        while (preserveLength) {
+        while (preserveLength > 0) {
             if (inEditor.startsWith(toInsert.right(preserveLength))
                     && (inEditorLength == preserveLength
                         || (!inEditor.at(preserveLength).isLetterOrNumber()
@@ -579,9 +554,8 @@ protected:
     virtual void visit(const Identifier *name)
     {
         _item = newCompletionItem(name);
-        if (!_symbol->isScope() || _symbol->isFunction()) {
+        if (!_symbol->isScope() || _symbol->isFunction())
             _item->setDetail(overview.prettyType(_symbol->type(), name));
-        }
     }
 
     virtual void visit(const TemplateNameId *name)
@@ -931,9 +905,6 @@ int CppCompletionAssistProcessor::startCompletionHelper()
                                           &m_model->m_completionOperator,
                                           /*want function call =*/ true);
 
-    const Core::IDocument *document = m_interface->document();
-    QString fileName = document->fileName();
-
     if (m_model->m_completionOperator == T_DOXY_COMMENT) {
         for (int i = 1; i < T_DOXY_LAST_TAG; ++i)
             addCompletionItem(QString::fromLatin1(doxygenTagSpell(i)), m_icons.keywordIcon());
@@ -1005,6 +976,7 @@ int CppCompletionAssistProcessor::startCompletionHelper()
 
     int line = 0, column = 0;
     Convenience::convertPosition(m_interface->textDocument(), startOfExpression, &line, &column);
+    const QString fileName = m_interface->document()->fileName();
     return startCompletionInternal(fileName, line, column, expression, endOfExpression);
 }
 
@@ -1233,8 +1205,7 @@ bool CppCompletionAssistProcessor::objcKeywordsWanted() const
     if (!m_objcEnabled)
         return false;
 
-    const Core::IDocument *document = m_interface->document();
-    QString fileName = document->fileName();
+    const QString fileName = m_interface->document()->fileName();
 
     const Core::MimeDatabase *mdb = Core::ICore::mimeDatabase();
     return mdb->findByFile(fileName).type() == QLatin1String(CppTools::Constants::OBJECTIVE_CPP_SOURCE_MIMETYPE);
@@ -1580,11 +1551,10 @@ void CppCompletionAssistProcessor::completeClass(CPlusPlus::ClassOrNamespace *b,
                     continue;
                 }
 
-                if (member->isPublic()) {
+                if (member->isPublic())
                     addCompletionItem(member, PublicClassMemberOrder);
-                } else {
+                else
                     addCompletionItem(member);
-                }
             }
         }
     }
@@ -1818,9 +1788,8 @@ bool CppCompletionAssistProcessor::completeConstructorOrFunction(const QList<CPl
                         Symbol *overload = r.declaration();
                         FullySpecifiedType overloadTy = overload->type().simplified();
 
-                        if (Function *funTy = overloadTy->asFunctionType()) {
+                        if (Function *funTy = overloadTy->asFunctionType())
                             functions.append(funTy);
-                        }
                     }
                 }
             }

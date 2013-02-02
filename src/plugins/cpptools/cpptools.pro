@@ -4,7 +4,6 @@ include(../../qtcreatorplugin.pri)
 include($$IDE_SOURCE_TREE/src/plugins/locator/locator.pri)
 include(cpptools_dependencies.pri)
 
-DEFINES += QT_NO_CAST_FROM_ASCII
 INCLUDEPATH += .
 DEFINES += CPPTOOLS_LIBRARY
 HEADERS += completionsettingspage.h \
@@ -49,7 +48,8 @@ HEADERS += completionsettingspage.h \
     ModelManagerInterface.h \
     TypeHierarchyBuilder.h \
     cppindexingsupport.h \
-    builtinindexingsupport.h
+    builtinindexingsupport.h \
+    cpppointerdeclarationformatter.h
 
 SOURCES += completionsettingspage.cpp \
     cppclassesfilter.cpp \
@@ -91,7 +91,8 @@ SOURCES += completionsettingspage.cpp \
     ModelManagerInterface.cpp \
     TypeHierarchyBuilder.cpp \
     cppindexingsupport.cpp \
-    builtinindexingsupport.cpp
+    builtinindexingsupport.cpp \
+    cpppointerdeclarationformatter.cpp
 
 FORMS += completionsettingspage.ui \
     cppfilesettingspage.ui \
@@ -102,7 +103,8 @@ equals(TEST, 1) {
         cppcodegen_test.cpp \
         cppcompletion_test.cpp \
         cppmodelmanager_test.cpp \
-        modelmanagertesthelper.cpp
+        modelmanagertesthelper.cpp \
+        cpppointerdeclarationformatter_test.cpp
 
     HEADERS += \
         modelmanagertesthelper.h

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -71,9 +71,13 @@ class QTCREATOR_UTILS_EXPORT NewClassWidget : public QWidget
     Q_ENUMS(ClassType)
 
 public:
-    enum ClassType { NoClassType, ClassInheritsQObject, ClassInheritsQWidget,
+    enum ClassType { NoClassType,
+                     ClassInheritsQObject,
+                     ClassInheritsQWidget,
                      ClassInheritsQDeclarativeItem,
-                     SharedDataClass };
+                     ClassInheritsQQuickItem,
+                     SharedDataClass
+                   };
 
     explicit NewClassWidget(QWidget *parent = 0);
     ~NewClassWidget();

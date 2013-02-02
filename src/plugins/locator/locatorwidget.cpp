@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -176,11 +176,10 @@ QVariant LocatorModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     if (role == Qt::DisplayRole) {
-        if (index.column() == 0) {
+        if (index.column() == 0)
             return mEntries.at(index.row()).displayName;
-        } else if (index.column() == 1) {
+        else if (index.column() == 1)
             return mEntries.at(index.row()).extraInfo;
-        }
     } else if (role == Qt::ToolTipRole) {
         if (mEntries.at(index.row()).extraInfo.isEmpty())
             return QVariant(mEntries.at(index.row()).displayName);
@@ -250,7 +249,8 @@ LocatorWidget::LocatorWidget(LocatorPlugin *qop) :
     m_configureAction(new QAction(tr("Configure..."), this)),
     m_fileLineEdit(new Utils::FilterLineEdit),
     m_updateRequested(false),
-    m_acceptRequested(false)
+    m_acceptRequested(false),
+    m_possibleToolTipRequest(false)
 {
     // Explicitly hide the completion list popup.
     m_completionList->hide();
@@ -318,36 +318,36 @@ void LocatorWidget::updateFilterList()
     m_filterMenu->clear();
 
     // update actions and menu
-    QMap<QString, QAction *> actionCopy = m_filterActionMap;
+    QMap<Id, QAction *> actionCopy = m_filterActionMap;
     m_filterActionMap.clear();
     // register new actions, update existent
     foreach (ILocatorFilter *filter, m_locatorPlugin->filters()) {
         if (filter->shortcutString().isEmpty() || filter->isHidden())
             continue;
-        Core::Id locatorId = Core::Id(QLatin1String("Locator.") + filter->id());
+        Id filterId = filter->id();
+        Id locatorId = filterId.withPrefix("Locator.");
         QAction *action = 0;
-        Core::Command *cmd = 0;
-        if (!actionCopy.contains(filter->id())) {
+        Command *cmd = 0;
+        if (!actionCopy.contains(filterId)) {
             // register new action
             action = new QAction(filter->displayName(), this);
-            cmd = Core::ActionManager::registerAction(action, locatorId,
-                               Core::Context(Core::Constants::C_GLOBAL));
-            cmd->setAttribute(Core::Command::CA_UpdateText);
+            cmd = ActionManager::registerAction(action, locatorId,
+                               Context(Core::Constants::C_GLOBAL));
+            cmd->setAttribute(Command::CA_UpdateText);
             connect(action, SIGNAL(triggered()), this, SLOT(filterSelected()));
             action->setData(qVariantFromValue(filter));
         } else {
-            action = actionCopy.take(filter->id());
-            action->setText(filter->displayName());
-            cmd = Core::ActionManager::command(locatorId);
+            action = actionCopy.take(filterId);
+            action->setText(filterId.toString());
+            cmd = ActionManager::command(locatorId);
         }
-        m_filterActionMap.insert(filter->id(), action);
+        m_filterActionMap.insert(filterId, action);
         m_filterMenu->addAction(cmd->action());
     }
 
     // unregister actions that are deleted now
-    foreach (const QString &id, actionCopy.keys()) {
-        Core::ActionManager::unregisterAction(actionCopy.value(id), Core::Id(QLatin1String("Locator.") + id));
-    }
+    foreach (const Id id, actionCopy.keys())
+        ActionManager::unregisterAction(actionCopy.value(id), id.withPrefix("Locator."));
     qDeleteAll(actionCopy);
 
     m_filterMenu->addSeparator();
@@ -540,9 +540,8 @@ void LocatorWidget::updateEntries()
 
     const QList<FilterEntry> entries = m_entriesWatcher->future().results();
     m_locatorModel->setEntries(entries);
-    if (m_locatorModel->rowCount() > 0) {
+    if (m_locatorModel->rowCount() > 0)
         m_completionList->setCurrentIndex(m_locatorModel->index(0, 0));
-    }
 #if 0
     m_completionList->updatePreferredSize();
 #endif

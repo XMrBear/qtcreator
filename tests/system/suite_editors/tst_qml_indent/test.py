@@ -15,23 +15,26 @@ def main():
     invokeMenuItem("File", "Exit")
 
 def prepareQmlFile():
-    # make sure the QML file is opened
-    navTree = waitForObject("{type='Utils::NavigationTreeView' unnamed='1' visible='1' "
-                            "window=':Qt Creator_Core::Internal::MainWindow'}")
-    model = navTree.model()
-    waitForObjectItem(navTree, "untitled.QML.qml/untitled.main\\.qml")
-    doubleClickItem(navTree, "untitled.QML.qml/untitled.main\\.qml", 5, 5, 0, Qt.LeftButton)
+    if not openDocument("untitled.QML.qml/untitled.main\\.qml"):
+        test.fatal("Could not open main.qml")
+        return False
     editor = waitForObject(":Qt Creator_QmlJSEditor::QmlJSTextEditorWidget")
     for i in range(3):
         content = "%s" % editor.plainText
         start = content.find("Text {")
-        end = content.rfind("}")
-        end = content.rfind("}", end-1)
-        if start==-1 or end==-1:
+        if not placeCursorToLine(editor, "Text {"):
             test.fatal("Couldn't find line(s) I'm looking for - QML file seems to "
                        "have changed!\nLeaving test...")
             return False
-        markText(editor, start, end)
+        type(editor, "<Right>")
+        type(editor, "<Up>")
+        # mark until the end of file
+        if platform.system() == 'Darwin':
+            markText(editor, "End")
+        else:
+            markText(editor, "Ctrl+End")
+        # unmark the last line
+        type(editor, "<Shift+Up>")
         type(editor, "<Ctrl+C>")
         for j in range(10):
             type(editor, "<Ctrl+V>")

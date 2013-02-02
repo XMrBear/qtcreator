@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -618,11 +618,10 @@ private:
         _url = url;
 
         QString path;
-        if (_url.scheme() == QLatin1String("qrc")) {
+        if (_url.scheme() == QLatin1String("qrc"))
             path = QLatin1Char(':') + _url.path();
-        } else {
+        else
             path = _url.toLocalFile();
-        }
 
         QFile file(path);
         if (file.open(QIODevice::ReadOnly)) {
@@ -683,11 +682,10 @@ private:
         _url = url;
 
         QString path;
-        if (_url.scheme() == QLatin1String("qrc")) {
+        if (_url.scheme() == QLatin1String("qrc"))
             path = QLatin1Char(':') + _url.path();
-        } else {
+        else
             path = _url.toLocalFile();
-        }
 
         QFile file(path);
         if (file.open(QIODevice::ReadOnly)) {
@@ -755,11 +753,10 @@ private:
         _url = url;
 
         QString path;
-        if (_url.scheme() == QLatin1String("qrc")) {
+        if (_url.scheme() == QLatin1String("qrc"))
             path = QLatin1Char(':') + _url.path();
-        } else {
+        else
             path = _url.toLocalFile();
-        }
 
         QFile file(path);
         if (file.open(QIODevice::ReadOnly)) {

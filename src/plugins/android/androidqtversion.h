@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 BogDan Vatra <bog_dan_ro@yahoo.com>
+** Copyright (c) 2013 BogDan Vatra <bog_dan_ro@yahoo.com>
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -51,6 +51,8 @@ public:
     QString invalidReason() const;
 
     QList<ProjectExplorer::Abi> detectQtAbis() const;
+
+    void addToEnvironment(const ProjectExplorer::Kit *k, Utils::Environment &env) const;
 
     Core::FeatureSet availableFeatures() const;
     QString platformName() const;

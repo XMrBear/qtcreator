@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -37,6 +37,7 @@
 #include "debuggerstringutils.h"
 #include "moduleshandler.h"
 #include "registerhandler.h"
+#include "sourceutils.h"
 #include "stackhandler.h"
 #include "watchhandler.h"
 #include "watchutils.h"
@@ -784,11 +785,10 @@ void ScriptEngine::updateSubItem(const WatchData &data0)
             data1.name = it.name();
             data.id = m_watchIdCounter++;
             m_watchIdToScriptValue.insert(data.id, it.value());
-            if (watchHandler()->isExpandedIName(data1.iname)) {
+            if (watchHandler()->isExpandedIName(data1.iname))
                 data1.setChildrenNeeded();
-            } else {
+            else
                 data1.setChildrenUnneeded();
-            }
             children.push_back(data1);
         }
         data.setHasChildren(!children.isEmpty());

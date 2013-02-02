@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -263,7 +263,8 @@ public:
             QVarLengthArray<FullySpecifiedType, 8> args(name->templateArgumentCount());
             for (unsigned i = 0; i < name->templateArgumentCount(); ++i)
                 args[i] = rewrite->rewriteType(name->templateArgumentAt(i));
-            temps.append(control()->templateNameId(identifier(name->identifier()), args.data(), args.size()));
+            temps.append(control()->templateNameId(identifier(name->identifier()), name->isSpecialization(),
+                                                   args.data(), args.size()));
         }
 
         virtual void visit(const DestructorNameId *name)
@@ -406,9 +407,8 @@ FullySpecifiedType UseMinimalNames::apply(const Name *name, Rewrite *rewrite) co
 
     const QList<LookupItem> results = context.lookup(name, scope);
     foreach (const LookupItem &r, results) {
-        if (Symbol *d = r.declaration()) {
+        if (Symbol *d = r.declaration())
             return control->namedType(LookupContext::minimalName(d, _target, control));
-        }
 
         return r.type();
     }
@@ -605,9 +605,8 @@ CPLUSPLUS_EXPORT QString simplifySTLType(const QString &typeIn)
                 QRegExp mapRE2(QString::fromLatin1("map<const %1, ?%2, ?std::less<const %3>, ?%4\\s*>")
                     .arg(keyEsc, valueEsc, keyEsc, allocEsc));
                 mapRE2.setMinimal(true);
-                if (mapRE2.indexIn(type) != -1) {
+                if (mapRE2.indexIn(type) != -1)
                     type.replace(mapRE2.cap(0), QString::fromLatin1("map<const %1, %2>").arg(key, value));
-                }
             }
         }
     }

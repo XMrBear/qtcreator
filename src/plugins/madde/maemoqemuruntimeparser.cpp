@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -379,11 +379,10 @@ void MaemoQemuRuntimeParserV2::handleVariableTag(MaemoQemuRuntime &runtime)
 
     if (varName.isEmpty())
         return;
-    if (isGlBackend) {
+    if (isGlBackend)
         runtime.m_openGlBackendVarName = varName;
-    } else {
+    else
         runtime.m_normalVars << MaemoQemuRuntime::Variable(varName, varValue);
-    }
 }
 
 QList<MaemoQemuRuntimeParserV2::Port> MaemoQemuRuntimeParserV2::handleTcpPortListTag()

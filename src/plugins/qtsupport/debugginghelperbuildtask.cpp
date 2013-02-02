@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -224,9 +224,8 @@ bool DebuggingHelperBuildTask::buildDebuggingHelper(QFutureInterface<void> &futu
         }
 
         log(output, error);
-        if (!success) {
+        if (!success)
             return false;
-        }
     }
     future.setProgressValue(4);
 
@@ -247,9 +246,8 @@ bool DebuggingHelperBuildTask::buildDebuggingHelper(QFutureInterface<void> &futu
             success = false;
         }
         log(output, error);
-        if (!success) {
+        if (!success)
             return false;
-        }
     }
     future.setProgressValue(5);
     return true;

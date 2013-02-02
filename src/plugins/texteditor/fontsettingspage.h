@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -88,9 +88,7 @@ class TEXTEDITOR_EXPORT FontSettingsPage : public TextEditorOptionsPage
     Q_OBJECT
 
 public:
-    FontSettingsPage(const FormatDescriptions &fd,
-                     const QString &id,
-                     QObject *parent = 0);
+    FontSettingsPage(const FormatDescriptions &fd, Core::Id id, QObject *parent = 0);
 
     ~FontSettingsPage();
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -77,8 +77,8 @@ void ResizeTool::mouseMoveEvent(const QList<QGraphicsItem*> &,
                                            QGraphicsSceneMouseEvent *event)
 {
     if (m_resizeManipulator.isActive()) {
-        bool shouldSnapping = view()->widget()->snappingAction()->isChecked();
-        bool shouldSnappingAndAnchoring = view()->widget()->snappingAndAnchoringAction()->isChecked();
+        bool shouldSnapping = view()->formEditorWidget()->snappingAction()->isChecked();
+        bool shouldSnappingAndAnchoring = view()->formEditorWidget()->snappingAndAnchoringAction()->isChecked();
 
         ResizeManipulator::Snapping useSnapping = ResizeManipulator::NoSnapping;
         if (event->modifiers().testFlag(Qt::ControlModifier) != (shouldSnapping || shouldSnappingAndAnchoring)) {

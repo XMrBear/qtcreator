@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -42,15 +42,15 @@ public:
     explicit CloneWizard(QObject *parent = 0);
 
     // IWizard
-    virtual QIcon icon() const;
-    virtual QString description() const;
-    virtual QString displayName() const;
+    QIcon icon() const;
+    QString description() const;
+    QString displayName() const;
 
 protected:
     // BaseCheckoutWizard
-    virtual QList<QWizardPage*> createParameterPages(const QString &path);
-    virtual QSharedPointer<VcsBase::AbstractCheckoutJob> createJob(const QList<QWizardPage*> &parameterPages,
-                                                                   QString *checkoutPath);
+    QList<QWizardPage*> createParameterPages(const QString &path);
+    QSharedPointer<VcsBase::AbstractCheckoutJob> createJob(const QList<QWizardPage*> &parameterPages,
+                                                           QString *checkoutPath);
 };
 
 } // namespace Internal

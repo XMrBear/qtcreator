@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -277,7 +277,7 @@ public:
     { return m_modelManager.data(); }
 
 public: // attributes
-    CPlusPlus::Snapshot snapshot;
+    CPlusPlus::Snapshot m_snapshot;
 
 protected:
     CPlusPlus::Document::Ptr switchDocument(CPlusPlus::Document::Ptr doc);
@@ -299,6 +299,7 @@ protected:
                                      const CPlusPlus::Macro &macro,
                                      const QVector<CPlusPlus::MacroArgumentReference> &actuals);
     virtual void stopExpandingMacro(unsigned offset, const CPlusPlus::Macro &macro);
+    virtual void markAsIncludeGuard(const QByteArray &macroName);
     virtual void startSkippingBlocks(unsigned offset);
     virtual void stopSkippingBlocks(unsigned offset);
     virtual void sourceNeeded(unsigned line, QString &fileName, IncludeType type);
@@ -306,8 +307,8 @@ protected:
 private:
     QPointer<CppModelManager> m_modelManager;
     bool m_dumpFileNameWhileParsing;
-    CPlusPlus::Environment env;
-    CPlusPlus::Preprocessor preprocess;
+    CPlusPlus::Environment m_env;
+    CPlusPlus::Preprocessor m_preprocess;
     QStringList m_includePaths;
     CPlusPlus::CppModelManagerInterface::WorkingCopy m_workingCopy;
     QStringList m_projectFiles;

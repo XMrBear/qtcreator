@@ -28,7 +28,6 @@
 #include "QtContextKeywords.h"
 #include <string>
 #include <cstdio> // for putchar
-#include <QDebug>
 #ifdef _MSC_VER
 #    define va_copy(dst, src) ((dst) = (src))
 #elif defined(__INTEL_COMPILER) && !defined(va_copy)
@@ -898,9 +897,8 @@ bool Parser::parseConversionFunctionId(NameAST *&node)
         return false;
     unsigned operator_token = consumeToken();
     SpecifierListAST *type_specifier = 0;
-    if (! parseTypeSpecifier(type_specifier)) {
+    if (! parseTypeSpecifier(type_specifier))
         return false;
-    }
     PtrOperatorListAST *ptr_operators = 0, **ptr_operators_tail = &ptr_operators;
     while (parsePtrOperator(*ptr_operators_tail))
         ptr_operators_tail = &(*ptr_operators_tail)->next;
@@ -1550,9 +1548,8 @@ bool Parser::parseDeclarator(DeclaratorAST *&node, SpecifierListAST *decl_specif
                 for (SpecifierListAST *iter = decl_specifier_list; !hasAuto && iter; iter = iter->next) {
                     SpecifierAST *spec = iter->value;
                     if (SimpleSpecifierAST *simpleSpec = spec->asSimpleSpecifier()) {
-                        if (_translationUnit->tokenKind(simpleSpec->specifier_token) == T_AUTO) {
+                        if (_translationUnit->tokenKind(simpleSpec->specifier_token) == T_AUTO)
                             hasAuto = true;
-                        }
                     }
                 }
 
@@ -1567,9 +1564,8 @@ bool Parser::parseDeclarator(DeclaratorAST *&node, SpecifierListAST *decl_specif
         } else if (LA() == T_LBRACKET) {
             ArrayDeclaratorAST *ast = new (_pool) ArrayDeclaratorAST;
             ast->lbracket_token = consumeToken();
-            if (LA() == T_RBRACKET || parseConstantExpression(ast->expression)) {
+            if (LA() == T_RBRACKET || parseConstantExpression(ast->expression))
                 match(T_RBRACKET, &ast->rbracket_token);
-            }
             *postfix_ptr = new (_pool) PostfixDeclaratorListAST(ast);
             postfix_ptr = &(*postfix_ptr)->next;
         } else
@@ -1715,9 +1711,8 @@ bool Parser::parseEnumSpecifier(SpecifierListAST *&node)
                     skipUntil(T_IDENTIFIER);
                 }
 
-                if (parseEnumerator(*enumerator_ptr)) {
+                if (parseEnumerator(*enumerator_ptr))
                     enumerator_ptr = &(*enumerator_ptr)->next;
-                }
 
                 if (LA() == T_COMMA && LA(2) == T_RBRACE)
                     ast->stray_comma_token = consumeToken();
@@ -2182,11 +2177,10 @@ bool Parser::parseQtPropertyDeclaration(DeclarationAST *&node)
 
         SimpleNameAST *property_name = new (_pool) SimpleNameAST;
         // special case: keywords are allowed for property names!
-        if (tok().isKeyword()) {
+        if (tok().isKeyword())
             property_name->identifier_token = consumeToken();
-        } else {
+        else
             match(T_IDENTIFIER, &property_name->identifier_token);
-        }
 
         ast->property_name = property_name;
         QtPropertyDeclarationItemListAST **iter = &ast->property_declaration_item_list;
@@ -3484,11 +3478,10 @@ bool Parser::parseForStatement(StatementAST *&node)
             ast->colon_token = consumeToken();
             blockErrors(blocked);
 
-            if (LA() == T_LBRACE) {
+            if (LA() == T_LBRACE)
                 parseBracedInitList0x(ast->expression);
-            } else {
+            else
                 parseExpression(ast->expression);
-            }
             match(T_RPAREN, &ast->rparen_token);
             parseStatement(ast->statement);
 
@@ -3910,12 +3903,17 @@ bool Parser::parseSimpleDeclaration(DeclarationAST *&node, ClassSpecifierAST *de
             startOfNamedTypeSpecifier = cursor();
             if (parseName(named_type_specifier)) {
 
-              if (LA() == T_LPAREN && identifier(named_type_specifier) == className(declaringClass)) {
-                // looks like a constructor declaration
-                rewind(startOfNamedTypeSpecifier);
-                break;
-              }
+                const Identifier *classIdentifier = className(declaringClass);
+                if (QualifiedNameAST *qn = named_type_specifier->asQualifiedName())
+                    if (NestedNameSpecifierListAST *namesList = qn->nested_name_specifier_list)
+                        if (NestedNameSpecifierAST *lastName = namesList->lastValue())
+                            classIdentifier = identifier(lastName->class_or_namespace_name);
 
+                if (LA() == T_LPAREN && identifier(named_type_specifier) == classIdentifier) {
+                    // looks like a constructor declaration
+                    rewind(startOfNamedTypeSpecifier);
+                    break;
+                }
 
                 NamedTypeSpecifierAST *spec = new (_pool) NamedTypeSpecifierAST;
                 spec->name = named_type_specifier;
@@ -5093,11 +5091,10 @@ bool Parser::parseNewArrayDeclarator(NewArrayDeclaratorListAST *&node)
 bool Parser::parseNewInitializer(ExpressionAST *&node)
 {
     DEBUG_THIS_RULE();
-    if (LA() == T_LPAREN) {
+    if (LA() == T_LPAREN)
         return parseExpressionListParen(node);
-    } else if (_cxx0xEnabled && LA() == T_LBRACE) {
+    else if (_cxx0xEnabled && LA() == T_LBRACE)
         return parseBracedInitList0x(node);
-    }
     return false;
 }
 
@@ -5787,9 +5784,8 @@ bool Parser::parseObjCMethodDefinition(DeclarationAST *&node)
     // - (void) foo; { body; }
     // so a method is a forward declaration when it doesn't have a _body_.
     // However, we still need to read the semicolon.
-    if (LA() == T_SEMICOLON) {
+    if (LA() == T_SEMICOLON)
         ast->semicolon_token = consumeToken();
-    }
 
     parseFunctionBody(ast->function_body);
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -45,6 +45,36 @@
 namespace Git {
 namespace Internal {
 
+class GitSubmitFileModel : public VcsBase::SubmitFileModel
+{
+public:
+    GitSubmitFileModel(QObject *parent = 0) : VcsBase::SubmitFileModel(parent)
+    { }
+
+    void updateSelections(SubmitFileModel *source)
+    {
+        int j = 0;
+        for (int i = 0; i < rowCount() && j < source->rowCount(); ++i) {
+            CommitData::StateFilePair stateFile = stateFilePair(i);
+            for (; j < source->rowCount(); ++j) {
+                CommitData::StateFilePair sourceStateFile = stateFilePair(j);
+                if (stateFile == sourceStateFile) {
+                    setChecked(i, source->checked(j));
+                    break;
+                } else if (stateFile < sourceStateFile) {
+                    break;
+                }
+            }
+        }
+    }
+
+private:
+    CommitData::StateFilePair stateFilePair(int row)
+    {
+        return CommitData::StateFilePair(static_cast<FileStates>(extraData(row).toInt()), file(row));
+    }
+};
+
 /* The problem with git is that no diff can be obtained to for a random
  * multiselection of staged/unstaged files; it requires the --cached
  * option for staged files. So, we sort apart the diff file lists
@@ -55,31 +85,12 @@ GitSubmitEditor::GitSubmitEditor(const VcsBase::VcsBaseSubmitEditorParameters *p
     m_model(0),
     m_amend(false)
 {
-    connect(this, SIGNAL(diffSelectedFiles(QStringList)), this, SLOT(slotDiffSelected(QStringList)));
+    connect(this, SIGNAL(diffSelectedFiles(QList<int>)), this, SLOT(slotDiffSelected(QList<int>)));
 }
 
 GitSubmitEditorWidget *GitSubmitEditor::submitEditorWidget()
 {
     return static_cast<GitSubmitEditorWidget *>(widget());
-}
-
-static void mergeFileModels(VcsBase::SubmitFileModel *model, const VcsBase::SubmitFileModel *source)
-{
-    int j = 0;
-    for (int i = 0; i < model->rowCount() && j < source->rowCount(); ++i) {
-        CommitData::StateFilePair stateFile(
-                    static_cast<FileStates>(model->extraData(i).toInt()), model->file(i));
-        for (; j < source->rowCount(); ++j) {
-            CommitData::StateFilePair sourceStateFile(
-                        static_cast<FileStates>(source->extraData(j).toInt()), source->file(j));
-            if (stateFile == sourceStateFile) {
-                model->setChecked(i, source->checked(j));
-                break;
-            } else if (stateFile < sourceStateFile) {
-                break;
-            }
-        }
-    }
 }
 
 void GitSubmitEditor::setCommitData(const CommitData &d)
@@ -92,8 +103,7 @@ void GitSubmitEditor::setCommitData(const CommitData &d)
     m_commitEncoding = d.commitEncoding;
     m_workingDirectory = d.panelInfo.repository;
 
-    VcsBase::SubmitFileModel *oldModel = m_model;
-    m_model = new VcsBase::SubmitFileModel(this);
+    m_model = new GitSubmitFileModel(this);
     if (!d.files.isEmpty()) {
         for (QList<CommitData::StateFilePair>::const_iterator it = d.files.constBegin();
              it != d.files.constEnd(); ++it) {
@@ -112,10 +122,6 @@ void GitSubmitEditor::setCommitData(const CommitData &d)
                              QVariant(static_cast<int>(state)));
         }
     }
-    if (oldModel) {
-        mergeFileModels(m_model, oldModel);
-        delete oldModel;
-    }
     setFileModel(m_model, d.panelInfo.repository);
 }
 
@@ -125,25 +131,21 @@ void GitSubmitEditor::setAmend(bool amend)
     setEmptyFileListEnabled(amend); // Allow for just correcting the message
 }
 
-void GitSubmitEditor::slotDiffSelected(const QStringList &files)
+void GitSubmitEditor::slotDiffSelected(const QList<int> &rows)
 {
     // Sort it apart into unmerged/staged/unstaged files
     QStringList unmergedFiles;
     QStringList unstagedFiles;
     QStringList stagedFiles;
-    const int fileColumn = fileNameColumn();
-    const int rowCount = m_model->rowCount();
-    for (int r = 0; r < rowCount; r++) {
-        const QString fileName = m_model->item(r, fileColumn)->text();
-        if (files.contains(fileName)) {
-            const FileStates state = static_cast<FileStates>(m_model->extraData(r).toInt());
-            if (state & UnmergedFile)
-                unmergedFiles.push_back(fileName);
-            else if (state & StagedFile)
-                stagedFiles.push_back(fileName);
-            else if (state != UntrackedFile)
-                unstagedFiles.push_back(fileName);
-        }
+    foreach (int row, rows) {
+        const QString fileName = m_model->file(row);
+        const FileStates state = static_cast<FileStates>(m_model->extraData(row).toInt());
+        if (state & UnmergedFile)
+            unmergedFiles.push_back(fileName);
+        else if (state & StagedFile)
+            stagedFiles.push_back(fileName);
+        else if (state != UntrackedFile)
+            unstagedFiles.push_back(fileName);
     }
     if (!unstagedFiles.empty() || !stagedFiles.empty())
         emit diff(unstagedFiles, stagedFiles);
@@ -153,6 +155,8 @@ void GitSubmitEditor::slotDiffSelected(const QStringList &files)
 
 void GitSubmitEditor::updateFileModel()
 {
+    if (m_workingDirectory.isEmpty())
+        return;
     GitClient *client = GitPlugin::instance()->gitClient();
     QString errorMessage, commitTemplate;
     CommitData data;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -53,23 +53,20 @@ public:
     QList<QStandardItem *> addFile(const QString &fileName, const QString &status = QString(),
                                    CheckMode checkMode = Checked, const QVariant &data = QVariant());
 
-    // Find convenience that returns the whole row (as opposed to QStandardItemModel::find).
-    QList<QStandardItem *> findRow(const QString &text, int column = 0) const;
-
-    // Convenience to obtain a row
-    QList<QStandardItem *> rowAt(int row) const;
-
     QString state(int row) const;
     QString file(int row) const;
     bool checked(int row) const;
     void setChecked(int row, bool check);
+    void setAllChecked(bool check);
     QVariant extraData(int row) const;
 
     bool hasCheckedFiles() const;
 
     // Filter for entries contained in the filter list. Returns the
     // number of deleted entries.
-    unsigned filter(const QStringList &filter, int column);
+    unsigned int filterFiles(const QStringList &filter);
+
+    virtual void updateSelections(SubmitFileModel *source);
 };
 
 } // namespace VcsBase

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -103,7 +103,7 @@ QString SettingsPageWidget::searchKeywords() const
 SettingsPage::SettingsPage() :
     m_widget(0)
 {
-    setId(QLatin1String(VcsBase::Constants::VCS_ID_SUBVERSION));
+    setId(VcsBase::Constants::VCS_ID_SUBVERSION);
     setDisplayName(tr("Subversion"));
 }
 

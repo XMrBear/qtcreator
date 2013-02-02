@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -30,17 +30,16 @@
 #include "remotegdbserveradapter.h"
 
 #include "debuggeractions.h"
-#include "debuggerstartparameters.h"
 #include "debuggercore.h"
+#include "debuggerprotocol.h"
+#include "debuggerstartparameters.h"
 #include "debuggerstringutils.h"
-#include "gdbengine.h"
-#include "gdbmi.h"
 
+#include <projectexplorer/abi.h>
+#include <utils/fancymainwindow.h>
 #include <utils/hostosinfo.h>
 #include <utils/qtcassert.h>
-#include <utils/fancymainwindow.h>
 #include <utils/qtcprocess.h>
-#include <projectexplorer/abi.h>
 
 #include <QFileInfo>
 #include <QMessageBox>
@@ -314,11 +313,10 @@ void GdbRemoteServerEngine::handleTargetQnx(const GdbResponse &response)
         showMessage(msgAttachedToStoppedInferior(), StatusBar);
 
         const qint64 pid = isMasterEngine() ? startParameters().attachPID : masterEngine()->startParameters().attachPID;
-        if (pid > -1) {
+        if (pid > -1)
             postCommand("attach " + QByteArray::number(pid), CB(handleAttach));
-        } else {
+        else
             handleInferiorPrepared();
-        }
     } else {
         // 16^error,msg="hd:5555: Connection timed out."
         QString msg = msgConnectRemoteServerFailed(

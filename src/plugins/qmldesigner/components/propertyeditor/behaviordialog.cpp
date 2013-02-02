@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -63,9 +63,8 @@ void BehaviorWidget::setComplexNode(PropertyEditorNodeWrapper* complexNode)
     m_propertyName = complexNode->propertyName();
     m_modelNode = complexNode->parentModelNode();
 
-    if (!modelNode().isValid()) {
+    if (!modelNode().isValid())
         m_BehaviorDialog->hide();
-    }
 
     m_BehaviorDialog->setup(modelNode(), propertyName());
 }

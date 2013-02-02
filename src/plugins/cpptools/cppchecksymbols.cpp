@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -324,6 +324,8 @@ CheckSymbols::CheckSymbols(Document::Ptr doc, const LookupContext &context, cons
     _potentialStatics = collectTypes.statics();
 
     typeOfExpression.init(_doc, _context.snapshot(), _context.bindings());
+    // make possible to instantiate templates
+    typeOfExpression.setExpandTemplates(true);
 }
 
 CheckSymbols::~CheckSymbols()
@@ -665,11 +667,10 @@ bool CheckSymbols::visit(NewExpressionAST *ast)
             int arguments = 0;
             if (ast->new_initializer) {
                 ExpressionListAST *list = 0;
-                if (ExpressionListParenAST *exprListParen = ast->new_initializer->asExpressionListParen()) {
+                if (ExpressionListParenAST *exprListParen = ast->new_initializer->asExpressionListParen())
                     list = exprListParen->expression_list;
-                } else if (BracedInitializerAST *braceInit = ast->new_initializer->asBracedInitializer()) {
+                else if (BracedInitializerAST *braceInit = ast->new_initializer->asBracedInitializer())
                     list = braceInit->expression_list;
-                }
                 for (ExpressionListAST *it = list; it; it = it->next)
                     ++arguments;
             }
@@ -786,7 +787,11 @@ void CheckSymbols::checkName(NameAST *ast, Scope *scope)
                 }
             }
         } else if (maybeType(ast->name) || maybeStatic(ast->name)) {
-            maybeAddTypeOrStatic(_context.lookup(ast->name, scope), ast);
+            if (! maybeAddTypeOrStatic(_context.lookup(ast->name, scope), ast)) {
+                // it can be a local variable
+                if (maybeField(ast->name))
+                    maybeAddField(_context.lookup(ast->name, scope), ast);
+            }
         } else if (maybeField(ast->name)) {
             maybeAddField(_context.lookup(ast->name, scope), ast);
         }
@@ -1163,6 +1168,7 @@ bool CheckSymbols::maybeAddTypeOrStatic(const QList<LookupItem> &candidates, Nam
         else if (c->isUsingNamespaceDirective()) // ... and using namespace directives.
             continue;
         else if (c->isTypedef() || c->isNamespace() ||
+                 c->isStatic() || //consider also static variable
                  c->isClass() || c->isEnum() || isTemplateClass(c) ||
                  c->isForwardClassDeclaration() || c->isTypenameArgument() || c->enclosingEnum() != 0) {
 
@@ -1173,6 +1179,9 @@ bool CheckSymbols::maybeAddTypeOrStatic(const QList<LookupItem> &candidates, Nam
             UseKind kind = SemanticInfo::TypeUse;
             if (c->enclosingEnum() != 0)
                 kind = SemanticInfo::EnumerationUse;
+            else if (c->isStatic())
+                // treat static variable as a field(highlighting)
+                kind = SemanticInfo::FieldUse;
 
             const Use use(line, column, length, kind);
             addUse(use);
@@ -1202,7 +1211,7 @@ bool CheckSymbols::maybeAddField(const QList<LookupItem> &candidates, NameAST *a
             return false;
         else if (! (c->enclosingScope() && c->enclosingScope()->isClass()))
             return false; // shadowed
-        else if (c->isTypedef() || c->type()->isFunctionType())
+        else if (c->isTypedef() || (c->type() && c->type()->isFunctionType()))
             return false; // shadowed
 
         unsigned line, column;

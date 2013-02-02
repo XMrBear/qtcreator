@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -73,6 +73,38 @@ Node::Node(NodeType nodeType,
 
 }
 
+void Node::emitNodeSortKeyAboutToChange()
+{
+    if (ProjectNode *project = projectNode()) {
+        foreach (NodesWatcher *watcher, project->watchers())
+            emit watcher->nodeSortKeyAboutToChange(this);
+    }
+}
+
+void Node::emitNodeSortKeyChanged()
+{
+    if (ProjectNode *project = projectNode()) {
+        foreach (NodesWatcher *watcher, project->watchers())
+            emit watcher->nodeSortKeyChanged();
+    }
+}
+
+/*!
+ * \brief The path of the file representing this node.
+ *
+ * This method does not emit any signals, that has to be done by the calling class!
+ */
+void Node::setPath(const QString &path)
+{
+    if (m_path == path)
+        return;
+
+    emitNodeSortKeyAboutToChange();
+    m_path = path;
+    emitNodeSortKeyChanged();
+    emitNodeUpdated();
+}
+
 NodeType Node::nodeType() const
 {
     return m_nodeType;
@@ -102,6 +134,11 @@ QString Node::path() const
     return m_path;
 }
 
+int Node::line() const
+{
+    return -1;
+}
+
 QString Node::displayName() const
 {
     return QFileInfo(path()).fileName();
@@ -117,6 +154,11 @@ QString Node::tooltip() const
     return QDir::toNativeSeparators(path());
 }
 
+bool Node::isEnabled() const
+{
+    return parentFolderNode()->isEnabled();
+}
+
 void Node::setNodeType(NodeType type)
 {
     m_nodeType = type;
@@ -125,6 +167,13 @@ void Node::setNodeType(NodeType type)
 void Node::setProjectNode(ProjectNode *project)
 {
     m_projectNode = project;
+}
+
+void Node::emitNodeUpdated()
+{
+    if (ProjectNode *node = projectNode())
+        foreach (NodesWatcher *watcher, node->watchers())
+            emit watcher->nodeUpdated(this);
 }
 
 void Node::setParentFolderNode(FolderNode *parentFolder)
@@ -222,12 +271,35 @@ void FolderNode::accept(NodesVisitor *visitor)
 
 void FolderNode::setDisplayName(const QString &name)
 {
+    if (m_displayName == name)
+        return;
+    emitNodeSortKeyAboutToChange();
     m_displayName = name;
+    emitNodeSortKeyChanged();
+    emitNodeUpdated();
 }
 
 void FolderNode::setIcon(const QIcon &icon)
 {
     m_icon = icon;
+}
+
+FileNode *FolderNode::findFile(const QString &path)
+{
+    foreach (FileNode *n, fileNodes()) {
+        if (n->path() == path)
+            return n;
+    }
+    return 0;
+}
+
+FolderNode *FolderNode::findSubFolder(const QString &path)
+{
+    foreach (FolderNode *n, subFolderNodes()) {
+        if (n->path() == path)
+            return n;
+    }
+    return 0;
 }
 
 /*!
@@ -785,7 +857,8 @@ FileType typeForFileName(const Core::MimeDatabase *db, const QFileInfo &file)
         return ResourceType;
     if (typeName == QLatin1String(Constants::FORM_MIMETYPE))
         return FormType;
-    if (typeName == QLatin1String(Constants::QML_MIMETYPE))
+    if (mt.subClassesOf().contains(QLatin1String(Constants::QML_MIMETYPE))
+            || typeName == QLatin1String(Constants::QML_MIMETYPE))
         return QMLType;
     return UnknownFileType;
 }

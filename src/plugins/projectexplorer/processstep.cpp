@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -55,12 +55,6 @@ const char PROCESS_ARGUMENTS_KEY[] = "ProjectExplorer.ProcessStep.Arguments";
 
 ProcessStep::ProcessStep(BuildStepList *bsl) :
     AbstractProcessStep(bsl, Core::Id(PROCESS_STEP_ID))
-{
-    ctor();
-}
-
-ProcessStep::ProcessStep(BuildStepList *bsl, const Core::Id id) :
-    AbstractProcessStep(bsl, id)
 {
     ctor();
 }

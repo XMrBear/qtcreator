@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -62,6 +62,7 @@
 #include "localsandexpressionswindow.h"
 #include "loadcoredialog.h"
 #include "hostutils.h"
+#include "sourceutils.h"
 
 #include "snapshothandler.h"
 #include "threadshandler.h"
@@ -91,7 +92,7 @@
 #include <extensionsystem/invoker.h>
 
 #include <projectexplorer/abi.h>
-#include <projectexplorer/applicationrunconfiguration.h>
+#include <projectexplorer/localapplicationrunconfiguration.h>
 #include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/buildmanager.h>
 #include <projectexplorer/devicesupport/deviceprocessesdialog.h>
@@ -1166,7 +1167,10 @@ public slots:
             int line, column;
             exp = cppExpressionAt(textEditor, tc.position(), &line, &column);
         }
-        exp = fixCppExpression(exp);
+        if (currentEngine()->hasCapability(WatchComplexExpressionsCapability))
+            exp = removeObviousSideEffects(exp);
+        else
+            exp = fixCppExpression(exp);
         if (exp.isEmpty())
             return;
         currentEngine()->watchHandler()->watchVariable(exp);
@@ -1192,9 +1196,8 @@ public slots:
         // Go to source only if we have the file.
         if (currentEngine()->stackHandler()->currentIndex() >= 0) {
             const StackFrame frame = currentEngine()->stackHandler()->currentFrame();
-            if (operateByInstructionTriggered || frame.isUsable()) {
+            if (operateByInstructionTriggered || frame.isUsable())
                 currentEngine()->gotoLocation(Location(frame, true));
-            }
         }
     }
 
@@ -1819,8 +1822,6 @@ void DebuggerPluginPrivate::runScheduled()
 
 void DebuggerPluginPrivate::editorOpened(IEditor *editor)
 {
-    if (!isEditorDebuggable(editor))
-        return;
     ITextEditor *textEditor = qobject_cast<ITextEditor *>(editor);
     if (!textEditor)
         return;
@@ -1841,9 +1842,6 @@ void DebuggerPluginPrivate::updateBreakMenuItem(IEditor *editor)
 void DebuggerPluginPrivate::requestContextMenu(ITextEditor *editor,
     int lineNumber, QMenu *menu)
 {
-    if (!isEditorDebuggable(editor))
-        return;
-
     BreakpointMenuContextData args;
     args.lineNumber = lineNumber;
     bool contextUsable = true;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -86,6 +86,22 @@ private slots:
     void findUsages();
     void currentEditorChanged(Core::IEditor *editor);
     void openTypeHierarchy();
+
+#ifdef WITH_TESTS
+private slots: // quickfix tests
+    void test_quickfix_GetterSetter_basicGetterWithPrefix();
+    void test_quickfix_GetterSetter_basicGetterWithoutPrefix();
+    void test_quickfix_GetterSetter_customType();
+    void test_quickfix_GetterSetter_constMember();
+    void test_quickfix_GetterSetter_pointerToNonConst();
+    void test_quickfix_GetterSetter_pointerToConst();
+    void test_quickfix_GetterSetter_staticMember();
+    void test_quickfix_GetterSetter_secondDeclarator();
+    void test_quickfix_GetterSetter_triggeringRightAfterPointerSign();
+    void test_quickfix_GetterSetter_notTriggeringOnMemberFunction();
+    void test_quickfix_GetterSetter_notTriggeringOnMemberArray();
+    void test_quickfix_GetterSetter_notTriggeringWhenGetterOrSetterExist();
+#endif // WITH_TESTS
 
 private:
     Core::IEditor *createEditor(QWidget *parent);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -50,7 +50,7 @@ using namespace Core::Internal;
 ToolSettings::ToolSettings(QObject *parent) :
     IOptionsPage(parent)
 {
-    setId(QLatin1String(Core::Constants::SETTINGS_ID_TOOLS));
+    setId(Core::Constants::SETTINGS_ID_TOOLS);
     setDisplayName(tr("External Tools"));
     setCategory(Core::Constants::SETTINGS_CATEGORY_CORE);
     setDisplayCategory(QCoreApplication::translate("Core", Constants::SETTINGS_TR_CATEGORY_CORE));
@@ -67,9 +67,8 @@ QWidget *ToolSettings::createPage(QWidget *parent)
 {
     m_widget = new ExternalToolConfig(parent);
     m_widget->setTools(ExternalToolManager::instance()->toolsByCategory());
-    if (m_searchKeywords.isEmpty()) {
+    if (m_searchKeywords.isEmpty())
         m_searchKeywords = m_widget->searchKeywords();
-    }
     return m_widget;
 }
 
@@ -151,9 +150,8 @@ void ToolSettings::apply()
             ExternalTool *toolToAdd = 0;
             if (ExternalTool *originalTool = originalTools.take(tool->id())) {
                 // check if it has different category and is custom tool
-                if (tool->displayCategory() != it.key() && !tool->preset()) {
+                if (tool->displayCategory() != it.key() && !tool->preset())
                     tool->setDisplayCategory(it.key());
-                }
                 // check if the tool has changed
                 if ((*originalTool) == (*tool)) {
                     toolToAdd = originalTool;

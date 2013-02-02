@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -31,6 +31,7 @@
 #include "vcsbaseconstants.h"
 
 #include <coreplugin/fileiconprovider.h>
+#include <utils/qtcassert.h>
 
 #include <QStandardItem>
 #include <QFileInfo>
@@ -41,6 +42,8 @@ namespace VcsBase {
 // --------------------------------------------------------------------------
 // Helpers:
 // --------------------------------------------------------------------------
+
+enum { fileColumn = 1 };
 
 static QList<QStandardItem *> createFileRow(const QString &fileName, const QString &status,
                                             CheckMode checked, const QVariant &v)
@@ -87,15 +90,6 @@ QList<QStandardItem *> SubmitFileModel::addFile(const QString &fileName, const Q
     return row;
 }
 
-QList<QStandardItem *> SubmitFileModel::rowAt(int row) const
-{
-    const int colCount = columnCount();
-    QList<QStandardItem *> rc;
-    for (int c = 0; c < colCount; c++)
-        rc.push_back(item(row, c));
-    return rc;
-}
-
 QString SubmitFileModel::state(int row) const
 {
     if (row < 0 || row >= rowCount())
@@ -107,7 +101,7 @@ QString SubmitFileModel::file(int row) const
 {
     if (row < 0 || row >= rowCount())
         return QString();
-    return item(row, 1)->text();
+    return item(row, fileColumn)->text();
 }
 
 bool SubmitFileModel::checked(int row) const
@@ -120,6 +114,13 @@ bool SubmitFileModel::checked(int row) const
 void SubmitFileModel::setChecked(int row, bool check)
 {
     if (row >= 0 || row < rowCount())
+        item(row)->setCheckState(check ? Qt::Checked : Qt::Unchecked);
+}
+
+void SubmitFileModel::setAllChecked(bool check)
+{
+    int rows = rowCount();
+    for (int row = 0; row < rows; ++row)
         item(row)->setCheckState(check ? Qt::Checked : Qt::Unchecked);
 }
 
@@ -139,26 +140,39 @@ bool SubmitFileModel::hasCheckedFiles() const
     return false;
 }
 
-QList<QStandardItem *> SubmitFileModel::findRow(const QString &text, int column) const
+unsigned int SubmitFileModel::filterFiles(const QStringList &filter)
 {
-    // Single item
-    const QList<QStandardItem *> items = findItems(text, Qt::MatchExactly, column);
-    if (items.empty())
-        return items;
-    // Compile row
-    return rowAt(items.front()->row());
- }
-
-unsigned SubmitFileModel::filter(const QStringList &filter, int column)
-{
-    unsigned rc = 0;
+    unsigned int rc = 0;
     for (int r = rowCount() - 1; r >= 0; r--)
-        if (const QStandardItem *i = item(r, column))
-            if (!filter.contains(i->text())) {
-                qDeleteAll(takeRow(r));
-                rc++;
-            }
+        if (!filter.contains(file(r))) {
+            removeRow(r);
+            rc++;
+        }
     return rc;
+}
+
+/*! Updates user selections from \a source model.
+ *
+ *  Assumption: Both model are sorted with the same order, and there
+ *              are no duplicate entries.
+ */
+void SubmitFileModel::updateSelections(SubmitFileModel *source)
+{
+    QTC_ASSERT(source, return);
+    int rows = rowCount();
+    int sourceRows = source->rowCount();
+    int lastMatched = 0;
+    for (int i = 0; i < rows; ++i) {
+        // Since both models are sorted with the same order, there is no need
+        // to test rows earlier than latest match found
+        for (int j = lastMatched; j < sourceRows; ++j) {
+            if (file(i) == source->file(j) && state(i) == source->state(j)) {
+                setChecked(i, source->checked(j));
+                lastMatched = j + 1; // No duplicates, start on next entry
+                break;
+            }
+        }
+    }
 }
 
 } // namespace VcsBase

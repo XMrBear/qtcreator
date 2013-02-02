@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Denis Mingulov
+** Copyright (c) 2013 Denis Mingulov
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -40,7 +40,7 @@ namespace Internal {
 
 /*!
    \class SymbolInformation
-   \brief
+   \brief Provides name, type and icon for single item in Class View tree
  */
 
 class SymbolInformation

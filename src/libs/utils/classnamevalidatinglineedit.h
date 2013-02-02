@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -51,6 +51,9 @@ public:
     bool namespacesEnabled() const;
     void setNamespacesEnabled(bool b);
 
+    QString namespaceDelimiter();
+    void setNamespaceDelimiter(const QString &delimiter);
+
     bool lowerCaseFileName() const;
     void setLowerCaseFileName(bool v);
 
@@ -71,6 +74,8 @@ protected:
     virtual QString fixInputString(const QString &string);
 
 private:
+    void updateRegExp() const;
+
     ClassNameValidatingLineEditPrivate *d;
 };
 

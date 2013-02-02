@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -59,6 +59,7 @@
 #include <projectexplorer/kitinformation.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
+#include <projectexplorer/projectmacroexpander.h>
 #include <utils/qtcassert.h>
 #include <qtsupport/customexecutablerunconfiguration.h>
 #include <qtsupport/qmldumptool.h>
@@ -98,71 +99,6 @@ Qt4BuildConfiguration *enableActiveQt4BuildConfiguration(ProjectExplorer::Target
     bc->setEnabled(enabled);
     return bc;
 }
-
-QString sanitize(const QString &input)
-{
-    QString result;
-    result.reserve(input.size());
-    foreach (const QChar &qc, input) {
-        const char c = qc.toLatin1();
-        if ((c >= 'a' && c <='z')
-                || (c >= 'A' && c <= 'Z')
-                || (c >= '0' && c <= '9')
-                || c == '-'
-                || c == '_')
-            result.append(qc);
-        else
-            result.append(QLatin1Char('_'));
-    }
-    return result;
-}
-
-class Qt4ProjectExpander : public Utils::AbstractQtcMacroExpander
-{
-public:
-    Qt4ProjectExpander(const QString &proFilePath, const Kit *k, const QString &bcName) :
-        m_proFile(proFilePath), m_kit(k), m_bcName(bcName)
-    { }
-
-    bool resolveMacro(const QString &name, QString *ret)
-    {
-        QString result;
-        bool found = false;
-        if (name == QLatin1String(ProjectExplorer::Constants::VAR_CURRENTPROJECT_NAME)) {
-            result = m_proFile.baseName();
-            found = true;
-        } else if (name == QLatin1String(ProjectExplorer::Constants::VAR_CURRENTPROJECT_PATH)) {
-            result = m_proFile.absolutePath();
-            found = true;
-        } else if (name == QLatin1String(ProjectExplorer::Constants::VAR_CURRENTPROJECT_FILEPATH)) {
-            result = m_proFile.absoluteFilePath();
-            found = true;
-        } else if (m_kit && name == QLatin1String(ProjectExplorer::Constants::VAR_CURRENTKIT_NAME)) {
-            result = m_kit->displayName();
-            found = true;
-        } else if (m_kit && name == QLatin1String(ProjectExplorer::Constants::VAR_CURRENTKIT_FILESYSTEMNAME)) {
-            result = m_kit->fileSystemFriendlyName();
-            found = true;
-        } else if (m_kit && name == QLatin1String(ProjectExplorer::Constants::VAR_CURRENTKIT_ID)) {
-            result = m_kit->id().toString();
-            found = true;
-        } else if (name == QLatin1String(ProjectExplorer::Constants::VAR_CURRENTBUILD_NAME)) {
-            result = m_bcName;
-            found = true;
-        } else {
-            result = Core::VariableManager::instance()->value(name.toUtf8(), &found);
-        }
-        if (ret)
-            *ret = result;
-        return found;
-    }
-
-private:
-    QFileInfo m_proFile;
-    const Kit *m_kit;
-    QString m_bcName;
-    Utils::AbstractMacroExpander *m_expander;
-};
 
 } // namespace
 
@@ -594,7 +530,7 @@ void Qt4Project::updateCppCodeModel()
         else
             part->qtVersion = ProjectPart::NoQt;
 
-        QStringList cxxflags = pro->variableValue(CppFlagsVar);
+        const QStringList cxxflags = pro->variableValue(CppFlagsVar);
 
         // part->defines
         if (tc)
@@ -607,9 +543,8 @@ void Qt4Project::updateCppCodeModel()
         QList<HeaderPath> headers;
         if (tc)
             headers = tc->systemHeaderPaths(cxxflags, SysRootKitInformation::sysRoot(k));
-        if (qtVersion) {
+        if (qtVersion)
             headers.append(qtVersion->systemHeaderPathes(k));
-        }
 
         foreach (const HeaderPath &headerPath, headers) {
             if (headerPath.kind() == HeaderPath::FrameworkHeaderPath)
@@ -631,7 +566,7 @@ void Qt4Project::updateCppCodeModel()
 
         // part->language
         if (tc)
-            part->language = tc->compilerFlags(pro->variableValue(CppFlagsVar)) == ToolChain::STD_CXX11 ? ProjectPart::CXX11 : ProjectPart::CXX;
+            part->language = tc->compilerFlags(cxxflags) == ToolChain::STD_CXX11 ? ProjectPart::CXX11 : ProjectPart::CXX;
         else
             part->language = CPlusPlus::CppModelManagerInterface::ProjectPart::CXX11;
 
@@ -1313,9 +1248,8 @@ void CentralizedFolderWatcher::unwatchFolders(const QList<QString> &folders, Qt4
         if (!folder.endsWith(slash))
             folder.append(slash);
         m_map.remove(folder, node);
-        if (!m_map.contains(folder)) {
+        if (!m_map.contains(folder))
             m_watcher.removePath(folder);
-        }
 
         // Figure out which recursive directories we can remove
         // this might not scale. I'm pretty sure it doesn't
@@ -1471,7 +1405,8 @@ QString Qt4Project::shadowBuildDirectory(const QString &proFilePath, const Kit *
     if (version && !version->supportsShadowBuilds())
         return info.absolutePath();
 
-    Qt4ProjectExpander expander(proFilePath, k, suffix);
+    const QString projectName = QFileInfo(proFilePath).completeBaseName();
+    ProjectExplorer::ProjectExpander expander(proFilePath, projectName, k, suffix);
     QDir projectDir = QDir(projectDirectory(proFilePath));
     QString buildPath = Utils::expandMacros(Core::DocumentManager::buildDirectory(), &expander);
     return QDir::cleanPath(projectDir.absoluteFilePath(buildPath));

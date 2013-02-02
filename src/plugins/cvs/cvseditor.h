@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -48,9 +48,7 @@ public:
 private:
     QSet<QString> annotationChanges() const;
     QString changeUnderCursor(const QTextCursor &) const;
-    VcsBase::DiffHighlighter *createDiffHighlighter() const;
     VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes, const QColor &bg) const;
-    QString fileNameFromDiffSpecification(const QTextBlock &diffFileName) const;
     QStringList annotationPreviousVersions(const QString &revision) const;
 
     mutable QRegExp m_revisionAnnotationPattern;

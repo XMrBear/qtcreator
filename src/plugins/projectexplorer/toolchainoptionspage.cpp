@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -445,7 +445,7 @@ ToolChainOptionsPage::ToolChainOptionsPage() :
     m_model(0), m_selectionModel(0), m_toolChainView(0), m_container(0),
     m_addButton(0), m_cloneButton(0), m_delButton(0)
 {
-    setId(QLatin1String(Constants::TOOLCHAIN_SETTINGS_PAGE_ID));
+    setId(Constants::TOOLCHAIN_SETTINGS_PAGE_ID);
     setDisplayName(tr("Compilers"));
     setCategory(Constants::PROJECTEXPLORER_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("ProjectExplorer",
@@ -573,8 +573,12 @@ bool ToolChainOptionsPage::matches(const QString &s) const
 
 void ToolChainOptionsPage::toolChainSelectionChanged()
 {
+    if (!m_container)
+        return;
     QModelIndex current = currentIndex();
-    (void)m_container->takeWidget(); // Prevent deletion.
+    QWidget *oldWidget = m_container->takeWidget(); // Prevent deletion.
+    if (oldWidget)
+        oldWidget->setVisible(false);
     QWidget *currentTcWidget = current.isValid() ? m_model->widget(current) : 0;
     m_container->setWidget(currentTcWidget);
     m_container->setVisible(currentTcWidget != 0);

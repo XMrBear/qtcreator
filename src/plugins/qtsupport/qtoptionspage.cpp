@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -62,6 +62,7 @@ enum ModelRoles { VersionIdRole = Qt::UserRole, ToolChainIdRole, BuildLogRole, B
 
 using namespace QtSupport;
 using namespace QtSupport::Internal;
+using namespace Utils;
 
 ///
 // QtOptionsPage
@@ -70,7 +71,7 @@ using namespace QtSupport::Internal;
 QtOptionsPage::QtOptionsPage()
     : m_widget(0)
 {
-    setId(QLatin1String(Constants::QTVERSION_SETTINGS_PAGE_ID));
+    setId(Constants::QTVERSION_SETTINGS_PAGE_ID);
     setDisplayName(QCoreApplication::translate("Qt4ProjectManager", Constants::QTVERSION_SETTINGS_PAGE_NAME));
     setCategory(ProjectExplorer::Constants::PROJECTEXPLORER_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("ProjectExplorer",
@@ -118,7 +119,7 @@ QtOptionsPageWidget::QtOptionsPageWidget(QWidget *parent)
 {
     QWidget *versionInfoWidget = new QWidget();
     m_versionUi->setupUi(versionInfoWidget);
-    m_versionUi->editPathPushButton->setText(tr(Utils::PathChooser::browseButtonLabel));
+    m_versionUi->editPathPushButton->setText(QCoreApplication::translate("Utils::PathChooser", Utils::PathChooser::browseButtonLabel));
 
     QWidget *debuggingHelperDetailsWidget = new QWidget();
     m_debuggingHelperUi->setupUi(debuggingHelperDetailsWidget);
@@ -130,14 +131,14 @@ QtOptionsPageWidget::QtOptionsPageWidget(QWidget *parent)
     connect(m_infoBrowser, SIGNAL(anchorClicked(QUrl)), this, SLOT(infoAnchorClicked(QUrl)));
     m_ui->infoWidget->setWidget(m_infoBrowser);
     connect(m_ui->infoWidget, SIGNAL(expanded(bool)),
-            this, SLOT(handleInfoWidgetExpanded(bool)));
+            this, SLOT(setInfoWidgetVisibility()));
 
     m_ui->versionInfoWidget->setWidget(versionInfoWidget);
     m_ui->versionInfoWidget->setState(Utils::DetailsWidget::NoSummary);
 
     m_ui->debuggingHelperWidget->setWidget(debuggingHelperDetailsWidget);
     connect(m_ui->debuggingHelperWidget, SIGNAL(expanded(bool)),
-            this, SLOT(handleDebuggingHelperExpanded(bool)));
+            this, SLOT(setInfoWidgetVisibility()));
 
     // setup parent items for auto-detected and manual versions
     m_ui->qtdirList->header()->setResizeMode(QHeaderView::ResizeToContents);
@@ -335,16 +336,12 @@ void QtOptionsPageWidget::qtVersionsDumpUpdated(const Utils::FileName &qmakeComm
     }
 }
 
-void QtOptionsPageWidget::handleInfoWidgetExpanded(bool expanded)
+void QtOptionsPageWidget::setInfoWidgetVisibility()
 {
-    m_ui->versionInfoWidget->setVisible(!expanded);
-    m_ui->debuggingHelperWidget->setVisible(!expanded);
-}
-
-void QtOptionsPageWidget::handleDebuggingHelperExpanded(bool expanded)
-{
-    m_ui->versionInfoWidget->setVisible(!expanded);
-    m_ui->infoWidget->setVisible(!expanded);
+    m_ui->versionInfoWidget->setVisible((m_ui->infoWidget->state() == DetailsWidget::Collapsed)
+                                        && (m_ui->debuggingHelperWidget->state() == DetailsWidget::Collapsed));
+    m_ui->infoWidget->setVisible(m_ui->debuggingHelperWidget->state() == DetailsWidget::Collapsed);
+    m_ui->debuggingHelperWidget->setVisible(m_ui->infoWidget->state() == DetailsWidget::Collapsed);
 }
 
 void QtOptionsPageWidget::infoAnchorClicked(const QUrl &url)
@@ -634,7 +631,7 @@ void QtOptionsPageWidget::addQtDir()
 {
     Utils::FileName qtVersion = Utils::FileName::fromString(
                 QFileDialog::getOpenFileName(this,
-                                             tr("Select a qmake executable"),
+                                             tr("Select a qmake Executable"),
                                              QString(),
                                              filterForQmakeFileDialog(),
                                              0,
@@ -650,7 +647,7 @@ void QtOptionsPageWidget::addQtDir()
     }
     if (version) {
         // Already exist
-        QMessageBox::warning(this, tr("Qt known"),
+        QMessageBox::warning(this, tr("Qt Version Already Known"),
                              tr("This Qt version was already registered as \"%1\".")
                              .arg(version->displayName()));
         return;
@@ -671,8 +668,8 @@ void QtOptionsPageWidget::addQtDir()
         m_versionUi->nameEdit->setFocus();
         m_versionUi->nameEdit->selectAll();
     } else {
-        QMessageBox::warning(this, tr("Qmake not executable"),
-                             tr("The qmake %1 could not be added: %2").arg(qtVersion.toUserOutput()).arg(error));
+        QMessageBox::warning(this, tr("Qmake not Executable"),
+                             tr("The qmake executable %1 could not be added: %2").arg(qtVersion.toUserOutput()).arg(error));
         return;
     }
     updateCleanUpButton();
@@ -713,7 +710,7 @@ void QtOptionsPageWidget::editPath()
     if (current->type() != version->type()) {
         // not the same type, error out
         QMessageBox::critical(this, tr("Incompatible Qt Versions"),
-                              tr("The Qt version selected must be for the same device type."),
+                              tr("The Qt version selected must match the device type."),
                               QMessageBox::Ok);
         delete version;
         return;
@@ -800,11 +797,10 @@ void QtOptionsPageWidget::updateDebuggingHelperUi()
             gdbHelperText = QDir::toNativeSeparators(version->gdbDebuggingHelperLibrary());
             gdbHelperTextFlags = Qt::TextSelectableByMouse;
         } else {
-            if (canBuildGdbHelper) {
+            if (canBuildGdbHelper)
                 gdbHelperText =  tr("<i>Not yet built.</i>");
-            } else {
+            else
                 gdbHelperText =  tr("<i>Not needed.</i>");
-            }
         }
         m_debuggingHelperUi->gdbHelperStatus->setText(gdbHelperText);
         m_debuggingHelperUi->gdbHelperStatus->setTextInteractionFlags(gdbHelperTextFlags);
@@ -919,8 +915,7 @@ void QtOptionsPageWidget::updateDebuggingHelperUi()
 
         m_debuggingHelperUi->rebuildButton->setEnabled(canBuild && !isBuilding);
         m_debuggingHelperUi->toolChainComboBox->setEnabled(canBuild && !isBuilding);
-
-        m_ui->debuggingHelperWidget->setVisible(true);
+        setInfoWidgetVisibility();
     }
 }
 
@@ -968,12 +963,12 @@ void QtOptionsPageWidget::updateDescriptionLabel()
 
     if (version) {
         m_infoBrowser->setHtml(version->toHtml(true));
-        m_ui->versionInfoWidget->setVisible(true);
-        m_ui->infoWidget->setVisible(true);
+        setInfoWidgetVisibility();
     } else {
         m_infoBrowser->setHtml(QString());
         m_ui->versionInfoWidget->setVisible(false);
         m_ui->infoWidget->setVisible(false);
+        m_ui->debuggingHelperWidget->setVisible(false);
     }
 }
 
@@ -996,9 +991,8 @@ QTreeWidgetItem *QtOptionsPageWidget::treeItemForIndex(int index) const
         QTreeWidgetItem *toplevelItem = m_ui->qtdirList->topLevelItem(i);
         for (int j = 0; j < toplevelItem->childCount(); ++j) {
             QTreeWidgetItem *item = toplevelItem->child(j);
-            if (item->data(0, VersionIdRole).toInt() == uniqueId) {
+            if (item->data(0, VersionIdRole).toInt() == uniqueId)
                 return item;
-            }
         }
     }
     return 0;

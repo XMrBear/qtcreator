@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -138,7 +138,7 @@ QString SettingsPageWidget::searchKeywords() const
 
 SettingsPage::SettingsPage()
 {
-    setId(QLatin1String(VcsBase::Constants::VCS_ID_PERFORCE));
+    setId(VcsBase::Constants::VCS_ID_PERFORCE);
     setDisplayName(tr("Perforce"));
 }
 

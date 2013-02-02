@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -29,9 +29,11 @@
 
 #include "branchdialog.h"
 #include "branchadddialog.h"
+#include "branchcheckoutdialog.h"
 #include "branchmodel.h"
 #include "gitclient.h"
 #include "gitplugin.h"
+#include "gitutils.h"
 #include "ui_branchdialog.h"
 #include "stashdialog.h" // Label helpers
 
@@ -42,6 +44,7 @@
 #include <QItemSelectionModel>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QList>
 
 #include <QDebug>
 
@@ -65,6 +68,8 @@ BranchDialog::BranchDialog(QWidget *parent) :
     connect(m_ui->removeButton, SIGNAL(clicked()), this, SLOT(remove()));
     connect(m_ui->diffButton, SIGNAL(clicked()), this, SLOT(diff()));
     connect(m_ui->logButton, SIGNAL(clicked()), this, SLOT(log()));
+    connect(m_ui->mergeButton, SIGNAL(clicked()), this, SLOT(merge()));
+    connect(m_ui->rebaseButton, SIGNAL(clicked()), this, SLOT(rebase()));
 
     m_ui->branchView->setModel(m_model);
 
@@ -77,8 +82,6 @@ BranchDialog::BranchDialog(QWidget *parent) :
 BranchDialog::~BranchDialog()
 {
     delete m_ui;
-    delete m_model;
-    m_model = 0;
 }
 
 void BranchDialog::refresh(const QString &repository, bool force)
@@ -102,11 +105,14 @@ void BranchDialog::enableButtons()
     const bool currentSelected = hasSelection && idx == m_model->currentBranch();
     const bool isLocal = m_model->isLocal(idx);
     const bool isLeaf = m_model->isLeaf(idx);
+    const bool currentLocal = m_model->isLocal(m_model->currentBranch());
 
     m_ui->removeButton->setEnabled(hasSelection && !currentSelected && isLocal && isLeaf);
     m_ui->logButton->setEnabled(hasSelection && isLeaf);
     m_ui->diffButton->setEnabled(hasSelection && isLeaf);
     m_ui->checkoutButton->setEnabled(hasSelection && !currentSelected && isLeaf);
+    m_ui->rebaseButton->setEnabled(hasSelection && !currentSelected && isLeaf && currentLocal);
+    m_ui->mergeButton->setEnabled(hasSelection && !currentSelected && isLeaf && currentLocal);
 }
 
 void BranchDialog::refresh()
@@ -152,9 +158,57 @@ void BranchDialog::add()
 void BranchDialog::checkout()
 {
     QModelIndex idx = selectedIndex();
-    QTC_CHECK(m_model->isLocal(idx));
 
-    m_model->checkoutBranch(idx);
+    const QString currentBranch = m_model->branchName(m_model->currentBranch());
+    const QString nextBranch = m_model->branchName(idx);
+    const QString popMessageStart = QCoreApplication::applicationName() +
+            QLatin1String(" ") + nextBranch + QLatin1String("-AutoStash ");
+
+    BranchCheckoutDialog branchCheckoutDialog(this, currentBranch, nextBranch);
+    GitClient *gitClient = GitPlugin::instance()->gitClient();
+
+    if (gitClient->gitStatus(m_repository, StatusMode(NoUntracked | NoSubmodules)) != GitClient::StatusChanged)
+        branchCheckoutDialog.foundNoLocalChanges();
+
+    QList<Stash> stashes;
+    gitClient->synchronousStashList(m_repository, &stashes);
+    foreach (const Stash &stash, stashes) {
+        if (stash.message.startsWith(popMessageStart)) {
+            branchCheckoutDialog.foundStashForNextBranch();
+            break;
+        }
+    }
+
+    if (!branchCheckoutDialog.hasLocalChanges() &&
+        !branchCheckoutDialog.hasStashForNextBranch()) {
+        // No local changes and no Auto Stash - no need to open dialog
+        m_model->checkoutBranch(idx);
+    } else if (branchCheckoutDialog.exec() == QDialog::Accepted && m_model) {
+
+        QString stashMessage;
+        if (branchCheckoutDialog.makeStashOfCurrentBranch()
+            || branchCheckoutDialog.moveLocalChangesToNextBranch()) {
+            gitClient->ensureStash(m_repository, currentBranch + QLatin1String("-AutoStash"), false, &stashMessage);
+        } else if (branchCheckoutDialog.discardLocalChanges()) {
+            gitClient->synchronousReset(m_repository);
+        }
+
+        m_model->checkoutBranch(idx);
+
+        QString stashName;
+        gitClient->synchronousStashList(m_repository, &stashes);
+        foreach (const Stash &stash, stashes) {
+            if (stash.message.startsWith(popMessageStart)) {
+                stashName = stash.name;
+                break;
+            }
+        }
+
+        if (!stashMessage.isEmpty() && branchCheckoutDialog.moveLocalChangesToNextBranch())
+            gitClient->stashPop(m_repository);
+        else if (branchCheckoutDialog.popStashOfNextBranch())
+            gitClient->synchronousStashRestore(m_repository, stashName, true);
+    }
     enableButtons();
 }
 
@@ -192,6 +246,30 @@ void BranchDialog::log()
     if (branchName.isEmpty())
         return;
     GitPlugin::instance()->gitClient()->graphLog(m_repository, branchName);
+}
+
+void BranchDialog::merge()
+{
+    QModelIndex idx = selectedIndex();
+    QTC_CHECK(m_model->isLocal(m_model->currentBranch())); // otherwise the button would not be enabled!
+    QTC_CHECK(idx != m_model->currentBranch());            // otherwise the button would not be enabled!
+
+    const QString branch = m_model->branchName(idx);
+    GitClient::StashGuard stashGuard(m_repository, QLatin1String("merge"), false);
+    if (!GitPlugin::instance()->gitClient()->synchronousMerge(m_repository, branch))
+        stashGuard.preventPop();
+}
+
+void BranchDialog::rebase()
+{
+    QModelIndex idx = selectedIndex();
+    QTC_CHECK(m_model->isLocal(m_model->currentBranch())); // otherwise the button would not be enabled!
+    QTC_CHECK(idx != m_model->currentBranch());            // otherwise the button would not be enabled!
+
+    const QString baseBranch = m_model->branchName(idx);
+    GitClient::StashGuard stashGuard(m_repository, QLatin1String("rebase"), false);
+    if (!GitPlugin::instance()->gitClient()->synchronousRebase(m_repository, baseBranch))
+        stashGuard.preventPop();
 }
 
 void BranchDialog::changeEvent(QEvent *e)

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -270,9 +270,9 @@ public:
 // Helpers to sort by category. id
 bool optionsPageLessThan(const IOptionsPage *p1, const IOptionsPage *p2)
 {
-    if (const int cc = p1->category().toString().compare(p2->category().toString()))
-        return cc < 0;
-    return p1->id().compare(p2->id()) < 0;
+    if (p1->category() != p2->category())
+        return p1->category().alphabeticallyBefore(p2->category());
+    return p1->id().alphabeticallyBefore(p2->id());
 }
 
 static inline QList<Core::IOptionsPage*> sortedOptionsPages()
@@ -331,11 +331,11 @@ void SettingsDialog::showPage(Id categoryId, Id pageId)
 {
     // handle the case of "show last page"
     Id initialCategory = categoryId;
-    QString initialPage = pageId.toString();
-    if (!initialCategory.isValid() && initialPage.isEmpty()) {
+    Id initialPage = pageId;
+    if (!initialCategory.isValid() && !initialPage.isValid()) {
         QSettings *settings = ICore::settings();
-        initialCategory = Id(settings->value(QLatin1String(categoryKeyC), QVariant(QString())).toString());
-        initialPage = settings->value(QLatin1String(pageKeyC), QVariant(QString())).toString();
+        initialCategory = Id::fromSetting(settings->value(QLatin1String(categoryKeyC)));
+        initialPage = Id::fromSetting(settings->value(QLatin1String(pageKeyC)));
     }
 
     int initialCategoryIndex = -1;
@@ -542,8 +542,8 @@ void SettingsDialog::apply()
 void SettingsDialog::done(int val)
 {
     QSettings *settings = ICore::settings();
-    settings->setValue(QLatin1String(categoryKeyC), m_currentCategory.toString());
-    settings->setValue(QLatin1String(pageKeyC), m_currentPage);
+    settings->setValue(QLatin1String(categoryKeyC), m_currentCategory.toSetting());
+    settings->setValue(QLatin1String(pageKeyC), m_currentPage.toSetting());
 
     ICore::saveSettings(); // save all settings
 

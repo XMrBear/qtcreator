@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -180,17 +180,15 @@ static void extractKeywords(const QByteArray &input, QStringList *destination)
                 keyword += chr;
             } else {
                 if (!keyword.isEmpty()) {
-                    if (keyword.size() > 1) {
+                    if (keyword.size() > 1)
                         *destination << keyword;
-                    }
                     keyword.clear();
                 }
             }
         }
     }
-    if (keyword.size() > 1) {
+    if (keyword.size() > 1)
         *destination << keyword;
-    }
 }
 
 void CMakeValidator::parseFunctionOutput(const QByteArray &output)

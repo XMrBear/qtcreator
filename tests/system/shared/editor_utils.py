@@ -68,17 +68,12 @@ def openContextMenuOnTextCursorPosition(editor):
     waitFor("menuVisibleAtEditor(editor, menuInList)", 5000)
     return menuInList[0]
 
-# this function marks/selects the text inside the given editor from position
-# startPosition to endPosition (both inclusive)
-def markText(editor, startPosition, endPosition):
-    cursor = editor.textCursor()
-    cursor.setPosition(startPosition)
-    cursor.movePosition(QTextCursor.StartOfLine)
-    editor.setTextCursor(cursor)
-    cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, endPosition-startPosition)
-    cursor.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
-    cursor.setPosition(endPosition, QTextCursor.KeepAnchor)
-    editor.setTextCursor(cursor)
+# this function marks/selects the text inside the given editor from current cursor position
+# param direction is one of "Left", "Right", "Up", "Down", but "End" and combinations work as well
+# param typeCount defines how often the cursor will be moved in the given direction (while marking)
+def markText(editor, direction, typeCount=1):
+    for i in range(typeCount):
+        type(editor, "<Shift+%s>" % direction)
 
 # works for all standard editors
 def replaceEditorContent(editor, newcontent):
@@ -292,13 +287,24 @@ def invokeFindUsage(editor, line, typeOperation, n=1):
     invokeContextMenuItem(editor, "Find Usages")
     return True
 
+def addBranchWildcardToRoot(rootNode):
+    pos = rootNode.find(".")
+    if pos == -1:
+        return rootNode + " (*)"
+    return rootNode[:pos] + " (*)" + rootNode[pos:]
+
 def openDocument(treeElement):
     try:
+        selectFromCombo(":Qt Creator_Core::Internal::NavComboBox", "Open Documents")
         navigator = waitForObject(":Qt Creator_Utils::NavigationTreeView")
-        fileName = waitForObjectItem(navigator, treeElement).text
+        try:
+            item = waitForObjectItem(navigator, treeElement, 3000)
+        except:
+            treeElement = addBranchWildcardToRoot(treeElement)
+            item = waitForObjectItem(navigator, treeElement)
         doubleClickItem(navigator, treeElement, 5, 5, 0, Qt.LeftButton)
         mainWindow = waitForObject(":Qt Creator_Core::Internal::MainWindow")
-        waitFor("fileName in str(mainWindow.windowTitle)")
+        waitFor("item.text in str(mainWindow.windowTitle)")
         return True
     except:
         return False

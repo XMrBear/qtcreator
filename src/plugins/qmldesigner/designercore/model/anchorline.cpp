@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -84,9 +84,8 @@ AnchorLine &AnchorLine::operator =(const AnchorLine &other)
 
 ModelNode AnchorLine::modelNode() const
 {
-    if (m_internalNode.isNull() || m_internalNodeState.isNull() || m_model.isNull()) {
+    if (m_internalNode.isNull() || m_internalNodeState.isNull() || m_model.isNull())
         return ModelNode();
-    }
     return ModelNode(m_internalNode, m_model.data());
 }
 

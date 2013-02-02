@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -353,8 +353,7 @@ int JsonSchema::itemArraySchemaSize() const
  *
  * The method also marks the context as being inside an array evaluation.
  *
- * \param index
- * \return whether it was necessary to "enter" a schema for the supplied array index
+ * \return whether it was necessary to "enter" a schema for the supplied array index, false if index is out of bounds
  */
 bool JsonSchema::maybeEnterNestedArraySchema(int index)
 {
@@ -730,9 +729,8 @@ JsonSchema *JsonSchemaManager::parseSchema(const QString &schemaFileName) const
     if (reader.fetch(schemaFileName, QIODevice::Text)) {
         const QString &contents = QString::fromUtf8(reader.data());
         JsonValue *json = JsonValue::create(contents);
-        if (json && json->kind() == JsonValue::Object) {
+        if (json && json->kind() == JsonValue::Object)
             return new JsonSchema(json->toObject(), this);
-        }
     }
 
     return 0;

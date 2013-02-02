@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -94,7 +94,7 @@ NavigatorView::~NavigatorView()
         delete m_widget.data();
 }
 
-NavigatorWidget *NavigatorView::widget()
+QWidget *NavigatorView::widget()
 {
     return m_widget.data();
 }
@@ -270,7 +270,7 @@ void NavigatorView::changeToComponent(const QModelIndex &index)
 {
     if (index.isValid() && m_treeModel->data(index, Qt::UserRole).isValid()) {
         ModelNode doubleClickNode = m_treeModel->nodeForIndex(index);
-        if (doubleClickNode.metaInfo().isComponent())
+        if (doubleClickNode.metaInfo().isFileComponent())
             Core::EditorManager::openEditor(doubleClickNode.metaInfo().componentFileName());
     }
 }

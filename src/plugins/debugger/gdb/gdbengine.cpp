@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -44,13 +44,14 @@
 #include "debuggerconstants.h"
 #include "debuggercore.h"
 #include "debuggerplugin.h"
+#include "debuggerprotocol.h"
 #include "debuggerrunner.h"
 #include "debuggerstringutils.h"
 #include "debuggertooltipmanager.h"
 #include "disassembleragent.h"
-#include "gdbmi.h"
 #include "gdboptionspage.h"
 #include "memoryagent.h"
+#include "sourceutils.h"
 #include "watchutils.h"
 
 #include "breakhandler.h"
@@ -262,6 +263,7 @@ GdbEngine::GdbEngine(const DebuggerStartParameters &startParameters)
     m_terminalTrap = startParameters.useTerminal;
     m_fullStartDone = false;
     m_forceAsyncModel = false;
+    m_pythonAttemptedToLoad = false;
 
     invalidateSourcesList();
 
@@ -768,19 +770,18 @@ void GdbEngine::handleResponse(const QByteArray &buff)
                     break;
 
             QByteArray resultClass = QByteArray::fromRawData(from, inner - from);
-            if (resultClass == "done") {
+            if (resultClass == "done")
                 response.resultClass = GdbResultDone;
-            } else if (resultClass == "running") {
+            else if (resultClass == "running")
                 response.resultClass = GdbResultRunning;
-            } else if (resultClass == "connected") {
+            else if (resultClass == "connected")
                 response.resultClass = GdbResultConnected;
-            } else if (resultClass == "error") {
+            else if (resultClass == "error")
                 response.resultClass = GdbResultError;
-            } else if (resultClass == "exit") {
+            else if (resultClass == "exit")
                 response.resultClass = GdbResultExit;
-            } else {
+            else
                 response.resultClass = GdbResultUnknown;
-            }
 
             from = inner;
             if (from != to) {
@@ -958,9 +959,8 @@ void GdbEngine::postCommandHelper(const GdbCommand &cmd)
             showMessage(_("QUEUING COMMAND " + cmd.command));
             m_commandsToRunOnTemporaryBreak.append(cmd);
             if (state() == InferiorStopRequested) {
-                if (cmd.flags & LosesChild) {
+                if (cmd.flags & LosesChild)
                     notifyInferiorIll();
-                }
                 showMessage(_("CHILD ALREADY BEING INTERRUPTED. STILL HOPING."));
                 // Calling shutdown() here breaks all situations where two
                 // NeedsStop commands are issued in quick succession.
@@ -1435,11 +1435,12 @@ void GdbEngine::handleStopResponse(const GdbMi &data)
         return;
     }
 
+    tryLoadPythonDumpers();
+
     bool gotoHandleStop1 = true;
     if (!m_fullStartDone) {
         m_fullStartDone = true;
         postCommand("sharedlibrary .*");
-        loadPythonDumpers();
         postCommand("p 3", CB(handleStop1));
         gotoHandleStop1 = false;
     }
@@ -1841,6 +1842,14 @@ void GdbEngine::handleListFeatures(const GdbResponse &response)
 
 void GdbEngine::handleHasPython(const GdbResponse &response)
 {
+    if (response.resultClass == GdbResultDone)
+        m_hasPython = true;
+    else
+        pythonDumpersFailed();
+}
+
+void GdbEngine::handlePythonSetup(const GdbResponse &response)
+{
     if (response.resultClass == GdbResultDone) {
         m_hasPython = true;
         GdbMi data;
@@ -1862,8 +1871,6 @@ void GdbEngine::handleHasPython(const GdbResponse &response)
         }
         const GdbMi hasInferiorThreadList = data.findChild("hasInferiorThreadList");
         m_hasInferiorThreadList = (hasInferiorThreadList.data().toInt() != 0);
-    } else {
-        pythonDumpersFailed();
     }
 }
 
@@ -2134,6 +2141,7 @@ bool GdbEngine::hasCapability(unsigned cap) const
         | CatchCapability
         | OperateByInstructionCapability
         | RunToLineCapability
+        | WatchComplexExpressionsCapability
         | MemoryAddressCapability))
         return true;
 
@@ -2177,11 +2185,10 @@ void GdbEngine::executeStep()
     setTokenBarrier();
     notifyInferiorRunRequested();
     showStatusMessage(tr("Step requested..."), 5000);
-    if (isReverseDebugging()) {
+    if (isReverseDebugging())
         postCommand("reverse-step", RunRequest, CB(handleExecuteStep));
-    } else {
+    else
         postCommand("-exec-step", RunRequest, CB(handleExecuteStep));
-    }
 }
 
 void GdbEngine::handleExecuteStep(const GdbResponse &response)
@@ -4130,13 +4137,13 @@ void GdbEngine::handleVarCreate(const GdbResponse &response)
     //qDebug() << "HANDLE VARIABLE CREATION:" << data.toString();
     if (response.resultClass == GdbResultDone) {
         data.variable = data.iname;
-        setWatchDataType(data, response.data.findChild("type"));
+        data.updateType(response.data.findChild("type"));
         if (watchHandler()->isExpandedIName(data.iname)
                 && !response.data.findChild("children").isValid())
             data.setChildrenNeeded();
         else
             data.setChildrenUnneeded();
-        setWatchDataChildCount(data, response.data.findChild("numchild"));
+        data.updateChildCount(response.data.findChild("numchild"));
         insertData(data);
     } else {
         data.setError(QString::fromLocal8Bit(response.data.findChild("msg").data()));
@@ -4203,7 +4210,7 @@ WatchData GdbEngine::localVariable(const GdbMi &item,
             data.setError(WatchData::msgNotInScope());
             return data;
         }
-        setWatchDataValue(data, item);
+        data.updateValue(item);
         //: Type of local variable or parameter shadowed by another
         //: variable of the same name in a nested block.
         data.setType(GdbEngine::tr("<shadowed>").toUtf8());
@@ -4216,13 +4223,13 @@ WatchData GdbEngine::localVariable(const GdbMi &item,
     data.iname = "local." + name;
     data.name = nam;
     data.exp = name;
-    setWatchDataType(data, item.findChild("type"));
+    data.updateType(item.findChild("type"));
     if (uninitializedVariables.contains(data.name)) {
         data.setError(WatchData::msgNotInScope());
         return data;
     }
     if (isSynchronous()) {
-        setWatchDataValue(data, item);
+        data.updateValue(item);
         // We know that the complete list of children is
         // somewhere in the response.
         data.setChildrenUnneeded();
@@ -4230,7 +4237,7 @@ WatchData GdbEngine::localVariable(const GdbMi &item,
         // Set value only directly if it is simple enough, otherwise
         // pass through the insertData() machinery.
         if (isIntOrFloatType(data.type) || isPointerType(data.type))
-            setWatchDataValue(data, item);
+            data.updateValue(item);
     }
 
     if (!watchHandler()->isExpandedIName(data.iname))
@@ -4483,11 +4490,15 @@ void GdbEngine::fetchDisassemblerByCliPointMixed(const DisassemblerAgentCookie &
 
 void GdbEngine::fetchDisassemblerByCliPointPlain(const DisassemblerAgentCookie &ac0)
 {
-    DisassemblerAgentCookie ac = ac0;
-    QTC_ASSERT(ac.agent, return);
-    postCommand(disassemblerCommand(ac.agent->location(), false), Discardable,
-        CB(handleFetchDisassemblerByCliPointPlain),
-        QVariant::fromValue(ac));
+    // This here
+    //    DisassemblerAgentCookie ac = ac0;
+    //    QTC_ASSERT(ac.agent, return);
+    //    postCommand(disassemblerCommand(ac.agent->location(), false), Discardable,
+    //        CB(handleFetchDisassemblerByCliPointPlain),
+    //        QVariant::fromValue(ac));
+    // takes far too long if function boundaries are not hit.
+    // Skip this feature and immediately fall back to the 'range' version:
+    fetchDisassemblerByCliRangePlain(ac0);
 }
 
 void GdbEngine::fetchDisassemblerByCliRangeMixed(const DisassemblerAgentCookie &ac0)
@@ -4844,16 +4855,19 @@ void GdbEngine::startGdb(const QStringList &args)
     } else {
         m_fullStartDone = true;
         postCommand("set auto-solib-add on", ConsoleCommand);
-        loadPythonDumpers();
     }
-
-    // Dummy command to guarantee a roundtrip before the adapter proceed.
-    postCommand("pwd", ConsoleCommand, CB(reportEngineSetupOk));
 
     if (debuggerCore()->boolSetting(MultiInferior)) {
         //postCommand("set follow-exec-mode new");
         postCommand("set detach-on-fork off");
     }
+
+    // Quick check whether we have python.
+    postCommand("python print 43", ConsoleCommand, CB(handleHasPython));
+
+    // Dummy command to guarantee a roundtrip before the adapter proceed.
+    // Make sure this stays the last command in startGdb().
+    postCommand("pwd", ConsoleCommand, CB(reportEngineSetupOk));
 }
 
 void GdbEngine::reportEngineSetupOk(const GdbResponse &response)
@@ -4890,10 +4904,15 @@ void GdbEngine::loadInitScript()
     }
 }
 
-void GdbEngine::loadPythonDumpers()
+void GdbEngine::tryLoadPythonDumpers()
 {
     if (m_forceAsyncModel)
         return;
+    if (!m_hasPython)
+        return;
+    if (m_pythonAttemptedToLoad)
+        return;
+    m_pythonAttemptedToLoad = true;
 
     const QByteArray dumperSourcePath =
         Core::ICore::resourcePath().toLocal8Bit() + "/dumper/";
@@ -4911,7 +4930,16 @@ void GdbEngine::loadPythonDumpers()
 
     loadInitScript();
 
-    postCommand("bbsetup", ConsoleCommand, CB(handleHasPython));
+    postCommand("bbsetup", ConsoleCommand, CB(handlePythonSetup));
+}
+
+void GdbEngine::reloadDebuggingHelpers()
+{
+    // Only supported for python.
+    if (m_hasPython) {
+        m_pythonAttemptedToLoad = false;
+        tryLoadPythonDumpers();
+    }
 }
 
 void GdbEngine::handleGdbError(QProcess::ProcessError error)
@@ -5429,6 +5457,14 @@ void GdbEngine::interruptLocalInferior(qint64 pid)
         showMessage(errorMessage, LogError);
         notifyInferiorStopFailed();
     }
+}
+
+QByteArray GdbEngine::dotEscape(QByteArray str)
+{
+    str.replace(' ', '.');
+    str.replace('\\', '.');
+    str.replace('/', '.');
+    return str;
 }
 
 //

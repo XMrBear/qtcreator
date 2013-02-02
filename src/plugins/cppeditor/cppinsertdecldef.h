@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -49,7 +49,17 @@ public:
 
 class ExtractFunction : public CppQuickFixFactory
 {
+public:
     void match(const CppQuickFixInterface &interface, TextEditor::QuickFixOperations &result);
+};
+
+class GetterSetter : public CppQuickFixFactory
+{
+public:
+    GetterSetter(const bool testMode = false) : m_testMode(testMode) {}
+    void match(const CppQuickFixInterface &interface, TextEditor::QuickFixOperations &result);
+private:
+    const bool m_testMode;
 };
 
 } // namespace Internal

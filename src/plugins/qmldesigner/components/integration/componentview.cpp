@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -34,6 +34,7 @@
 #include <nodemetainfo.h>
 #include <nodeabstractproperty.h>
 #include <QStandardItemModel>
+#include <QAbstractItemView>
 
 // silence gcc warnings about unused parameters
 
@@ -45,8 +46,6 @@ ComponentView::ComponentView(QObject *parent)
     m_componentAction(new ComponentAction(this))
 {
 }
-
-
 
 void ComponentView::nodeAboutToBeRemoved(const ModelNode &removedNode)
 {
@@ -72,6 +71,11 @@ ModelNode ComponentView::modelNode(int index) const
 void ComponentView::setComponentNode(const ModelNode &node)
 {
     m_componentAction->setCurrentIndex(indexForNode(node));
+}
+
+QWidget *ComponentView::widget()
+{
+    return 0;
 }
 
 void ComponentView::appendWholeDocumentAsComponent()
@@ -110,7 +114,6 @@ void ComponentView::modelAttached(Model *model)
 
     AbstractView::modelAttached(model);
 
-    Q_ASSERT(model->masterModel());
     appendWholeDocumentAsComponent();
     searchForComponentAndAddToList(rootModelNode());
 
@@ -154,11 +157,10 @@ void ComponentView::searchForComponentAndAddToList(const ModelNode &node)
                 QString description;
                 ModelNode parentNode = node.parentProperty().parentModelNode();
                 if (parentNode.isValid()) {
-                    if (parentNode.id().isEmpty()) {
+                    if (parentNode.id().isEmpty())
                         description = parentNode.simplifiedTypeName() + QLatin1Char(' ');
-                    } else {
+                    else
                         description = parentNode.id() + QLatin1Char(' ');
-                    }
                 }
                 description += node.parentProperty().name();
                 QStandardItem *item = new QStandardItem(description);
@@ -183,9 +185,8 @@ void ComponentView::searchForComponentAndRemoveFromList(const ModelNode &node)
 
 
     foreach (const ModelNode &childNode, nodeList) {
-        if (childNode.nodeSourceType() == ModelNode::NodeWithComponentSource) {
+        if (childNode.nodeSourceType() == ModelNode::NodeWithComponentSource)
             removeSingleNodeFromList(childNode);
-        }
     }
 }
 

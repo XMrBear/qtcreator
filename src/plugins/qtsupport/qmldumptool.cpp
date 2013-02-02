@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -121,9 +121,8 @@ private slots:
             }
         }
 
-        if (m_failed) {
+        if (m_failed)
             qWarning("%s", qPrintable(errorMessage));
-        }
 
         // update qmldump path for all the project
         QmlJS::ModelManagerInterface *modelManager = QmlJS::ModelManagerInterface::instance();
@@ -295,9 +294,8 @@ QString QmlDumpTool::copy(const QString &qtInstallData, QString *errorMessage)
 
     // Try to find a writeable directory.
     foreach (const QString &directory, directories) {
-        if (copyFiles(sourcePath(), sourceFileNames(), directory, errorMessage)) {
+        if (copyFiles(sourcePath(), sourceFileNames(), directory, errorMessage))
             return directory;
-        }
     }
     *errorMessage = QCoreApplication::translate("ProjectExplorer::QmlDumpTool",
                                                 "qmldump could not be built in any of the directories:\n- %1\n\nReason: %2")

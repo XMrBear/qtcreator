@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -62,10 +62,8 @@ static const char debuggingToolsWikiLinkC[] = "http://qt-project.org/wiki/Qt_Cre
 // DebuggerKitConfigWidget:
 // -----------------------------------------------------------------------
 
-DebuggerKitConfigWidget::DebuggerKitConfigWidget(ProjectExplorer::Kit *workingCopy,
-                                                 const DebuggerKitInformation *ki)
+DebuggerKitConfigWidget::DebuggerKitConfigWidget(ProjectExplorer::Kit *workingCopy)
   : KitConfigWidget(workingCopy),
-    m_info(ki),
     m_label(new QLabel),
     m_button(new QPushButton(tr("Manage...")))
 {
@@ -140,11 +138,10 @@ DebuggerKitConfigDialog::DebuggerKitConfigDialog(QWidget *parent)
     formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
     m_comboBox->addItem(DebuggerKitInformation::debuggerEngineName(GdbEngineType), QVariant(int(GdbEngineType)));
-    if (ProjectExplorer::Abi::hostAbi().os() == ProjectExplorer::Abi::WindowsOS) {
+    if (ProjectExplorer::Abi::hostAbi().os() == ProjectExplorer::Abi::WindowsOS)
         m_comboBox->addItem(DebuggerKitInformation::debuggerEngineName(CdbEngineType), QVariant(int(CdbEngineType)));
-    } else {
+    else
         m_comboBox->addItem(DebuggerKitInformation::debuggerEngineName(LldbEngineType), QVariant(int(LldbEngineType)));
-    }
     connect(m_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(refreshLabel()));
     QLabel *engineTypeLabel = new QLabel(tr("&Engine:"));
     engineTypeLabel->setBuddy(m_comboBox);

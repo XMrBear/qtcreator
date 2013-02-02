@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -49,15 +49,15 @@ class MsvcToolChain : public AbstractMsvcToolChain
 {
 public:
     enum Type { WindowsSDK, VS };
-    enum Platform { x86,        // x86   -> x86
-                    amd64,      // amd64 -> amd64
-                    ia64,       // ia64  -> ia64
-                    x86_amd64,  // x86   -> amd64
-                    x86_ia64,   // x86   -> ia64
+    enum Platform { x86,
+                    amd64,
+                    ia64,
+                    arm
                   };
 
     MsvcToolChain(const QString &name, const Abi &abi,
                   const QString &varsBat, const QString &varsBatArg, bool autodetect = false);
+    bool isValid() const;
     QList<Utils::FileName> suggestedMkspecList() const;
 
     static MsvcToolChain *readFromMap(const QVariantMap &data);
@@ -106,6 +106,9 @@ public:
         { return MsvcToolChain::readFromMap(data); }
 
     ToolChainConfigWidget *configurationWidget(ToolChain *);
+    static QString vcVarsBatFor(const QString &basePath, const QString &toolchainName);
+private:
+    static bool checkForVisualStudioInstallation(const QString &vsName);
 };
 
 // --------------------------------------------------------------------------

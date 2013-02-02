@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -230,12 +230,13 @@ protected: ////////// Gdb Process Management //////////
 
     void startGdb(const QStringList &args = QStringList());
     void reportEngineSetupOk(const GdbResponse &response);
+    void handleCheckForPython(const GdbResponse &response);
     void handleInferiorShutdown(const GdbResponse &response);
     void handleGdbExit(const GdbResponse &response);
     void handleNamespaceExtraction(const GdbResponse &response);
 
     void loadInitScript();
-    void loadPythonDumpers();
+    void tryLoadPythonDumpers();
     void pythonDumpersFailed();
 
     // Something went wrong with the adapter *before* adapterStarted() was emitted.
@@ -390,6 +391,7 @@ protected:
     void handleShowVersion(const GdbResponse &response);
     void handleListFeatures(const GdbResponse &response);
     void handleHasPython(const GdbResponse &response);
+    void handlePythonSetup(const GdbResponse &response);
 
     int m_gdbVersion; // 6.8.0 is 60800
     int m_gdbBuildVersion; // MAC only?
@@ -651,6 +653,7 @@ protected:
     bool checkDebuggingHelpersClassic();
     void setDebuggingHelperStateClassic(DebuggingHelperState);
     void tryLoadDebuggingHelpersClassic();
+    void reloadDebuggingHelpers();
 
     DebuggingHelperState m_debuggingHelperState;
     DumperHelper m_dumperHelper;
@@ -705,6 +708,7 @@ protected:
     // debug information.
     bool attemptQuickStart() const;
     bool m_fullStartDone;
+    bool m_pythonAttemptedToLoad;
 
     // Test
     bool m_forceAsyncModel;
@@ -717,6 +721,7 @@ protected:
     static QString msgInferiorSetupOk();
     static QString msgInferiorRunOk();
     static QString msgConnectRemoteServerFailed(const QString &why);
+    static QByteArray dotEscape(QByteArray str);
 
 protected:
     enum DumperHandling

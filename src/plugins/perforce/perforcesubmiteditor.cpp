@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -114,7 +114,7 @@ bool PerforceSubmitEditor::parseText(QString text)
 
 void PerforceSubmitEditor::restrictToProjectFiles(const QStringList &knownProjectFiles)
 {
-    m_fileModel->filter(knownProjectFiles, fileNameColumn());
+    m_fileModel->filterFiles(knownProjectFiles);
 }
 
 void PerforceSubmitEditor::updateFields()

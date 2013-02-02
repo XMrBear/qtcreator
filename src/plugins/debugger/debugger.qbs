@@ -5,7 +5,6 @@ import "../../../qbs/defaults.js" as Defaults
 
 QtcPlugin {
     name: "Debugger"
-    type: base.concat(["installed_content"])
 
     Depends { name: "Qt"; submodules: ["widgets", "network", "script"] }
     Depends { name: "Core" }
@@ -26,12 +25,11 @@ QtcPlugin {
         "../../shared/json",
         "../../shared/registryaccess"
     ])
-    cpp.defines: base.concat(["QT_NO_CAST_FROM_ASCII"])
 
     Group {
         condition: Defaults.testsEnabled(qbs)
+        qbs.install: true
         qbs.installDir: "tests/manual/debugger/simple/"
-        fileTags: ["install"]
         files: ["../../../tests/manual/debugger/simple/simple.pro"]
     }
 
@@ -67,6 +65,8 @@ QtcPlugin {
         "debuggermainwindow.h",
         "debuggerplugin.cpp",
         "debuggerplugin.h",
+        "debuggerprotocol.cpp",
+        "debuggerprotocol.h",
         "debuggerruncontrolfactory.h",
         "debuggerrunner.cpp",
         "debuggerrunner.h",
@@ -82,6 +82,8 @@ QtcPlugin {
         "disassembleragent.h",
         "disassemblerlines.cpp",
         "disassemblerlines.h",
+        "imageviewer.cpp",
+        "imageviewer.h",
         "loadcoredialog.cpp",
         "loadcoredialog.h",
         "localsandexpressionsoptionspage.ui",
@@ -115,6 +117,8 @@ QtcPlugin {
         "sourcefileshandler.h",
         "sourcefileswindow.cpp",
         "sourcefileswindow.h",
+        "sourceutils.cpp",
+        "sourceutils.h",
         "stackframe.cpp",
         "stackframe.h",
         "stackhandler.cpp",
@@ -159,8 +163,6 @@ QtcPlugin {
         "gdb/gdb.qrc",
         "gdb/gdbengine.cpp",
         "gdb/gdbengine.h",
-        "gdb/gdbmi.cpp",
-        "gdb/gdbmi.h",
         "gdb/gdboptionspage.cpp",
         "gdb/gdboptionspage.h",
         "gdb/localgdbprocess.cpp",

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -77,7 +77,7 @@ QString QmlProjectFile::suggestedFileName() const
 
 QString QmlProjectFile::mimeType() const
 {
-    return QLatin1String(Constants::QMLMIMETYPE);
+    return QLatin1String(Constants::QMLPROJECT_MIMETYPE);
 }
 
 bool QmlProjectFile::isModified() const

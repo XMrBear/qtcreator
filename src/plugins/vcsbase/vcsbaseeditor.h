@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -38,6 +38,7 @@
 
 QT_BEGIN_NAMESPACE
 class QAction;
+class QRegExp;
 class QTextCodec;
 class QTextCursor;
 QT_END_NAMESPACE
@@ -99,6 +100,11 @@ protected:
     // virtual functions).
     explicit VcsBaseEditorWidget(const VcsBaseEditorParameters *type,
                                  QWidget *parent);
+    // Pattern for diff header. File name must be in the first capture group
+    void setDiffFilePattern(const QRegExp &pattern);
+    // Pattern for log entry. hash/revision number must be in the first capture group
+    void setLogEntryPattern(const QRegExp &pattern);
+
 public:
     void init();
 
@@ -187,7 +193,6 @@ public:
     static Core::IEditor* locateEditorByTag(const QString &tag);
     static QString editorTag(EditorContentType t, const QString &workingDirectory, const QStringList &files,
                              const QString &revision = QString());
-
 signals:
     // These signals also exist in the opaque editable (IEditor) that is
     // handled by the editor manager for convenience. They are emitted
@@ -217,8 +222,9 @@ public slots:
 private slots:
     void slotActivateAnnotation();
     void slotPopulateDiffBrowser();
-    void slotDiffBrowse(int);
-    void slotDiffCursorPositionChanged();
+    void slotPopulateLogBrowser();
+    void slotJumpToEntry(int);
+    void slotCursorPositionChanged();
     void slotAnnotateRevision();
     void slotApplyDiffChunk();
     void slotPaste();
@@ -227,25 +233,22 @@ protected:
     /* A helper that can be used to locate a file in a diff in case it
      * is relative. Tries to derive the directory from base directory,
      * source and version control. */
-    QString findDiffFile(const QString &f) const;
+    virtual QString findDiffFile(const QString &f) const;
 
-    virtual bool canApplyDiffChunk(const DiffChunk &dc) const;
-    // Revert a patch chunk. Default implementation uses patch.exe
-    virtual bool applyDiffChunk(const DiffChunk &dc, bool revert = false) const;
+    virtual void addChangeActions(QMenu *menu, const QString &change);
 
-private:
     // Implement to return a set of change identifiers in
     // annotation mode
     virtual QSet<QString> annotationChanges() const = 0;
     // Implement to identify a change number at the cursor position
     virtual QString changeUnderCursor(const QTextCursor &) const = 0;
     // Factory functions for highlighters
-    virtual DiffHighlighter *createDiffHighlighter() const = 0;
     virtual BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes,
                                                                    const QColor &bg) const = 0;
-    // Implement to return a local file name from the diff file specification
+    // Returns a local file name from the diff file specification
     // (text cursor at position above change hunk)
-    virtual QString fileNameFromDiffSpecification(const QTextBlock &diffFileSpec) const = 0;
+    QString fileNameFromDiffSpecification(const QTextBlock &inBlock) const;
+
     // Implement to return decorated annotation change for "Annotate version"
     virtual QString decorateVersion(const QString &revision) const;
     // Implement to return the previous version[s] of an annotation change
@@ -253,6 +256,19 @@ private:
     virtual QStringList annotationPreviousVersions(const QString &revision) const;
     // Implement to validate revisions
     virtual bool isValidRevision(const QString &revision) const;
+    // Implement to return subject for a change line in log
+    virtual QString revisionSubject(const QTextBlock &inBlock) const;
+
+private:
+    bool canApplyDiffChunk(const DiffChunk &dc) const;
+    // Revert a patch chunk. Default implementation uses patch.exe
+    bool applyDiffChunk(const DiffChunk &dc, bool revert = false) const;
+
+    // Indicates if the editor has diff contents. If true, an appropriate
+    // highlighter is used and double-click inside a diff chunk jumps to
+    // the relevant file and line
+    bool hasDiff() const;
+
     // cut out chunk and determine file name.
     DiffChunk diffChunk(QTextCursor cursor) const;
 
@@ -260,6 +276,12 @@ private:
 
     friend class Internal::ChangeTextCursorHandler;
     Internal::VcsBaseEditorWidgetPrivate *const d;
+
+#ifdef WITH_TESTS
+public:
+    void testDiffFileResolving();
+    void testLogResolving(QByteArray &data, const QByteArray &entry1, const QByteArray &entry2);
+#endif
 };
 
 } // namespace VcsBase

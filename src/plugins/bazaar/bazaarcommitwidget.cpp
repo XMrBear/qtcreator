@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Hugues Delorme
+** Copyright (c) 2013 Hugues Delorme
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -61,7 +61,7 @@ class BazaarSubmitHighlighter : QSyntaxHighlighter
 {
 public:
     explicit BazaarSubmitHighlighter(QTextEdit *parent);
-    virtual void highlightBlock(const QString &text);
+    void highlightBlock(const QString &text);
 
 private:
     enum State { Header, Comment, Other };
@@ -114,7 +114,7 @@ void BazaarSubmitHighlighter::highlightBlock(const QString &text)
 
 
 BazaarCommitWidget::BazaarCommitWidget(QWidget *parent) :
-    Utils::SubmitEditorWidget(parent),
+    VcsBase::SubmitEditorWidget(parent),
     m_bazaarCommitPanel(new QWidget)
 {
     m_bazaarCommitPanelUi.setupUi(m_bazaarCommitPanel);

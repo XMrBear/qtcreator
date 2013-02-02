@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -178,11 +178,10 @@ bool OpenEditorsWidget::eventFilter(QObject *obj, QEvent *event)
 
 void OpenEditorsWidget::handlePressed(const QModelIndex &index)
 {
-    if (index.column() == 0) {
+    if (index.column() == 0)
         activateEditor(index);
-    } else if (index.column() == 1) {
+    else if (index.column() == 1)
         m_delegate->pressedIndex = index;
-    }
 }
 
 void OpenEditorsWidget::handleClicked(const QModelIndex &index)

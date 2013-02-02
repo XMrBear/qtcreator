@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -142,9 +142,8 @@ void BaseTextFind::clearResults()
 QString BaseTextFind::currentFindString() const
 {
     QTextCursor cursor = textCursor();
-    if (cursor.hasSelection() && cursor.block() != cursor.document()->findBlock(cursor.anchor())) {
+    if (cursor.hasSelection() && cursor.block() != cursor.document()->findBlock(cursor.anchor()))
         return QString(); // multi block selection
-    }
 
     if (cursor.hasSelection())
         return cursor.selectedText();
@@ -265,9 +264,23 @@ int BaseTextFind::replaceAll(const QString &before, const QString &after,
     regexp.setPatternSyntax(usesRegExp ? QRegExp::RegExp : QRegExp::FixedString);
     regexp.setCaseSensitivity((findFlags & Find::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive);
     QTextCursor found = findOne(regexp, editCursor, Find::textDocumentFlagsForFindFlags(findFlags));
-    while (!found.isNull()
-           && (found.selectionStart() < found.selectionEnd() || after.length() > 0)
-           && inScope(found.selectionStart(), found.selectionEnd())) {
+    bool first = true;
+    while (!found.isNull() && inScope(found.selectionStart(), found.selectionEnd())) {
+        if (found == editCursor && !first) {
+            if (editCursor.atEnd())
+                break;
+            // If the newly found QTextCursor is the same as recently edit one we have to move on,
+            // otherwise we would run into an endless loop for some regular expressions
+            // like ^ or \b.
+            QTextCursor newPosCursor = editCursor;
+            newPosCursor.movePosition(findFlags & Find::FindBackward ?
+                                          QTextCursor::PreviousCharacter :
+                                          QTextCursor::NextCharacter);
+            found = findOne(regexp, newPosCursor, Find::textDocumentFlagsForFindFlags(findFlags));
+            continue;
+        }
+        if (first)
+            first = false;
         ++count;
         editCursor.setPosition(found.selectionStart());
         editCursor.setPosition(found.selectionEnd(), QTextCursor::KeepAnchor);
@@ -330,9 +343,8 @@ bool BaseTextFind::find(const QString &txt, Find::FindFlags findFlags,
                 *wrapped = true;
         }
     }
-    if (!found.isNull()) {
+    if (!found.isNull())
         setTextCursor(found);
-    }
     return true;
 }
 

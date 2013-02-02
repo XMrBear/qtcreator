@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -43,11 +43,16 @@ using namespace Locator::Internal;
 
 DirectoryFilter::DirectoryFilter()
   : m_name(tr("Generic Directory Filter")),
-    m_filters(QStringList() << QLatin1String("*.h") << QLatin1String("*.cpp")
-                            << QLatin1String("*.ui") << QLatin1String("*.qrc")),
     m_dialog(0)
 {
+    setId(Core::Id::fromString(m_name));
     setIncludedByDefault(true);
+    setDisplayName(m_name);
+
+    m_filters.append(QLatin1String("*.h"));
+    m_filters.append(QLatin1String("*.cpp"));
+    m_filters.append(QLatin1String("*.ui"));
+    m_filters.append(QLatin1String("*.qrc"));
 }
 
 QByteArray DirectoryFilter::saveState() const
@@ -138,9 +143,8 @@ bool DirectoryFilter::openConfigDialog(QWidget *parent, bool &needsRefresh)
 void DirectoryFilter::addDirectory()
 {
     QString dir = QFileDialog::getExistingDirectory(m_dialog, tr("Select Directory"));
-    if (!dir.isEmpty()) {
+    if (!dir.isEmpty())
         m_ui.directoryList->addItem(dir);
-    }
 }
 
 void DirectoryFilter::editDirectory()
@@ -150,9 +154,8 @@ void DirectoryFilter::editDirectory()
     QListWidgetItem *currentItem = m_ui.directoryList->selectedItems().at(0);
     QString dir = QFileDialog::getExistingDirectory(m_dialog, tr("Select Directory"),
                                                     currentItem->text());
-    if (!dir.isEmpty()) {
+    if (!dir.isEmpty())
         currentItem->setText(dir);
-    }
 }
 
 void DirectoryFilter::removeDirectory()

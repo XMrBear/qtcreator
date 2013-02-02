@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -109,7 +109,7 @@ CommonOptionsPage::CommonOptionsPage(QObject *parent) :
 {
     m_settings.fromSettings(Core::ICore::settings());
 
-    setId(QLatin1String(Constants::VCS_COMMON_SETTINGS_ID));
+    setId(Constants::VCS_COMMON_SETTINGS_ID);
     setDisplayName(QCoreApplication::translate("VcsBase", Constants::VCS_COMMON_SETTINGS_NAME));
 }
 

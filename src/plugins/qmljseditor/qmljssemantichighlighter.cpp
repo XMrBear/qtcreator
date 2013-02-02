@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -270,11 +270,10 @@ protected:
 
     bool visit(UiObjectDefinition *ast)
     {
-        if (m_scopeChain.document()->bind()->isGroupedPropertyBinding(ast)) {
+        if (m_scopeChain.document()->bind()->isGroupedPropertyBinding(ast))
             processBindingName(ast->qualifiedTypeNameId);
-        } else {
+        else
             processTypeId(ast->qualifiedTypeNameId);
-        }
         scopedAccept(ast, ast->initializer);
         return false;
     }
@@ -342,9 +341,8 @@ protected:
             return false;
 
         const QString &value = ast->value.toString();
-        if (m_stateNames.contains(value)) {
+        if (m_stateNames.contains(value))
             addUse(ast->literalToken, SemanticHighlighter::LocalStateNameType);
-        }
 
         return false;
     }
@@ -438,7 +436,7 @@ void SemanticHighlighter::applyResults(int from, int to)
     if (m_startRevision != m_editor->editorRevision())
         return;
 
-    TextEditor::BaseTextDocument *baseTextDocument = m_editor->baseTextDocument();
+    TextEditor::BaseTextDocument *baseTextDocument = m_editor->baseTextDocument().data();
     QTC_ASSERT(baseTextDocument, return);
     TextEditor::SyntaxHighlighter *highlighter = qobject_cast<TextEditor::SyntaxHighlighter *>(baseTextDocument->syntaxHighlighter());
     QTC_ASSERT(highlighter, return);
@@ -454,7 +452,7 @@ void SemanticHighlighter::finished()
     if (m_startRevision != m_editor->editorRevision())
         return;
 
-    TextEditor::BaseTextDocument *baseTextDocument = m_editor->baseTextDocument();
+    TextEditor::BaseTextDocument *baseTextDocument = m_editor->baseTextDocument().data();
     QTC_ASSERT(baseTextDocument, return);
     TextEditor::SyntaxHighlighter *highlighter = qobject_cast<TextEditor::SyntaxHighlighter *>(baseTextDocument->syntaxHighlighter());
     QTC_ASSERT(highlighter, return);

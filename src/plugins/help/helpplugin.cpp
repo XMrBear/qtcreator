@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -1168,15 +1168,14 @@ void HelpPlugin::handleHelpRequest(const QUrl &url)
 
     QString address = url.toString();
     if (!Core::HelpManager::instance()->findFile(url).isValid()) {
-        if (address.startsWith(HelpViewer::NsNokia)
-            || address.startsWith(HelpViewer::NsTrolltech)) {
+        if (address.startsWith(QLatin1String("qthelp://com.nokia."))
+            || address.startsWith(QLatin1String("qthelp://com.trolltech."))) {
                 // local help not installed, resort to external web help
                 QString urlPrefix = QLatin1String("http://doc.qt.digia.com/");
-                if (url.authority() == QLatin1String("com.nokia.qtcreator")) {
+                if (url.authority() == QLatin1String("com.nokia.qtcreator"))
                     urlPrefix.append(QString::fromLatin1("qtcreator"));
-                } else {
+                else
                     urlPrefix.append(QLatin1String("latest"));
-                }
             address = urlPrefix + address.mid(address.lastIndexOf(QLatin1Char('/')));
         }
     }

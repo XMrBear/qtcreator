@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -84,7 +84,7 @@ QString SettingsPageWidget::searchKeywords() const
 SettingsPage::SettingsPage() :
     m_widget(0)
 {
-    setId(QLatin1String("B.QmlDesigner"));
+    setId("B.QmlDesigner");
     setDisplayName(tr("Qt Quick Designer"));
     setCategory(QmlJSEditor::Constants::SETTINGS_CATEGORY_QML);
     setDisplayCategory(QCoreApplication::translate("QmlJSEditor",
@@ -95,7 +95,7 @@ SettingsPage::SettingsPage() :
 QWidget *SettingsPage::createPage(QWidget *parent)
 {
     m_widget = new SettingsPageWidget(parent);
-    m_widget->setSettings(BauhausPlugin::pluginInstance()->settings());
+    m_widget->setSettings(QmlDesignerPlugin::instance()->settings());
     if (m_searchKeywords.isEmpty())
         m_searchKeywords = m_widget->searchKeywords();
     return m_widget;
@@ -105,7 +105,7 @@ void SettingsPage::apply()
 {
     if (!m_widget) // page was never shown
         return;
-    BauhausPlugin::pluginInstance()->setSettings(m_widget->settings());
+    QmlDesignerPlugin::instance()->setSettings(m_widget->settings());
 }
 
 bool SettingsPage::matches(const QString &s) const

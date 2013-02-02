@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -31,6 +31,8 @@
 #define CHANGESELECTIONDIALOG_H
 
 #include <QDialog>
+#include <QProcessEnvironment>
+QT_FORWARD_DECLARE_CLASS(QProcess)
 
 #include "ui_changeselectiondialog.h"
 
@@ -41,7 +43,8 @@ class ChangeSelectionDialog : public QDialog
 {
     Q_OBJECT
 public:
-    ChangeSelectionDialog(QWidget *parent = 0);
+    ChangeSelectionDialog(const QString &workingDirectory = QString(), QWidget *parent = 0);
+    ~ChangeSelectionDialog();
 
     QString change() const;
 
@@ -51,8 +54,15 @@ public:
 public slots:
     void selectWorkingDirectory();
 
+private slots:
+    void setDetails(int exitCode);
+    void recalculateDetails(const QString &ref);
+
 private:
     Ui_ChangeSelectionDialog m_ui;
+    QProcess* m_process;
+    QString m_gitBinaryPath;
+    QProcessEnvironment m_gitEnvironment;
 };
 
 } // namespace Internal

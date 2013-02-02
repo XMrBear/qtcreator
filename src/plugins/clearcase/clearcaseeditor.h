@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 AudioCodes Ltd.
+** Copyright (c) 2013 AudioCodes Ltd.
 ** Author: Orgad Shaneh <orgad.shaneh@audiocodes.com>
 ** Contact: http://www.qt-project.org/legal
 **
@@ -49,11 +49,9 @@ public:
 private:
     QSet<QString> annotationChanges() const;
     QString changeUnderCursor(const QTextCursor &) const;
-    VcsBase::DiffHighlighter *createDiffHighlighter() const;
     VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes, const QColor &bg) const;
-    QString fileNameFromDiffSpecification(const QTextBlock &diffFileName) const;
 
-    mutable QRegExp m_versionNumberPattern;
+    QRegExp m_versionNumberPattern;
 };
 
 } // namespace Internal

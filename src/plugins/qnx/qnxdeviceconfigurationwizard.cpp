@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -67,11 +67,10 @@ IDevice::Ptr QnxDeviceConfigurationWizard::device()
     sshParams.port = 22;
     sshParams.timeout = 10;
     sshParams.authenticationType = m_setupPage->authenticationType();
-    if (sshParams.authenticationType == QSsh::SshConnectionParameters::AuthenticationByPassword) {
+    if (sshParams.authenticationType == QSsh::SshConnectionParameters::AuthenticationByPassword)
         sshParams.password = m_setupPage->password();
-    } else {
+    else
         sshParams.privateKeyFile = m_setupPage->privateKeyFilePath();
-    }
 
     QnxDeviceConfiguration::Ptr device = QnxDeviceConfiguration::create(m_setupPage->configurationName(),
         Core::Id(Constants::QNX_QNX_OS_TYPE), IDevice::Hardware);

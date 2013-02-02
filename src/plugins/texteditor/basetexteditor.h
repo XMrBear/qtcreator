@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -38,6 +38,7 @@
 #include <find/ifindsupport.h>
 
 #include <QPlainTextEdit>
+#include <QSharedPointer>
 
 QT_BEGIN_NAMESPACE
 class QToolBar;
@@ -58,11 +59,11 @@ class IAssistMonitorInterface;
 class IAssistInterface;
 class IAssistProvider;
 class ICodeStylePreferences;
+typedef QList<RefactorMarker> RefactorMarkers;
 
 namespace Internal {
     class BaseTextEditorWidgetPrivate;
     class TextEditorOverlay;
-    typedef QList<RefactorMarker> RefactorMarkers;
     typedef QString (QString::*TransformationMethod)() const;
 }
 
@@ -179,6 +180,12 @@ public:
 
     void setLineNumbersVisible(bool b);
     bool lineNumbersVisible() const;
+
+    void setOpenLinksInNextSplit(bool b);
+    bool openLinksInNextSplit() const;
+
+    void setForceOpenLinksInNextSplit(bool b);
+    bool forceOpenLinksInNextSplit() const;
 
     void setMarksVisible(bool b);
     bool marksVisible() const;
@@ -347,6 +354,13 @@ protected:
     bool canInsertFromMimeData(const QMimeData *source) const;
     void insertFromMimeData(const QMimeData *source);
 
+    virtual QString plainTextFromSelection() const;
+    static QString convertToPlainText(const QString &txt);
+
+    virtual QString lineNumber(int blockNumber) const;
+    virtual int lineNumberTopPositionOffset(int blockNumber) const;
+    virtual int lineNumberDigits() const;
+
     static QString msgTextTooLarge(quint64 size);
 
 private:
@@ -357,8 +371,8 @@ public:
     void duplicateFrom(BaseTextEditorWidget *editor);
 
 protected:
-    BaseTextDocument *baseTextDocument() const;
-    void setBaseTextDocument(BaseTextDocument *doc);
+    QSharedPointer<BaseTextDocument> baseTextDocument() const;
+    void setBaseTextDocument(const QSharedPointer<BaseTextDocument> &doc);
 
     void setDefaultPath(const QString &defaultPath);
 
@@ -419,8 +433,8 @@ public:
     QList<QTextEdit::ExtraSelection> extraSelections(ExtraSelectionKind kind) const;
     QString extraSelectionTooltip(int pos) const;
 
-    Internal::RefactorMarkers refactorMarkers() const;
-    void setRefactorMarkers(const Internal::RefactorMarkers &markers);
+    RefactorMarkers refactorMarkers() const;
+    void setRefactorMarkers(const RefactorMarkers &markers);
 signals:
     void refactorMarkerClicked(const TextEditor::RefactorMarker &marker);
 

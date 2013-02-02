@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -46,6 +46,7 @@ public:
     void setAlwaysAdjustColumnsAction(QAction *action);
     virtual void addBaseContextActions(QMenu *menu);
     bool handleBaseContextAction(QAction *action);
+    QModelIndexList activeRows() const;
 
     void setModel(QAbstractItemModel *model);
     virtual void rowActivated(const QModelIndex &) {}

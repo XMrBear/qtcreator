@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -103,13 +103,12 @@ void InsertQtPropertyMembers::match(const CppQuickFixInterface &interface,
         FullySpecifiedType type = member->type();
         if (member->asFunction() || (type.isValid() && type->asFunctionType())) {
             const QString name = overview.prettyName(member->name());
-            if (name == getterName) {
+            if (name == getterName)
                 generateFlags &= ~GenerateGetter;
-            } else if (name == setterName) {
+            else if (name == setterName)
                 generateFlags &= ~GenerateSetter;
-            } else if (name == signalName) {
+            else if (name == signalName)
                 generateFlags &= ~GenerateSignal;
-            }
         } else if (member->asDeclaration()) {
             const QString name = overview.prettyName(member->name());
             if (name == storageName)

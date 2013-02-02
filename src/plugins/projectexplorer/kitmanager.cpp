@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -89,8 +89,7 @@ public:
 };
 
 KitManagerPrivate::KitManagerPrivate()
-    : m_defaultKit(0), m_initialized(false),
-      m_writer(0)
+    : m_defaultKit(0), m_initialized(false), m_writer(0)
 { }
 
 KitManagerPrivate::~KitManagerPrivate()
@@ -131,7 +130,15 @@ KitManager::KitManager(QObject *parent) :
 
 void KitManager::restoreKits()
 {
-    QTC_ASSERT(!d->m_writer, return);
+    QTC_ASSERT(!d->m_initialized, return);
+    static bool initializing = false;
+
+    if (initializing) // kits will call kits() to check their display names, which will trigger another
+                      // call to restoreKits, which ...
+        return;
+
+    initializing = true;
+
     QList<Kit *> kitsToRegister;
     QList<Kit *> kitsToValidate;
     QList<Kit *> kitsToCheck;
@@ -141,9 +148,11 @@ void KitManager::restoreKits()
     QFileInfo kitFile(systemSettingsFile.absolutePath() + QLatin1String(KIT_FILENAME));
     if (kitFile.exists()) {
         KitList system = restoreKits(Utils::FileName(kitFile));
-        // make sure we mark these as autodetected!
-        foreach (Kit *k, system.kits)
+        // make sure we mark these as autodetected and run additional setup logic
+        foreach (Kit *k, system.kits) {
             k->setAutoDetected(true);
+            k->setup();
+        }
 
         // SDK kits are always considered to be up for validation since they might have been
         // extended with additional information by creator in the meantime:
@@ -195,6 +204,8 @@ void KitManager::restoreKits()
         defaultKit->setAutoDetected(false);
         defaultKit->setIconPath(QLatin1String(":///DESKTOP///"));
 
+        defaultKit->setup();
+
         addKit(defaultKit);
     }
 
@@ -203,6 +214,7 @@ void KitManager::restoreKits()
         setDefaultKit(k);
 
     d->m_writer = new Utils::PersistentSettingsWriter(settingsFileName(), QLatin1String("QtCreatorProfiles"));
+    d->m_initialized = true;
     emit kitsChanged();
 }
 
@@ -320,10 +332,8 @@ KitManager::KitList KitManager::restoreKits(const Utils::FileName &fileName)
 
 QList<Kit *> KitManager::kits(const KitMatcher *m) const
 {
-    if (!d->m_initialized) {
-        d->m_initialized = true;
+    if (!d->m_initialized)
         const_cast<KitManager *>(this)->restoreKits();
-    }
 
     QList<Kit *> result;
     foreach (Kit *k, d->m_kitList) {
@@ -351,12 +361,10 @@ Kit *KitManager::find(const KitMatcher *m) const
     return matched.isEmpty() ? 0 : matched.first();
 }
 
-Kit *KitManager::defaultKit()
+Kit *KitManager::defaultKit() const
 {
-    if (!d->m_initialized) {
-        d->m_initialized = true;
-        restoreKits();
-    }
+    if (!d->m_initialized)
+        const_cast<KitManager *>(this)->restoreKits();
     return d->m_defaultKit;
 }
 
@@ -371,6 +379,8 @@ Internal::KitManagerConfigWidget *KitManager::createConfigWidget(Kit *k) const
     foreach (KitInformation *ki, d->m_informationList)
         result->addConfigWidget(ki->createConfigWidget(result->workingCopy()));
 
+    result->updateVisibility();
+
     return result;
 }
 
@@ -378,7 +388,7 @@ void KitManager::notifyAboutUpdate(ProjectExplorer::Kit *k)
 {
     if (!k)
         return;
-    if (kits().contains(k))
+    if (kits().contains(k) && d->m_initialized)
         emit kitUpdated(k);
     else
         emit unmanagedKitUpdated(k);
@@ -395,7 +405,8 @@ bool KitManager::registerKit(ProjectExplorer::Kit *k)
 
     // make sure we have all the information in our kits:
     addKit(k);
-    emit kitAdded(k);
+    if (d->m_initialized)
+        emit kitAdded(k);
     return true;
 }
 
@@ -415,7 +426,8 @@ void KitManager::deregisterKit(Kit *k)
         }
         setDefaultKit(newDefault);
     }
-    emit kitRemoved(k);
+    if (d->m_initialized)
+        emit kitRemoved(k);
     delete k;
 }
 
@@ -426,7 +438,8 @@ void KitManager::setDefaultKit(Kit *k)
     if (k && !kits().contains(k))
         return;
     d->m_defaultKit = k;
-    emit defaultkitChanged();
+    if (d->m_initialized)
+        emit defaultkitChanged();
 }
 
 void KitManager::validateKits()
@@ -440,12 +453,14 @@ void KitManager::addKit(Kit *k)
     if (!k)
         return;
 
-    KitGuard g(k);
-    foreach (KitInformation *ki, d->m_informationList) {
-        if (!k->hasValue(ki->dataId()))
-            k->setValue(ki->dataId(), ki->defaultValue(k));
-        else
-            ki->fix(k);
+    {
+        KitGuard g(k);
+        foreach (KitInformation *ki, d->m_informationList) {
+            if (!k->hasValue(ki->dataId()))
+                k->setValue(ki->dataId(), ki->defaultValue(k));
+            else
+                ki->fix(k);
+        }
     }
 
     d->m_kitList.append(k);

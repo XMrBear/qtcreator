@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -67,9 +67,8 @@ ProjectExplorer::IDevice::Ptr QnxDeviceConfigurationFactory::create(Core::Id id)
 {
     Q_UNUSED(id);
     QnxDeviceConfigurationWizard wizard;
-    if (wizard.exec() != QDialog::Accepted) {
+    if (wizard.exec() != QDialog::Accepted)
         return ProjectExplorer::IDevice::Ptr();
-    }
     return wizard.device();
 }
 

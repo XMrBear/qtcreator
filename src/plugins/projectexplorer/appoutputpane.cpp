@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -121,6 +121,8 @@ AppOutputPane::AppOutputPane() :
     m_stopButton(new QToolButton),
     m_attachButton(new QToolButton)
 {
+    setObjectName(QLatin1String("AppOutputPane")); // Used in valgrind engine
+
     // Rerun
     m_reRunButton->setIcon(QIcon(QLatin1String(ProjectExplorer::Constants::ICON_RUN_SMALL)));
     m_reRunButton->setToolTip(tr("Re-run this run-configuration"));
@@ -324,7 +326,8 @@ void AppOutputPane::createNewOutputWindow(RunControl *rc)
     }
     // Create new
     static uint counter = 0;
-    Core::Context context(Constants::C_APP_OUTPUT, counter++);
+    Core::Id contextId = Core::Id(Constants::C_APP_OUTPUT).withSuffix(counter++);
+    Core::Context context(contextId);
     Core::OutputWindow *ow = new Core::OutputWindow(context, m_tabWidget);
     ow->setWindowTitle(tr("Application Output Window"));
     ow->setWindowIcon(QIcon(QLatin1String(Constants::ICON_WINDOW)));

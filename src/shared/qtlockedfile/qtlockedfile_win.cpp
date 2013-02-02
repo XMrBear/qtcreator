@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -49,7 +49,7 @@ static QString errorCodeToString(DWORD errorCode)
     if (data != 0)
         LocalFree(data);
 
-    if (result.endsWith('\n'))
+    if (result.endsWith(QLatin1Char('\n')))
         result.truncate(result.length() - 1);
 
     return result;

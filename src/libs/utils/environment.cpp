@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -33,6 +33,7 @@
 
 #include <QDir>
 #include <QProcess>
+#include <QProcessEnvironment>
 #include <QString>
 #include <QCoreApplication>
 
@@ -40,7 +41,7 @@ class SystemEnvironment : public Utils::Environment
 {
 public:
     SystemEnvironment()
-        : Environment(QProcess::systemEnvironment())
+        : Environment(QProcessEnvironment::systemEnvironment().toStringList())
     {
         if (Utils::HostOsInfo::isLinuxHost()) {
             QString ldLibraryPath = value(QLatin1String("LD_LIBRARY_PATH"));
@@ -123,6 +124,15 @@ QStringList Environment::toStringList() const
         entry += it.value();
         result.push_back(entry);
     }
+    return result;
+}
+
+QProcessEnvironment Environment::toProcessEnvironment() const
+{
+    QProcessEnvironment result;
+    const QMap<QString, QString>::const_iterator end = m_values.constEnd();
+    for (QMap<QString, QString>::const_iterator it = m_values.constBegin(); it != end; ++it)
+        result.insert(it.key(), it.value());
     return result;
 }
 

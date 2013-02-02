@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -45,7 +45,7 @@ class PerforceChecker : public QObject
     Q_OBJECT
 public:
     explicit PerforceChecker(QObject *parent = 0);
-    virtual ~PerforceChecker();
+    ~PerforceChecker();
 
 public slots:
     void start(const QString &binary,

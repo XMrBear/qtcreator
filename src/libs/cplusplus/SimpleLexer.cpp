@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -133,6 +133,9 @@ QList<Token> SimpleLexer::operator()(const QString &text, int state)
             inPreproc = true;
         else if (inPreproc && tokens.size() == 1 && tk.is(T_IDENTIFIER) &&
                  spell == QLatin1String("include"))
+            lex.setScanAngleStringLiteralTokens(true);
+        else if (inPreproc && tokens.size() == 1 && tk.is(T_IDENTIFIER) &&
+                 spell == QLatin1String("include_next"))
             lex.setScanAngleStringLiteralTokens(true);
         else if (_objCEnabled
                  && inPreproc && tokens.size() == 1 && tk.is(T_IDENTIFIER) &&

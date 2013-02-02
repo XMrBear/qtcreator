@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -30,12 +30,14 @@
 #include "qmlconsolemanager.h"
 #include "qmlconsolepane.h"
 #include "qmlconsoleitemmodel.h"
+#include "qmlconsolemodel.h"
 
 #include <extensionsystem/pluginmanager.h>
 
 #include <qmljs/iscriptevaluator.h>
 
 #include <QVariant>
+#include <QCoreApplication>
 
 using namespace QmlJS;
 
@@ -174,7 +176,8 @@ void QmlConsoleModel::evaluate(const QString &expression)
         } else {
             ConsoleItem *root = manager->rootItem();
             ConsoleItem *item = constructLogItemTree(
-                        root, QObject::tr("Can only evaluate during a QML debug session."));
+                        root, QCoreApplication::translate("QmlJSTools::Internal::QmlConsoleModel",
+                                                          "Can only evaluate during a QML debug session."));
             if (item) {
                 QmlConsoleModel::qmlConsoleItemModel()->appendEditableRow();
                 manager->printToConsolePane(item);

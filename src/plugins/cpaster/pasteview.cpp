@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -207,11 +207,10 @@ void PasteView::setProtocol(const QString &protocol)
 {
      const int index = m_ui.protocolBox->findText(protocol);
      m_ui.protocolBox->setCurrentIndex(index);
-     if (index == m_ui.protocolBox->currentIndex()) {
+     if (index == m_ui.protocolBox->currentIndex())
          protocolChanged(index); // Force enabling
-     } else {
+     else
          m_ui.protocolBox->setCurrentIndex(index);
-     }
 }
 
 } //namespace CodePaster

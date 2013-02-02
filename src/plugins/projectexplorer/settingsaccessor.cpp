@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -2615,9 +2615,8 @@ void Version11Handler::parseQtversionFile()
                     const QStringList &list = line.split(QLatin1Char(' '));
                     if (list.count() <= 1)
                         continue;
-                    if (list.at(0) == QLatin1String("sysroot")) {
+                    if (list.at(0) == QLatin1String("sysroot"))
                         sysRoot = maddeRoot(qmake) + QLatin1String("/sysroots/") + list.at(1);
-                    }
                 }
             }
         }

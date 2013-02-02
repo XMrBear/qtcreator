@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -40,8 +40,8 @@
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/session.h>
 #include <texteditor/basetexteditor.h>
-#include <texteditor/tooltip/tooltip.h>
-#include <texteditor/tooltip/tipcontents.h>
+#include <utils/tooltip/tooltip.h>
+#include <utils/tooltip/tipcontents.h>
 #include <utils/qtcassert.h>
 
 #include <QDebug>
@@ -803,11 +803,10 @@ void BookmarkManager::operateTooltip(TextEditor::ITextEditor *textEditor, const 
     if (!mark)
         return;
 
-    if (mark->note().isEmpty()) {
-        TextEditor::ToolTip::instance()->hide();
-    } else {
-        TextEditor::ToolTip::instance()->show(pos, TextEditor::TextContent(mark->note()), textEditor->widget());
-    }
+    if (mark->note().isEmpty())
+        Utils::ToolTip::instance()->hide();
+    else
+        Utils::ToolTip::instance()->show(pos, Utils::TextContent(mark->note()), textEditor->widget());
 }
 
 /* Loads the bookmarks from the session settings. */

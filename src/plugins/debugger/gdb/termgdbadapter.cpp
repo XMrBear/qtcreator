@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -29,12 +29,11 @@
 
 #include "termgdbadapter.h"
 
-#include "debuggerstartparameters.h"
-#include "gdbmi.h"
-#include "gdbengine.h"
-#include "procinterrupt.h"
-#include "debuggerstringutils.h"
 #include "debuggercore.h"
+#include "debuggerprotocol.h"
+#include "debuggerstartparameters.h"
+#include "debuggerstringutils.h"
+#include "procinterrupt.h"
 #include "shared/hostutils.h"
 
 #include <utils/hostosinfo.h>
@@ -61,11 +60,10 @@ GdbTermEngine::GdbTermEngine(const DebuggerStartParameters &startParameters)
 {
 #ifdef Q_OS_WIN
     // Windows up to xp needs a workaround for attaching to freshly started processes. see proc_stub_win
-    if (QSysInfo::WindowsVersion >= QSysInfo::WV_VISTA) {
+    if (QSysInfo::WindowsVersion >= QSysInfo::WV_VISTA)
         m_stubProc.setMode(Utils::ConsoleProcess::Suspend);
-    } else {
+    else
         m_stubProc.setMode(Utils::ConsoleProcess::Debug);
-    }
 #else
     m_stubProc.setMode(Utils::ConsoleProcess::Debug);
     m_stubProc.setSettings(Core::ICore::settings());
@@ -105,7 +103,7 @@ void GdbTermEngine::setupEngine()
 
     connect(&m_stubProc, SIGNAL(processError(QString)), SLOT(stubError(QString)));
     connect(&m_stubProc, SIGNAL(processStarted()), SLOT(stubStarted()));
-    connect(&m_stubProc, SIGNAL(wrapperStopped()), SLOT(stubExited()));
+    connect(&m_stubProc, SIGNAL(stubStopped()), SLOT(stubExited()));
     // FIXME: Starting the stub implies starting the inferior. This is
     // fairly unclean as far as the state machine and error reporting go.
 

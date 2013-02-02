@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -118,9 +118,8 @@ void QmlProfilerTraceClient::setRecording(bool v)
 
     d->recording = v;
 
-    if (status() == Enabled) {
+    if (status() == Enabled)
         sendRecordingStatus();
-    }
 
     emit recordingChanged(v);
 }
@@ -225,9 +224,8 @@ void QmlProfilerTraceClient::messageReceived(const QByteArray &data)
             if (!stream.atEnd())
                 stream >> column;
 
-            if (d->rangeCount[range] > 0) {
+            if (d->rangeCount[range] > 0)
                 d->rangeLocations[range].push(QmlEventLocation(fileName, line, column));
-            }
         } else {
             if (d->rangeCount[range] > 0) {
                 --d->rangeCount[range];

@@ -129,9 +129,8 @@ void Bind::setDeclSpecifiers(Symbol *symbol, const FullySpecifiedType &declSpeci
     symbol->setStorage(storage);
 
     if (Function *funTy = symbol->asFunction()) {
-        if (declSpecifiers.isVirtual()) {
+        if (declSpecifiers.isVirtual())
             funTy->setVirtual(true);
-        }
     }
 
     if (declSpecifiers.isDeprecated())
@@ -179,6 +178,13 @@ void Bind::operator()(DeclarationAST *ast, Scope *scope)
 {
     Scope *previousScope = switchScope(scope);
     declaration(ast);
+    (void) switchScope(previousScope);
+}
+
+void Bind::operator()(StatementAST *ast, Scope *scope)
+{
+    Scope *previousScope = switchScope(scope);
+    statement(ast);
     (void) switchScope(previousScope);
 }
 
@@ -466,9 +472,8 @@ void Bind::enumerator(EnumeratorAST *ast, Enum *symbol)
         EnumeratorDeclaration *e = control()->newEnumeratorDeclaration(ast->identifier_token, name);
         e->setType(control()->integerType(IntegerType::Int)); // ### introduce IntegerType::Enumerator
 
-        if (ExpressionAST *expr = ast->expression) {
+        if (ExpressionAST *expr = ast->expression)
             e->setConstantValue(asStringLiteral(expr->firstToken(), expr->lastToken()));
-        }
 
         symbol->addMember(e);
     }
@@ -1845,9 +1850,8 @@ bool Bind::visit(SimpleDeclarationAST *ast)
 
         const Name *declName = 0;
         unsigned sourceLocation = location(it->value, ast->firstToken());
-        if (declaratorId && declaratorId->name) {
+        if (declaratorId && declaratorId->name)
             declName = declaratorId->name->name;
-        }
 
         Declaration *decl = control()->newDeclaration(sourceLocation, declName);
         decl->setType(declTy);
@@ -2635,10 +2639,14 @@ bool Bind::visit(TemplateIdAST *ast)
     }
 
     const Identifier *id = identifier(ast->identifier_token);
+    const int tokenKindBeforeIdentifier(translationUnit()->tokenKind(ast->identifier_token - 1));
+    const bool isSpecialization = (tokenKindBeforeIdentifier == T_CLASS ||
+                                   tokenKindBeforeIdentifier == T_STRUCT);
     if (templateArguments.empty())
-        _name = control()->templateNameId(id);
+        _name = control()->templateNameId(id, isSpecialization);
     else
-        _name = control()->templateNameId(id, &templateArguments[0], templateArguments.size());
+        _name = control()->templateNameId(id, isSpecialization, &templateArguments[0],
+                templateArguments.size());
 
     ast->name = _name;
     return false;

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -46,6 +46,12 @@
 #include "qnxrunconfigurationfactory.h"
 #include "qnxqtversionfactory.h"
 #include "blackberrywizardextension.h"
+#include "blackberryndksettingspage.h"
+#include "bardescriptoreditorfactory.h"
+#include "bardescriptormagicmatcher.h"
+
+#include <coreplugin/icore.h>
+#include <coreplugin/mimedatabase.h>
 
 #include <QtPlugin>
 
@@ -73,6 +79,7 @@ bool QNXPlugin::initialize(const QStringList &arguments, QString *errorString)
     addAutoReleasedObject(new BlackBerryRunConfigurationFactory);
     addAutoReleasedObject(new BlackBerryRunControlFactory);
     addAutoReleasedObject(new BlackBerryWizardExtension);
+    addAutoReleasedObject(new BlackBerryNDKSettingsPage);
 
     // Handles QNX
     addAutoReleasedObject(new QnxQtVersionFactory);
@@ -81,6 +88,23 @@ bool QNXPlugin::initialize(const QStringList &arguments, QString *errorString)
     addAutoReleasedObject(new QnxDeployStepFactory);
     addAutoReleasedObject(new QnxDeployConfigurationFactory);
     addAutoReleasedObject(new QnxRunConfigurationFactory);
+
+    // bar-descriptor.xml editor
+    Core::MimeGlobPattern barDescriptorGlobPattern(QRegExp(QLatin1String("*.xml"), Qt::CaseInsensitive, QRegExp::Wildcard), Core::MimeGlobPattern::MinWeight + 1);
+    Core::MimeType barDescriptorMimeType;
+    barDescriptorMimeType.setType(QLatin1String(Constants::QNX_BAR_DESCRIPTOR_MIME_TYPE));
+    barDescriptorMimeType.setComment(tr("Bar descriptor file (BlackBerry)"));
+    barDescriptorMimeType.setGlobPatterns(QList<Core::MimeGlobPattern>() << barDescriptorGlobPattern);
+    barDescriptorMimeType.addMagicMatcher(QSharedPointer<Core::IMagicMatcher>(new BarDescriptorMagicMatcher));
+    barDescriptorMimeType.setSubClassesOf(QStringList() << QLatin1String("application/xml"));
+
+    Core::ICore *core = Core::ICore::instance();
+    Core::MimeDatabase *mdb = core->mimeDatabase();
+    if (!mdb->addMimeType(barDescriptorMimeType)) {
+        *errorString = tr("Could not add mime-type for bar-descriptor.xml editor");
+        return false;
+    }
+    addAutoReleasedObject(new BarDescriptorEditorFactory);
 
     return true;
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -165,9 +165,8 @@ void SelectionTool::hoverMoveEvent(const QList<QGraphicsItem*> &itemList,
 void SelectionTool::mouseReleaseEvent(const QList<QGraphicsItem*> &itemList,
                                       QGraphicsSceneMouseEvent *event)
 {
-    if (m_singleSelectionManipulator.isActive()) {
+    if (m_singleSelectionManipulator.isActive())
         m_singleSelectionManipulator.end(event->scenePos());
-    }
     else if (m_rubberbandSelectionManipulator.isActive()) {
 
         QPointF mouseMovementVector = m_rubberbandSelectionManipulator.beginPoint() - event->scenePos();

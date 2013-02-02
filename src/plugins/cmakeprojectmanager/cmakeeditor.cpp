@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -46,6 +46,7 @@
 #include <texteditor/texteditorsettings.h>
 
 #include <QFileInfo>
+#include <QSharedPointer>
 
 using namespace CMakeProjectManager;
 using namespace CMakeProjectManager::Internal;
@@ -55,8 +56,7 @@ using namespace CMakeProjectManager::Internal;
 //
 
 CMakeEditor::CMakeEditor(CMakeEditorWidget *editor)
-  : BaseTextEditor(editor),
-    m_infoBarShown(false)
+  : BaseTextEditor(editor)
 {
     setContext(Core::Context(CMakeProjectManager::Constants::C_CMAKEEDITOR,
               TextEditor::Constants::C_TEXTEDITOR));
@@ -81,13 +81,15 @@ void CMakeEditor::markAsChanged()
 {
     if (!document()->isModified())
         return;
-    if (m_infoBarShown)
+    Core::InfoBar *infoBar = document()->infoBar();
+    Core::Id infoRunCmake("CMakeEditor.RunCMake");
+    if (!infoBar->canInfoBeAdded(infoRunCmake))
         return;
-    m_infoBarShown = true;
-    Core::InfoBarEntry info(Core::Id("CMakeEditor.RunCMake"),
-                            tr("Changes to cmake files are shown in the project tree after building."));
+    Core::InfoBarEntry info(infoRunCmake,
+                            tr("Changes to cmake files are shown in the project tree after building."),
+                            Core::InfoBarEntry::GlobalSuppressionEnabled);
     info.setCustomButtonInfo(tr("Build now"), this, SLOT(build()));
-    document()->infoBar()->addInfo(info);
+    infoBar->addInfo(info);
 }
 
 void CMakeEditor::build()
@@ -112,7 +114,7 @@ void CMakeEditor::build()
 CMakeEditorWidget::CMakeEditorWidget(QWidget *parent, CMakeEditorFactory *factory, TextEditor::TextEditorActionHandler *ah)
     : BaseTextEditorWidget(parent), m_factory(factory), m_ah(ah)
 {
-    CMakeDocument *doc = new CMakeDocument();
+    QSharedPointer<CMakeDocument> doc(new CMakeDocument);
     doc->setMimeType(QLatin1String(CMakeProjectManager::Constants::CMAKEMIMETYPE));
     setBaseTextDocument(doc);
 

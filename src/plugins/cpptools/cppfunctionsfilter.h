@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -42,10 +42,6 @@ class CppFunctionsFilter : public CppLocatorFilter
 public:
     CppFunctionsFilter(CppModelManager *manager);
     ~CppFunctionsFilter();
-
-    QString displayName() const { return tr("C++ Methods and Functions"); }
-    QString id() const { return QLatin1String("Methods"); }
-    Priority priority() const { return Medium; }
 };
 
 } // namespace Internal

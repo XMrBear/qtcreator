@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -64,6 +64,8 @@ QWidget *PathChooserDelegate::createEditor(QWidget *parent, const QStyleOptionVi
     editor->setAutoFillBackground(true); // To hide the text beneath the editor widget
     editor->lineEdit()->setMinimumWidth(0);
 
+    connect(editor, SIGNAL(browsingFinished()), this, SLOT(emitCommitData()));
+
     return editor;
 }
 
@@ -94,4 +96,9 @@ void PathChooserDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpti
     Q_UNUSED(index);
 
     editor->setGeometry(option.rect);
+}
+
+void PathChooserDelegate::emitCommitData()
+{
+    emit commitData(qobject_cast<QWidget*>(sender()));
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -146,11 +146,10 @@ void KdePasteProtocol::pasteFinished()
         // Parse id from '<result><id>143204</id><hash></hash></result>'
         // No useful error reports have been observed.
         const QString id = parseElement(m_pasteReply, QLatin1String("id"));
-        if (id.isEmpty()) {
+        if (id.isEmpty())
             qWarning("%s protocol error: Could not send entry.", qPrintable(protocolName()));
-        } else {
+        else
             emit pasteDone(QLatin1String(hostUrlC) + id);
-        }
     }
 
     m_pasteReply->deleteLater();

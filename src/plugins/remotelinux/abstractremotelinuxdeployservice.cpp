@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -29,7 +29,6 @@
 
 #include "abstractremotelinuxdeployservice.h"
 
-#include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/deployablefile.h>
 #include <projectexplorer/target.h>
 #include <qtsupport/qtkitinformation.h>
@@ -85,7 +84,7 @@ public:
         : kit(0), connection(0), state(Inactive), stopRequested(false) {}
 
     IDevice::ConstPtr deviceConfiguration;
-    QPointer<BuildConfiguration> buildConfiguration;
+    QPointer<Target> target;
     Kit *kit;
     SshConnection *connection;
     State state;
@@ -107,9 +106,9 @@ AbstractRemoteLinuxDeployService::~AbstractRemoteLinuxDeployService()
     delete d;
 }
 
-const BuildConfiguration *AbstractRemoteLinuxDeployService::buildConfiguration() const
+const Target *AbstractRemoteLinuxDeployService::target() const
 {
-    return d->buildConfiguration;
+    return d->target;
 }
 
 const Kit *AbstractRemoteLinuxDeployService::profile() const
@@ -129,15 +128,11 @@ SshConnection *AbstractRemoteLinuxDeployService::connection() const
 
 void AbstractRemoteLinuxDeployService::saveDeploymentTimeStamp(const DeployableFile &deployableFile)
 {
-    if (!d->buildConfiguration)
+    if (!d->target)
         return;
-    const QtSupport::BaseQtVersion *const qtVersion
-            = QtSupport::QtKitInformation::qtVersion(d->kit);
     QString systemRoot;
     if (SysRootKitInformation::hasSysRoot(d->kit))
         systemRoot = SysRootKitInformation::sysRoot(d->kit).toString();
-    if (!qtVersion || !qtVersion->isValid())
-        return;
     d->lastDeployed.insert(DeployParameters(deployableFile,
                                             deviceConfiguration()->sshParameters().host,
                                             systemRoot),
@@ -146,11 +141,7 @@ void AbstractRemoteLinuxDeployService::saveDeploymentTimeStamp(const DeployableF
 
 bool AbstractRemoteLinuxDeployService::hasChangedSinceLastDeployment(const DeployableFile &deployableFile) const
 {
-    if (!d->buildConfiguration)
-        return true;
-    const QtSupport::BaseQtVersion *const qtVersion
-            = QtSupport::QtKitInformation::qtVersion(d->kit);
-    if (!qtVersion || !qtVersion->isValid())
+    if (!target())
         return true;
     QString systemRoot;
     if (SysRootKitInformation::hasSysRoot(d->kit))
@@ -161,11 +152,11 @@ bool AbstractRemoteLinuxDeployService::hasChangedSinceLastDeployment(const Deplo
         || deployableFile.localFilePath().toFileInfo().lastModified() > lastDeployed;
 }
 
-void AbstractRemoteLinuxDeployService::setBuildConfiguration(BuildConfiguration *bc)
+void AbstractRemoteLinuxDeployService::setTarget(Target *target)
 {
-    d->buildConfiguration = bc;
-    if (bc && bc->target())
-        d->kit = bc->target()->kit();
+    d->target = target;
+    if (target)
+        d->kit = target->kit();
     else
         d->kit = 0;
     d->deviceConfiguration = DeviceKitInformation::device(d->kit);

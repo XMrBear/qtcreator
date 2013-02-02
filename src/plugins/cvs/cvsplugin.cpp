@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -70,6 +70,10 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QMessageBox>
+
+#ifdef WITH_TESTS
+#include <QTest>
+#endif
 
 using namespace VcsBase;
 using namespace Core;
@@ -213,7 +217,8 @@ static const VcsBaseSubmitEditorParameters submitParameters = {
     Constants::CVS_SUBMIT_MIMETYPE,
     Constants::CVSCOMMITEDITOR_ID,
     Constants::CVSCOMMITEDITOR_DISPLAY_NAME,
-    Constants::CVSCOMMITEDITOR
+    Constants::CVSCOMMITEDITOR,
+    VcsBase::VcsBaseSubmitEditorParameters::DiffFiles
 };
 
 bool CvsPlugin::initialize(const QStringList &arguments, QString *errorMessage)
@@ -248,7 +253,7 @@ bool CvsPlugin::initialize(const QStringList &arguments, QString *errorMessage)
     addAutoReleasedObject(new CheckoutWizard);
 
     const QString prefix = QLatin1String("cvs");
-    m_commandLocator = new Locator::CommandLocator(QLatin1String("CVS"), prefix, prefix);
+    m_commandLocator = new Locator::CommandLocator("CVS", prefix, prefix);
     addAutoReleasedObject(m_commandLocator);
 
     // Register actions
@@ -681,11 +686,10 @@ void CvsPlugin::revertAll()
     const CvsResponse revertResponse =
             runCvs(state.topLevel(), args, m_settings.timeOutMS(),
                    SshPasswordPrompt|ShowStdOutInLogWindow);
-    if (revertResponse.result == CvsResponse::Ok) {
+    if (revertResponse.result == CvsResponse::Ok)
         cvsVersionControl()->emitRepositoryChanged(state.topLevel());
-    } else {
+    else
         QMessageBox::warning(0, title, tr("Revert failed: %1").arg(revertResponse.message), QMessageBox::Ok);
-    }
 }
 
 void CvsPlugin::revertCurrentFile()
@@ -719,9 +723,8 @@ void CvsPlugin::revertCurrentFile()
     const CvsResponse revertResponse =
             runCvs(state.currentFileTopLevel(), args, m_settings.timeOutMS(),
                    SshPasswordPrompt|ShowStdOutInLogWindow);
-    if (revertResponse.result == CvsResponse::Ok) {
+    if (revertResponse.result == CvsResponse::Ok)
         cvsVersionControl()->emitFilesChanged(QStringList(state.currentFile()));
-    }
 }
 
 void CvsPlugin::diffProject()
@@ -776,11 +779,10 @@ void CvsPlugin::startCommit(const QString &workingDir, const QStringList &files)
     StateList statusOutput = parseStatusOutput(QString(), response.stdOut);
     if (!files.isEmpty()) {
         for (StateList::iterator it = statusOutput.begin(); it != statusOutput.end() ; ) {
-            if (files.contains(it->second)) {
+            if (files.contains(it->second))
                 ++it;
-            } else {
+            else
                 it = statusOutput.erase(it);
-            }
         }
     }
     if (statusOutput.empty()) {
@@ -1377,6 +1379,55 @@ CvsControl *CvsPlugin::cvsVersionControl() const
 {
     return static_cast<CvsControl *>(versionControl());
 }
+
+#ifdef WITH_TESTS
+void CvsPlugin::testDiffFileResolving_data()
+{
+    QTest::addColumn<QByteArray>("header");
+    QTest::addColumn<QByteArray>("fileName");
+
+    QTest::newRow("Modified") << QByteArray(
+            "Index: src/plugins/cvs/cvseditor.cpp\n"
+            "===================================================================\n"
+            "--- src/plugins/cvs/cvseditor.cpp\t21 Jan 2013 20:34:20 -0000\t1.1\n"
+            "+++ src/plugins/cvs/cvseditor.cpp\t21 Jan 2013 20:34:28 -0000\n"
+            "@@ -120,7 +120,7 @@\n\n")
+        << QByteArray("src/plugins/cvs/cvseditor.cpp");
+}
+
+void CvsPlugin::testDiffFileResolving()
+{
+    CvsEditor editor(editorParameters + 3, 0);
+    editor.testDiffFileResolving();
+}
+
+void CvsPlugin::testLogResolving()
+{
+    QByteArray data(
+                "RCS file: /sources/cvs/ccvs/Attic/FIXED-BUGS,v\n"
+                "Working file: FIXED-BUGS\n"
+                "head: 1.3\n"
+                "branch:\n"
+                "locks: strict\n"
+                "access list:\n"
+                "symbolic names:\n"
+                "keyword substitution: kv\n"
+                "total revisions: 3;     selected revisions: 3\n"
+                "description:\n"
+                "----------------------------\n"
+                "revision 1.3\n"
+                "date: 1995-04-29 06:22:41 +0300;  author: jimb;  state: dead;  lines: +0 -0;\n"
+                "*** empty log message ***\n"
+                "----------------------------\n"
+                "revision 1.2\n"
+                "date: 1995-04-28 18:52:24 +0300;  author: noel;  state: Exp;  lines: +6 -0;\n"
+                "added latest commentary\n"
+                "----------------------------\n"
+                );
+    CvsEditor editor(editorParameters + 1, 0);
+    editor.testLogResolving(data, "1.3", "1.2");
+}
+#endif
 
 } // namespace Internal
 } // namespace Cvs

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -78,7 +78,7 @@ Settings SettingsWidget::settings()
 SettingsPage::SettingsPage(const QSharedPointer<Settings> &settings) :
     m_settings(settings), m_widget(0)
 {
-    setId(QLatin1String("A.General"));
+    setId("A.General");
     setDisplayName(tr("General"));
     setCategory(Constants::CPASTER_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("CodePaster",

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -92,7 +92,7 @@ private:
     Q_SLOT void showSettingsPage()
     {
         Core::ICore::showOptionsDialog(MaemoQemuSettingsPage::pageCategory(),
-            Core::Id(MaemoQemuSettingsPage::pageId()));
+            MaemoQemuSettingsPage::pageId());
         accept();
     }
 };
@@ -136,9 +136,9 @@ void MaemoQemuSettingsPage::showQemuCrashDialog()
     dlg.exec();
 }
 
-QString MaemoQemuSettingsPage::pageId()
+Core::Id MaemoQemuSettingsPage::pageId()
 {
-    return QLatin1String("ZZ.Qemu Settings");
+    return "ZZ.Qemu Settings";
 }
 
 Core::Id MaemoQemuSettingsPage::pageCategory()

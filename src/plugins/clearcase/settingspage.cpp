@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 AudioCodes Ltd.
+** Copyright (c) 2013 AudioCodes Ltd.
 ** Author: Orgad Shaneh <orgad.shaneh@audiocodes.com>
 ** Contact: http://www.qt-project.org/legal
 **
@@ -127,7 +127,7 @@ QString SettingsPageWidget::searchKeywords() const
 SettingsPage::SettingsPage() :
     m_widget(0)
 {
-    setId(QLatin1String(ClearCase::Constants::VCS_ID_CLEARCASE));
+    setId(ClearCase::Constants::VCS_ID_CLEARCASE);
     setDisplayName(tr("ClearCase"));
 }
 

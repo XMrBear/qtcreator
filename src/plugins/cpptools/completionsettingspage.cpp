@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -48,7 +48,7 @@ CompletionSettingsPage::CompletionSettingsPage(QObject *parent)
 {
     m_commentsSettings.fromSettings(QLatin1String(CPPTOOLS_SETTINGSGROUP), Core::ICore::settings());
 
-    setId(QLatin1String("P.Completion"));
+    setId("P.Completion");
     setDisplayName(tr("Completion"));
 }
 

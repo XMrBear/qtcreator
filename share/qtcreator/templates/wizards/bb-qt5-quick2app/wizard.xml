@@ -4,7 +4,7 @@
 **
 ** This file is part of Qt Creator
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -36,11 +36,14 @@
         featuresRequired="QtSupport.Wizards.FeatureBlackBerry">
     <icon>icon.png</icon>
     <displayname>BlackBerry Qt Quick 2 Application</displayname>;
-    <description>Creates an experimental Qt Quick 2 application for BlackBerry 10. You need an own Qt5 build for BlackBerry 10 since Qt5 is not provided in the current BlackBerry 10 NDK and is not included in DevAlpha devices.</description>
+    <description>Creates an experimental Qt Quick 2 application for BlackBerry 10. You need to provide your own build of Qt 5 for BlackBerry 10 since Qt 5 is not provided in the current BlackBerry 10 NDK and is not included in DevAlpha devices.</description>
     <files>
         <file source="main.cpp" openeditor="true"/>
         <file source="qml/main.qml" openeditor="true"/>
         <file source="bar-descriptor.xml" openeditor="true"/>
         <file source="project.pro" target="%ProjectName%.pro" openproject="true"/>
+        <file source="../../qtquick2app/qtquick2applicationviewer/qtquick2applicationviewer.h" target="qtquick2applicationviewer/qtquick2applicationviewer.h" />
+        <file source="../../qtquick2app/qtquick2applicationviewer/qtquick2applicationviewer.cpp" target="qtquick2applicationviewer/qtquick2applicationviewer.cpp" />
+        <file source="../../qtquick2app/qtquick2applicationviewer/qtquick2applicationviewer.pri" target="qtquick2applicationviewer/qtquick2applicationviewer.pri" />
     </files>
 </wizard>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -260,6 +260,8 @@ void FindUsages::checkExpression(unsigned startToken, unsigned endToken, Scope *
     if (! scope)
         scope = _currentScope;
 
+    // make possible to instantiate templates
+    typeofExpression.setExpandTemplates(true);
     const QList<LookupItem> results = typeofExpression(expression, scope, TypeOfExpression::Preprocess);
     reportResult(endToken, results);
 }

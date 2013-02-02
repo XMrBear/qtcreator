@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -110,7 +110,8 @@ enum Command {
     CmdAddWatch,
     CmdWidgetAt,
     CmdBreakPoints,
-    CmdTest
+    CmdTest,
+    CmdSetParameter
 };
 
 static const CommandDescription commandDescriptions[] = {
@@ -167,12 +168,13 @@ static const CommandDescription commandDescriptions[] = {
 {"help","Prints help.",""},
 {"memory","Prints memory contents in Base64 encoding.","[-t token] <address> <length>"},
 {"expression","Prints expression value.","[-t token] <expression>"},
-{"stack","Prints stack in GDBMI format.","[-t token] [max-frames]"},
+{"stack","Prints stack in GDBMI format.","[-t token] [<max-frames>|unlimited]"},
 {"shutdownex","Unhooks output callbacks.\nNeeds to be called explicitly only in case of remote debugging.",""},
 {"addwatch","Add watch expression","<iname> <expression>"},
 {"widgetat","Return address of widget at position","<x> <y>"},
 {"breakpoints","List breakpoints with modules","[-h] [-v]"},
-{"test","Testing command","-T type | -w watch-expression"}
+{"test","Testing command","-T type | -w watch-expression"},
+{"setparameter","Set parameter","maxStringLength=value maxStackDepth=value"}
 };
 
 typedef std::vector<std::string> StringVector;
@@ -277,11 +279,10 @@ extern "C" HRESULT CALLBACK pid(CIDebugClient *client, PCSTR args)
     commandTokens<StringList>(args, &token);
     dprintf("Qt Creator CDB extension version 2.7 (Qt 5 support) %d bit built %s.\n",
             sizeof(void *) * 8, __DATE__);
-    if (const ULONG pid = currentProcessId(client)) {
+    if (const ULONG pid = currentProcessId(client))
         ExtensionContext::instance().report('R', token, 0, "pid", "%u", pid);
-    } else {
+    else
         ExtensionContext::instance().report('N', token, 0, "pid", "0");
-    }
     return S_OK;
 }
 
@@ -564,11 +565,10 @@ extern "C" HRESULT CALLBACK locals(CIDebugClient *client, PCSTR args)
     int token;
     const std::string output = commmandLocals(exc, args, &token, &errorMessage);
     SymbolGroupValue::verbose = 0;
-    if (output.empty()) {
+    if (output.empty())
         ExtensionContext::instance().report('N', token, 0, "locals", errorMessage.c_str());
-    } else {
+    else
         ExtensionContext::instance().reportLong('R', token, "locals", output);
-    }
     return S_OK;
 }
 
@@ -619,11 +619,10 @@ extern "C" HRESULT CALLBACK watches(CIDebugClient *client, PCSTR args)
     int token = 0;
     const std::string output = commmandWatches(exc, args, &token, &errorMessage);
     SymbolGroupValue::verbose = 0;
-    if (output.empty()) {
+    if (output.empty())
         ExtensionContext::instance().report('N', token, 0, "locals", errorMessage.c_str());
-    } else {
+    else
         ExtensionContext::instance().reportLong('R', token, "locals", output);
-    }
     return S_OK;
 }
 
@@ -670,11 +669,10 @@ extern "C" HRESULT CALLBACK dumplocal(CIDebugClient *client, PCSTR  argsIn)
     std::string errorMessage;
     int token = 0;
     const std::string value = dumplocalHelper(exc,argsIn, &token, &errorMessage);
-    if (value.empty()) {
+    if (value.empty())
         ExtensionContext::instance().report('N', token, 0, "dumplocal", errorMessage.c_str());
-    } else {
+    else
         ExtensionContext::instance().reportLong('R', token, "dumplocal", value);
-    }
     return S_OK;
 }
 
@@ -699,11 +697,10 @@ extern "C" HRESULT CALLBACK typecast(CIDebugClient *client, PCSTR args)
     } else {
         errorMessage = singleLineUsage(commandDescriptions[CmdTypecast]);
     }
-    if (symGroup != 0 && symGroup->typeCast(iname, desiredType, &errorMessage)) {
+    if (symGroup != 0 && symGroup->typeCast(iname, desiredType, &errorMessage))
         ExtensionContext::instance().report('R', token, 0, "typecast", "OK");
-    } else {
+    else
         ExtensionContext::instance().report('N', token, 0, "typecast", errorMessage.c_str());
-    }
     return S_OK;
 }
 
@@ -729,11 +726,10 @@ extern "C" HRESULT CALLBACK addsymbol(CIDebugClient *client, PCSTR args)
     } else {
         errorMessage = singleLineUsage(commandDescriptions[CmdAddsymbol]);
     }
-    if (symGroup != 0 && symGroup->addSymbol(std::string(), name, iname, &errorMessage)) {
+    if (symGroup != 0 && symGroup->addSymbol(std::string(), name, iname, &errorMessage))
         ExtensionContext::instance().report('R', token, 0, "addsymbol", "OK");
-    } else {
+    else
         ExtensionContext::instance().report('N', token, 0, "addsymbol", errorMessage.c_str());
-    }
     return S_OK;
 }
 
@@ -763,11 +759,10 @@ extern "C" HRESULT CALLBACK addwatch(CIDebugClient *client, PCSTR argsIn)
         success = watchesSymGroup->addWatch(exc.symbols(), iname, watchExpression, &errorMessage);
     } while (false);
 
-    if (success) {
+    if (success)
         ExtensionContext::instance().report('R', token, 0, "addwatch", "Ok");
-    } else {
+    else
         ExtensionContext::instance().report('N', token, 0, "addwatch", errorMessage.c_str());
-    }
     return S_OK;
 }
 
@@ -824,11 +819,10 @@ extern "C" HRESULT CALLBACK assign(CIDebugClient *client, PCSTR argsIn)
                                    &errorMessage);
     } while (false);
 
-    if (success) {
+    if (success)
         ExtensionContext::instance().report('R', token, 0, "assign", "Ok");
-    } else {
+    else
         ExtensionContext::instance().report('N', token, 0, "assign", errorMessage.c_str());
-    }
     return S_OK;
 }
 
@@ -848,11 +842,10 @@ extern "C" HRESULT CALLBACK threads(CIDebugClient *client, PCSTR  argsIn)
                                               exc.control(),
                                               exc.advanced(),
                                               &errorMessage);
-    if (gdbmi.empty()) {
+    if (gdbmi.empty())
         ExtensionContext::instance().report('N', token, 0, "threads", errorMessage.c_str());
-    } else {
+    else
         ExtensionContext::instance().reportLong('R', token, "threads", gdbmi);
-    }
     return S_OK;
 }
 
@@ -868,11 +861,10 @@ extern "C" HRESULT CALLBACK registers(CIDebugClient *Client, PCSTR argsIn)
     const StringList tokens = commandTokens<StringList>(argsIn, &token);
     const bool humanReadable = !tokens.empty() && tokens.front() == "-h";
     const std::string regs = gdbmiRegisters(exc.registers(), exc.control(), humanReadable, IncludePseudoRegisters, &errorMessage);
-    if (regs.empty()) {
+    if (regs.empty())
         ExtensionContext::instance().report('N', token, 0, "registers", errorMessage.c_str());
-    } else {
+    else
         ExtensionContext::instance().reportLong('R', token, "registers", regs);
-    }
     return S_OK;
 }
 
@@ -888,11 +880,10 @@ extern "C" HRESULT CALLBACK modules(CIDebugClient *Client, PCSTR argsIn)
     const StringList tokens = commandTokens<StringList>(argsIn, &token);
     const bool humanReadable = !tokens.empty() && tokens.front() == "-h";
     const std::string modules = gdbmiModules(exc.symbols(), humanReadable, &errorMessage);
-    if (modules.empty()) {
+    if (modules.empty())
         ExtensionContext::instance().report('N', token, 0, "modules", errorMessage.c_str());
-    } else {
+    else
         ExtensionContext::instance().reportLong('R', token, "modules", modules);
-    }
     return S_OK;
 }
 
@@ -901,6 +892,34 @@ extern "C" HRESULT CALLBACK modules(CIDebugClient *Client, PCSTR argsIn)
 extern "C" HRESULT CALLBACK idle(CIDebugClient *client, PCSTR)
 {
     ExtensionContext::instance().notifyIdleCommand(client);
+    return S_OK;
+}
+
+// Extension command 'setparameter':
+// Parse a list of parameters: 'key=value'
+
+extern "C" HRESULT CALLBACK setparameter(CIDebugClient *, PCSTR args)
+{
+    int token;
+    StringVector tokens = commandTokens<StringVector>(args, &token);
+    const size_t count = tokens.size();
+    size_t success = 0;
+    for (size_t i = 0; i < count; ++i) {
+        const std::string &token = tokens.at(i);
+        const std::string::size_type equalsPos = token.find('=');
+        if (equalsPos != std::string::npos) {
+            const std::string value = token.substr(equalsPos + 1, token.size() - 1 - equalsPos);
+            if (!token.compare(0, equalsPos, "maxStringLength")) {
+                if (integerFromString(value, &ExtensionContext::instance().parameters().maxStringLength))
+                    ++success;
+            } else if (!token.compare(0, equalsPos, "maxStackDepth")) {
+                if (integerFromString(value, &ExtensionContext::instance().parameters().maxStackDepth))
+                    ++success;
+            }
+        }
+    }
+    if (success != count)
+        DebugPrint() << "Errors parsing setparameters command '" << args << '\'';
     return S_OK;
 }
 
@@ -969,11 +988,10 @@ extern "C" HRESULT CALLBACK expression(CIDebugClient *Client, PCSTR argsIn)
             break;
     } while (false);
 
-    if (errorMessage.empty()) {
+    if (errorMessage.empty())
         ExtensionContext::instance().reportLong('R', token, "expression", toString(value));
-    } else {
+    else
         ExtensionContext::instance().report('N', token, 0, "expression", errorMessage.c_str());
-    }
     return S_OK;
 }
 
@@ -987,24 +1005,28 @@ extern "C" HRESULT CALLBACK stack(CIDebugClient *Client, PCSTR argsIn)
 
     int token;
     bool humanReadable = false;
-    unsigned maxFrames = ExtensionContext::maxStackFrames;
+    unsigned maxFrames = ExtensionContext::instance().parameters().maxStackDepth;
 
     StringList tokens = commandTokens<StringList>(argsIn, &token);
     if (!tokens.empty() && tokens.front() == "-h") {
          humanReadable = true;
          tokens.pop_front();
     }
-    if (!tokens.empty())
-        integerFromString(tokens.front(), &maxFrames);
+    if (!tokens.empty()) {
+        if (tokens.front() == "unlimited") {
+            maxFrames = 1000;
+        } else {
+            integerFromString(tokens.front(), &maxFrames);
+        }
+    }
 
     const std::string stack = gdbmiStack(exc.control(), exc.symbols(),
                                          maxFrames, humanReadable, &errorMessage);
 
-    if (stack.empty()) {
+    if (stack.empty())
         ExtensionContext::instance().report('N', token, 0, "stack", errorMessage.c_str());
-    } else {
+    else
         ExtensionContext::instance().reportLong('R', token, "stack", stack);
-    }
     return S_OK;
 }
 
@@ -1041,11 +1063,10 @@ extern "C" HRESULT CALLBACK widgetat(CIDebugClient *client, PCSTR argsIn)
                                  x, y, &errorMessage);
     } while (false);
 
-    if (widgetAddress.empty()) {
+    if (widgetAddress.empty())
         ExtensionContext::instance().report('N', token, 0, "widgetat", errorMessage.c_str());
-    } else {
+    else
         ExtensionContext::instance().reportLong('R', token, "widgetat", widgetAddress);
-    }
     return S_OK;
 }
 
@@ -1070,11 +1091,10 @@ extern "C" HRESULT CALLBACK breakpoints(CIDebugClient *client, PCSTR argsIn)
     }
     const std::string bp = gdbmiBreakpoints(exc.control(), exc.symbols(), exc.dataSpaces(),
                                             humanReadable, verbose, &errorMessage);
-    if (bp.empty()) {
+    if (bp.empty())
         ExtensionContext::instance().report('N', token, 0, "breakpoints", errorMessage.c_str());
-    } else {
+    else
         ExtensionContext::instance().reportLong('R', token, "breakpoints", bp);
-    }
     return S_OK;
 }
 

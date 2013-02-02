@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -85,9 +85,14 @@ public:
     ProjectNode *projectNode() const;     // managing project
     FolderNode *parentFolderNode() const; // parent folder or project
     QString path() const;                 // file system path
+    virtual int line() const;
     virtual QString displayName() const;
     virtual QString vcsTopic() const;
     virtual QString tooltip() const;
+    virtual bool isEnabled() const;
+
+    void setPath(const QString &path);
+    void emitNodeUpdated();
 
 protected:
     Node(NodeType nodeType, const QString &path);
@@ -95,6 +100,9 @@ protected:
     void setNodeType(NodeType type);
     void setProjectNode(ProjectNode *project);
     void setParentFolderNode(FolderNode *parentFolder);
+
+    void emitNodeSortKeyAboutToChange();
+    void emitNodeSortKeyChanged();
 
 private:
     NodeType m_nodeType;
@@ -136,6 +144,9 @@ public:
 
     void setDisplayName(const QString &name);
     void setIcon(const QIcon &icon);
+
+    FileNode *findFile(const QString &path);
+    FolderNode *findSubFolder(const QString &path);
 
 protected:
     QList<FolderNode*> m_subFolderNodes;
@@ -228,6 +239,8 @@ public:
 
     void accept(NodesVisitor *visitor);
 
+    bool isEnabled() const { return true; }
+
 protected:
     // this is just the in-memory representation, a subclass
     // will add the persistent stuff
@@ -270,6 +283,8 @@ public:
 
     void accept(NodesVisitor *visitor);
 
+    bool isEnabled() const { return true; }
+
 protected:
     void addProjectNodes(const QList<ProjectNode*> &projectNodes);
     void removeProjectNodes(const QList<ProjectNode*> &projectNodes);
@@ -289,6 +304,11 @@ public:
     explicit NodesWatcher(QObject *parent = 0);
 
 signals:
+    // everything
+
+    // Emited whenever the model needs to send a update signal.
+    void nodeUpdated(ProjectExplorer::Node *node);
+
     // projects
     void aboutToChangeHasBuildTargets(ProjectExplorer::ProjectNode*);
     void hasBuildTargetsChanged(ProjectExplorer::ProjectNode *node);
@@ -310,14 +330,16 @@ signals:
     void filesAboutToBeRemoved(FolderNode *folder,
                                const QList<FileNode*> &staleFiles);
     void filesRemoved();
+    void nodeSortKeyAboutToChange(Node *node);
+    void nodeSortKeyChanged();
 
 private:
 
     // let project & session emit signals
     friend class ProjectNode;
     friend class SessionNode;
+    friend class Node;
 };
-
 
 } // namespace ProjectExplorer
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -65,23 +65,24 @@ QString ViewLogger::time() const
 ViewLogger::ViewLogger(QObject *parent)
     : AbstractView(parent)
 {
-    const QString path = QDir::tempPath() + QString("/qmldesigner-logger-%1-XXXXXX.txt").
+    m_timer.start();
+}
+
+void ViewLogger::modelAttached(Model *model)
+{
+    static const QString path = QDir::tempPath() + QString("/qmldesigner-logger-%1-XXXXXX.txt").
                          arg(QDateTime::currentDateTime().toString(Qt::ISODate).
                          replace(':', '-'));
-    QTemporaryFile *temporaryFile = new QTemporaryFile(path, this);
+    static QTemporaryFile *temporaryFile = new QTemporaryFile(path, this);
     temporaryFile->setAutoRemove(false);
-    if (temporaryFile->open()) {
+    static bool fileOpen = temporaryFile->open();
+    if (fileOpen) {
         qDebug() << "QmlDesigner: Log file is:" << temporaryFile->fileName();
         m_output.setDevice(temporaryFile);
     } else {
         qDebug() << "QmlDesigner: failed to open:" << temporaryFile->fileName();
     }
 
-    m_timer.start();
-}
-
-void ViewLogger::modelAttached(Model *model)
-{
     m_output << time() << indent("modelAttached:") << model << endl;
     AbstractView::modelAttached(model);
 }
@@ -284,6 +285,11 @@ void ViewLogger::rewriterEndTransaction()
 void ViewLogger::actualStateChanged(const ModelNode &node)
 {
     m_output << time() << indent("actualStateChanged:") << node << endl;
+}
+
+QWidget *ViewLogger::widget()
+{
+    return 0;
 }
 } // namespace Internal
 } // namespace QmlDesigner

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -238,9 +238,8 @@ void CompletionContextFinder::checkImport()
                     break;
                 }
             } else if (tokenString == QLatin1String("import")) {
-                if (state == Unknown || (state & ExpectImport)) {
+                if (state == Unknown || (state & ExpectImport))
                     m_inImport = true;
-                }
             } else {
                 if (state == Unknown || (state & ExpectAnyTarget)
                         || (state & ExpectTargetIdentifier)) {

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 AudioCodes Ltd.
+** Copyright (c) 2013 AudioCodes Ltd.
 ** Author: Orgad Shaneh <orgad.shaneh@audiocodes.com>
 ** Contact: http://www.qt-project.org/legal
 **
@@ -31,7 +31,7 @@
 #ifndef CLEARCASESUBMITEDITORWIDGET_H
 #define CLEARCASESUBMITEDITORWIDGET_H
 
-#include <utils/submiteditorwidget.h>
+#include <vcsbase/submiteditorwidget.h>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -43,7 +43,7 @@ namespace Internal {
 
 class ActivitySelector;
 
-class ClearCaseSubmitEditorWidget : public Utils::SubmitEditorWidget
+class ClearCaseSubmitEditorWidget : public VcsBase::SubmitEditorWidget
 {
     Q_OBJECT
 

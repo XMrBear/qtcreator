@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -168,8 +168,8 @@ void AbstractMaemoDeployByMountService::doDeploy()
 {
     QTC_ASSERT(m_state == Inactive, return);
 
-    if (!buildConfiguration()) {
-        emit errorMessage(tr("Missing build configuration."));
+    if (!target()) {
+        emit errorMessage(tr("Missing target."));
         setFinished();
         return;
     }
@@ -255,7 +255,7 @@ QString AbstractMaemoDeployByMountService::deployMountPoint() const
 {
     return MaemoGlobal::homeDirOnDevice(deviceConfiguration()->sshParameters().userName)
         + QLatin1String("/deployMountPoint_")
-        + buildConfiguration()->target()->project()->displayName();
+        + target()->project()->displayName();
 }
 
 

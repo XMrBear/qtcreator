@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -38,14 +38,15 @@
 using namespace CPlusPlus;
 
 Overview::Overview()
-    : markedArgument(0),
-      markedArgumentBegin(0),
-      markedArgumentEnd(0),
+    : starBindFlags(BindToIdentifier), // default to "Qt Style"
       showArgumentNames(false),
       showReturnTypes(false),
       showFunctionSignatures(true),
       showDefaultArguments(true),
-      showTemplateParameters(false)
+      showTemplateParameters(false),
+      markedArgument(0),
+      markedArgumentBegin(0),
+      markedArgumentEnd(0)
 { }
 
 QString Overview::prettyName(const Name *name) const

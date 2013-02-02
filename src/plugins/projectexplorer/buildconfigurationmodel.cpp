@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -127,9 +127,8 @@ QVariant BuildConfigurationModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
         const int row = index.row();
-        if (row < m_buildConfigurations.size()) {
+        if (row < m_buildConfigurations.size())
             return m_buildConfigurations.at(row)->displayName();
-        }
     }
 
     return QVariant();
@@ -163,9 +162,8 @@ void BuildConfigurationModel::addedBuildConfiguration(ProjectExplorer::BuildConf
     BuildConfigurationComparer compare;
     int i = 0;
     for (; i < m_buildConfigurations.size(); ++i) {
-        if (compare(bc, m_buildConfigurations.at(i))) {
+        if (compare(bc, m_buildConfigurations.at(i)))
             break;
-        }
     }
 
     beginInsertRows(QModelIndex(), i, i);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -57,6 +57,7 @@ using namespace Utils;
 
 namespace Core {
 
+#ifndef Q_OS_MAC
 // Show error with option to open settings.
 static void showGraphicalShellError(QWidget *parent, const QString &app, const QString &error)
 {
@@ -74,6 +75,7 @@ static void showGraphicalShellError(QWidget *parent, const QString &app, const Q
     if (mbox.clickedButton() == settingsButton)
         ICore::showOptionsDialog(Constants::SETTINGS_CATEGORY_CORE, Constants::SETTINGS_ID_ENVIRONMENT);
 }
+#endif
 
 void FileUtils::showInGraphicalShell(QWidget *parent, const QString &pathIn)
 {

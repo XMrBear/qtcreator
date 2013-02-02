@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -65,7 +65,6 @@ FormEditorScene::FormEditorScene(FormEditorWidget *view, FormEditorView *editorV
     setupScene();
     view->setScene(this);
     setItemIndexMethod(QGraphicsScene::NoIndex);
-    setSceneRect(-canvasWidth()/2., -canvasHeight()/2., canvasWidth(), canvasHeight());
 }
 
 FormEditorScene::~FormEditorScene()
@@ -100,13 +99,13 @@ FormEditorItem* FormEditorScene::itemForQmlItemNode(const QmlItemNode &qmlItemNo
 
 double FormEditorScene::canvasWidth() const
 {
-    DesignerSettings settings = Internal::BauhausPlugin::pluginInstance()->settings();
+    DesignerSettings settings = QmlDesignerPlugin::instance()->settings();
     return settings.canvasWidth;
 }
 
 double FormEditorScene::canvasHeight() const
 {
-    DesignerSettings settings = Internal::BauhausPlugin::pluginInstance()->settings();
+    DesignerSettings settings = QmlDesignerPlugin::instance()->settings();
     return settings.canvasHeight;
 }
 
@@ -217,6 +216,7 @@ FormEditorItem *FormEditorScene::addFormEditorItem(const QmlItemNode &qmlItemNod
 
     m_qmlItemNodeItemHash.insert(qmlItemNode, formEditorItem);
     if (qmlItemNode.isRootNode()) {
+        setSceneRect(-canvasWidth()/2., -canvasHeight()/2., canvasWidth(), canvasHeight());
         formLayerItem()->update();
         manipulatorLayerItem()->update();
     }
@@ -264,9 +264,8 @@ QList<QGraphicsItem *> FormEditorScene::removeLayerItems(const QList<QGraphicsIt
 
 void FormEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (editorView() && editorView()->model()) {
+    if (editorView() && editorView()->model())
         currentTool()->mousePressEvent(removeLayerItems(items(event->scenePos())), event);
-    }
 }
 
 static QTime staticTimer()
@@ -311,16 +310,14 @@ void FormEditorScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 
 void FormEditorScene::keyPressEvent(QKeyEvent *keyEvent)
 {
-    if (editorView() && editorView()->model()) {
+    if (editorView() && editorView()->model())
         currentTool()->keyPressEvent(keyEvent);
-    }
 }
 
 void FormEditorScene::keyReleaseEvent(QKeyEvent *keyEvent)
 {
-    if (editorView() && editorView()->model()) {
+    if (editorView() && editorView()->model())
         currentTool()->keyReleaseEvent(keyEvent);
-    }
 }
 
 FormEditorView *FormEditorScene::editorView() const
@@ -401,9 +398,8 @@ void FormEditorScene::clearFormEditorItems()
     QList<QGraphicsItem*> itemList(items());
 
     foreach (QGraphicsItem *item, itemList) {
-        if (qgraphicsitem_cast<FormEditorItem* >(item)) {
+        if (qgraphicsitem_cast<FormEditorItem* >(item))
             item->setParentItem(0);
-        }
     }
 
     foreach (QGraphicsItem *item, itemList) {

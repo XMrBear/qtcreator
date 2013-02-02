@@ -3,7 +3,6 @@ TARGET = QmlJSTools
 include(../../qtcreatorplugin.pri)
 include(qmljstools_dependencies.pri)
 
-DEFINES += QT_NO_CAST_FROM_ASCII
 DEFINES += QMLJSTOOLS_LIBRARY
 
 !dll {
@@ -28,6 +27,7 @@ HEADERS += \
     $$PWD/qmljstools_global.h \
     $$PWD/qmlconsolemanager.h \
     $$PWD/qmlconsoleitemmodel.h \
+    $$PWD/qmlconsolemodel.h \
     $$PWD/qmlconsolepane.h \
     $$PWD/qmlconsoleview.h \
     $$PWD/qmlconsoleitemdelegate.h \

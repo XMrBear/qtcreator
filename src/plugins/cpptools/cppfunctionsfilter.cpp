@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -34,6 +34,8 @@ using namespace CppTools::Internal;
 CppFunctionsFilter::CppFunctionsFilter(CppModelManager *manager)
     : CppLocatorFilter(manager)
 {
+    setId("Methods");
+    setDisplayName(tr("C++ Methods and Functions"));
     setShortcutString(QString(QLatin1Char('m')));
     setIncludedByDefault(false);
 

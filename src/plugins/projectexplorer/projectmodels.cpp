@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -75,9 +75,8 @@ bool sortNodes(Node *n1, Node *n2)
             return true; // project file is before everything else
         }
     } else {
-        if (file2 && file2->fileType() == ProjectFileType) {
+        if (file2 && file2->fileType() == ProjectFileType)
             return false;
-        }
     }
 
     // projects
@@ -151,11 +150,10 @@ bool sortNodes(Node *n1, Node *n2)
             return result < 0; // sort by filename
         } else {
             result = caseFriendlyCompare(filePath1, filePath2);
-            if (result != 0) {
+            if (result != 0)
                 return result < 0; // sort by filepath
-            } else {
+            else
                 return n1 < n2; // sort by pointer value
-            }
         }
     }
     return false;
@@ -199,6 +197,14 @@ FlatModel::FlatModel(SessionNode *rootNode, QObject *parent)
             this, SLOT(filesAboutToBeRemoved(FolderNode*,QList<FileNode*>)));
     connect(watcher, SIGNAL(filesRemoved()),
             this, SLOT(filesRemoved()));
+
+    connect(watcher, SIGNAL(nodeSortKeyAboutToChange(Node*)),
+            this, SLOT(nodeSortKeyAboutToChange(Node*)));
+    connect(watcher, SIGNAL(nodeSortKeyChanged()),
+            this, SLOT(nodeSortKeyChanged()));
+
+    connect(watcher, SIGNAL(nodeUpdated(ProjectExplorer::Node*)),
+            this, SLOT(nodeUpdated(ProjectExplorer::Node*)));
 }
 
 QModelIndex FlatModel::index(int row, int column, const QModelIndex &parent) const
@@ -298,6 +304,10 @@ QVariant FlatModel::data(const QModelIndex &index, int role) const
             result = node->path();
             break;
         }
+        case ProjectExplorer::Project::EnabledRole: {
+            result = node->isEnabled();
+            break;
+        }
         }
     }
 
@@ -313,6 +323,8 @@ Qt::ItemFlags FlatModel::flags(const QModelIndex &index) const
     // We control the only view, and that one does the checks
     Qt::ItemFlags f = Qt::ItemIsSelectable|Qt::ItemIsEnabled;
     if (Node *node = nodeForIndex(index)) {
+        if (node == m_rootNode)
+            return 0; // no flags for session node...
         if (!qobject_cast<ProjectNode *>(node)) {
             // either folder or file node
             if (node->projectNode()->supportedActions(node).contains(ProjectNode::Rename))
@@ -809,6 +821,28 @@ void FlatModel::removeFromCache(QList<FolderNode *> list)
     }
 }
 
+void FlatModel::changedSortKey(FolderNode *folderNode, Node *node)
+{
+    QList<Node *> nodes = m_childNodes.value(folderNode);
+    int oldIndex = nodes.indexOf(node);
+
+    nodes.removeAt(oldIndex);
+    QList<Node *>::iterator newPosIt = qLowerBound(nodes.begin(), nodes.end(), node, sortNodes);
+    int newIndex = newPosIt - nodes.begin();
+
+    if (newIndex == oldIndex)
+        return;
+
+    nodes.insert(newPosIt, node);
+
+    QModelIndex parentIndex = indexForNode(folderNode);
+    if (newIndex > oldIndex)
+        ++newIndex; // see QAbstractItemModel::beginMoveRows
+    beginMoveRows(parentIndex, oldIndex, oldIndex, parentIndex, newIndex);
+    m_childNodes[folderNode] = nodes;
+    endMoveRows();
+}
+
 void FlatModel::foldersRemoved()
 {
     // Do nothing
@@ -847,6 +881,23 @@ void FlatModel::filesAboutToBeRemoved(FolderNode *folder, const QList<FileNode*>
 void FlatModel::filesRemoved()
 {
     // Do nothing
+}
+
+void FlatModel::nodeSortKeyAboutToChange(Node *node)
+{
+    m_nodeForSortKeyChange = node;
+}
+
+void FlatModel::nodeSortKeyChanged()
+{
+    FolderNode *folderNode = visibleFolderNode(m_nodeForSortKeyChange->parentFolderNode());
+    changedSortKey(folderNode, m_nodeForSortKeyChange);
+}
+
+void FlatModel::nodeUpdated(Node *node)
+{
+    QModelIndex idx = indexForNode(node);
+    emit dataChanged(idx, idx);
 }
 
 namespace ProjectExplorer {

@@ -4,7 +4,7 @@ import "../QtcLibrary.qbs" as QtcLibrary
 QtcLibrary {
     name: "Utils"
 
-    cpp.defines: base.concat(["QTCREATOR_UTILS_LIB", "QT_NO_CAST_FROM_ASCII"])
+    cpp.defines: base.concat("QTCREATOR_UTILS_LIB")
 
     Properties {
         condition: qbs.targetOS == "windows"
@@ -57,6 +57,8 @@ QtcLibrary {
         "detailswidget.h",
         "elfreader.cpp",
         "elfreader.h",
+        "elidinglabel.cpp",
+        "elidinglabel.h",
         "environment.cpp",
         "environment.h",
         "environmentmodel.cpp",
@@ -89,6 +91,7 @@ QtcLibrary {
         "historycompleter.cpp",
         "historycompleter.h",
         "hostosinfo.h",
+        "hostosinfo.cpp",
         "htmldocextractor.cpp",
         "htmldocextractor.h",
         "ipaddresslineedit.cpp",
@@ -152,11 +155,6 @@ QtcLibrary {
         "styledbar.h",
         "stylehelper.cpp",
         "stylehelper.h",
-        "submiteditorwidget.cpp",
-        "submiteditorwidget.h",
-        "submiteditorwidget.ui",
-        "submitfieldwidget.cpp",
-        "submitfieldwidget.h",
         "synchronousprocess.cpp",
         "synchronousprocess.h",
         "tcpportsgatherer.cpp",
@@ -167,6 +165,8 @@ QtcLibrary {
         "treewidgetcolumnstretcher.h",
         "uncommentselection.cpp",
         "uncommentselection.h",
+        "unixutils.cpp",
+        "unixutils.h",
         "utils.qrc",
         "utils_global.h",
         "wizard.cpp",
@@ -178,9 +178,22 @@ QtcLibrary {
         "images/crumblepath-segment-selected-end.png",
         "images/crumblepath-segment-selected.png",
         "images/crumblepath-segment.png",
-        "images/removesubmitfield.png",
         "images/triangle_vert.png",
     ]
+
+    Group {
+        prefix: "tooltip/"
+        files: [
+            "effects.h",
+            "reuse.h",
+            "tipcontents.cpp",
+            "tipcontents.h",
+            "tips.cpp",
+            "tips.h",
+            "tooltip.cpp",
+            "tooltip.h",
+        ]
+    }
 
     Group {
         condition: qbs.targetOS == "windows"
@@ -195,14 +208,6 @@ QtcLibrary {
         condition: qbs.targetOS == "linux" || qbs.targetOS == "mac"
         files: [
             "consoleprocess_unix.cpp",
-        ]
-    }
-
-    Group {
-        condition: qbs.targetOS == "linux"
-        files: [
-            "unixutils.cpp",
-            "unixutils.h",
         ]
     }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -79,11 +79,10 @@ void CommonVcsSettings::toSettings(QSettings *s) const
     s->setValue(QLatin1String(lineWrapWidthKeyC), lineWrapWidth);
     s->setValue(QLatin1String(patchCommandKeyC), patchCommand);
     // Do not store the default setting to avoid clobbering the environment.
-    if (sshPasswordPrompt != sshPasswordPromptDefault()) {
+    if (sshPasswordPrompt != sshPasswordPromptDefault())
         s->setValue(QLatin1String(sshPasswordPromptKeyC), sshPasswordPrompt);
-    } else {
+    else
         s->remove(QLatin1String(sshPasswordPromptKeyC));
-    }
     s->endGroup();
 }
 

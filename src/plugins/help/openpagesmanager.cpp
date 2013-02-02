@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -259,11 +259,10 @@ void OpenPagesManager::closePagesExcept(const QModelIndex &index)
         int i = 0;
         HelpViewer *viewer = m_model->pageAt(index.row());
         while (m_model->rowCount() > 1) {
-            if (m_model->pageAt(i) != viewer) {
+            if (m_model->pageAt(i) != viewer)
                 removePage(i);
-            } else {
+            else
                 i++;
-            }
         }
     }
 }

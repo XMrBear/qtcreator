@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -40,7 +40,7 @@ namespace {
 
 class StaticAnalysisMessages
 {
-    Q_DECLARE_TR_FUNCTIONS(StaticAnalysisMessages)
+    Q_DECLARE_TR_FUNCTIONS(QmlJS::StaticAnalysisMessages)
 
 public:
     class PrototypeMessageData {
@@ -221,7 +221,7 @@ StaticAnalysisMessages::StaticAnalysisMessages()
     newMsg(WarnReferenceToParentItemNotSupportedByVisualDesigner, Warning,
             tr("Reference to parent item cannot be resolved correctly by the Qt Quick Designer"));
     newMsg(WarnUndefinedValueForVisualDesigner, Warning,
-            tr("This visual property binding cannot be evaluted in the local context "
+            tr("This visual property binding cannot be evaluated in the local context "
                "and might not show up in Qt Quick Designer as expected"));
     newMsg(WarnStatesOnlyInRootItemForVisualDesigner, Warning,
             tr("Qt Quick Designer only supports states in the root item "));

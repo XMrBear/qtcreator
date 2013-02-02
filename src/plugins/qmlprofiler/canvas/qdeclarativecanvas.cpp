@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -127,9 +127,8 @@ void Canvas::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget 
             painter->setWorldTransform(scale * old);
             painter->drawPixmap(0, 0, m_context->pixmap());
             painter->setWorldTransform(old);
-            if (clip()) {
+            if (clip())
                 painter->restore();
-            }
         }
     } else {
         painter->drawPixmap(0, 0, m_context->pixmap());

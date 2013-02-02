@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Brian McGillion
+** Copyright (c) 2013 Brian McGillion
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -44,19 +44,16 @@ public:
     explicit MercurialEditor(const VcsBase::VcsBaseEditorParameters *type, QWidget *parent);
 
 private:
-    virtual QSet<QString> annotationChanges() const;
-    virtual QString changeUnderCursor(const QTextCursor &cursor) const;
-    virtual VcsBase::DiffHighlighter *createDiffHighlighter() const;
-    virtual VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes, const QColor &bg) const;
-    virtual QString fileNameFromDiffSpecification(const QTextBlock &diffFileSpec) const;
-    virtual QString decorateVersion(const QString &revision) const;
-    virtual QStringList annotationPreviousVersions(const QString &revision) const;
+    QSet<QString> annotationChanges() const;
+    QString changeUnderCursor(const QTextCursor &cursor) const;
+    VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes, const QColor &bg) const;
+    QString decorateVersion(const QString &revision) const;
+    QStringList annotationPreviousVersions(const QString &revision) const;
 
     mutable QRegExp exactIdentifier12;
     mutable QRegExp exactIdentifier40;
     mutable QRegExp changesetIdentifier12;
     const QRegExp changesetIdentifier40;
-    const QRegExp diffIdentifier;
 };
 
 } // namespace Internal

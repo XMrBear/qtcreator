@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Brian McGillion
+** Copyright (c) 2013 Brian McGillion
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -43,7 +43,7 @@ public:
                                             QTextDocument *document = 0);
 
 private:
-    virtual QString changeNumber(const QString &block) const;
+    QString changeNumber(const QString &block) const;
     mutable QRegExp changeset;
 };
 

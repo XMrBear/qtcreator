@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -49,9 +49,6 @@ class LineNumberFilter : public Locator::ILocatorFilter
 public:
     explicit LineNumberFilter(QObject *parent = 0);
 
-    QString displayName() const { return tr("Line in Current Document"); }
-    QString id() const { return QLatin1String("Line in current document"); }
-    Locator::ILocatorFilter::Priority priority() const { return Locator::ILocatorFilter::High; }
     QList<Locator::FilterEntry> matchesFor(QFutureInterface<Locator::FilterEntry> &future, const QString &entry);
     void accept(Locator::FilterEntry selection) const;
     void refresh(QFutureInterface<void> &) {}

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -49,7 +49,7 @@ public:
     { return m_name; }
 
     virtual Core::Id id() const
-    { return Core::Id(m_name); }
+    { return Core::Id::fromString(m_name); }
 
     virtual Core::IDocument *document() const
     { return 0; }

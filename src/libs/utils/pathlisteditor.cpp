@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -174,11 +174,10 @@ QAction *PathListEditor::insertAction(int index /* -1 */, const QString &text, Q
             beforeAction = actions.at(index);
     }
     QAction *rc = createAction(this, text, receiver, slotFunc);
-    if (beforeAction) {
+    if (beforeAction)
         d->buttonMenu->insertAction(beforeAction, rc);
-    } else {
+    else
         d->buttonMenu->addAction(rc);
-    }
     return rc;
 }
 

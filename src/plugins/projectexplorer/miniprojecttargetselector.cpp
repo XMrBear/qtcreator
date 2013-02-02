@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -270,9 +270,8 @@ void ProjectListWidget::addProject(Project *project)
     item->setText(displayName);
     insertItem(pos, item);
 
-    if (project == ProjectExplorerPlugin::instance()->startupProject()) {
+    if (project == ProjectExplorerPlugin::instance()->startupProject())
         setCurrentItem(item);
-    }
 
     QFontMetrics fn(font());
     int width = fn.width(displayName) + padding();
@@ -517,9 +516,8 @@ QListWidgetItem *GenericListWidget::itemForProjectConfiguration(ProjectConfigura
 {
     for (int i = 0; i < count(); ++i) {
         QListWidgetItem *lwi = item(i);
-        if (lwi->data(Qt::UserRole).value<ProjectConfiguration *>() == pc) {
+        if (lwi->data(Qt::UserRole).value<ProjectConfiguration *>() == pc)
             return lwi;
-        }
     }
     return 0;
 }
@@ -1373,6 +1371,7 @@ void MiniProjectTargetSelector::mousePressEvent(QMouseEvent *e)
 void MiniProjectTargetSelector::updateActionAndSummary()
 {
     QString projectName;
+    QString fileName; // contains the path if projectName is not unique
     QString targetName;
     QString targetToolTipText;
     QString buildConfig;
@@ -1383,6 +1382,12 @@ void MiniProjectTargetSelector::updateActionAndSummary()
     Project *project = ProjectExplorerPlugin::instance()->startupProject();
     if (project) {
         projectName = project->displayName();
+        foreach (Project *p, ProjectExplorerPlugin::instance()->session()->projects()) {
+            if (p != project && p->displayName() == projectName) {
+                fileName = project->document()->fileName();
+                break;
+            }
+        }
 
         if (Target *target = project->activeTarget()) {
             targetName = project->activeTarget()->displayName();
@@ -1401,14 +1406,15 @@ void MiniProjectTargetSelector::updateActionAndSummary()
         }
     }
     m_projectAction->setProperty("heading", projectName);
-    if (project && project->needsConfiguration()) {
+    if (project && project->needsConfiguration())
         m_projectAction->setProperty("subtitle", tr("Unconfigured"));
-    } else {
+    else
         m_projectAction->setProperty("subtitle", buildConfig);
-    }
     m_projectAction->setIcon(targetIcon);
     QStringList lines;
     lines << tr("<b>Project:</b> %1").arg(projectName);
+    if (!fileName.isEmpty())
+        lines << tr("<b>Path:</b> %1").arg(fileName);
     if (!targetName.isEmpty())
         lines << tr("<b>Kit:</b> %1").arg(targetName);
     if (!buildConfig.isEmpty())

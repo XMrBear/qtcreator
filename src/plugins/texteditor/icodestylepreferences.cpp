@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -114,9 +114,8 @@ void ICodeStylePreferences::setTabSettings(const TabSettings &settings)
     d->m_tabSettings = settings;
 
     emit tabSettingsChanged(d->m_tabSettings);
-    if (!currentDelegate()) {
+    if (!currentDelegate())
         emit currentTabSettingsChanged(d->m_tabSettings);
-    }
 }
 
 TabSettings ICodeStylePreferences::tabSettings() const

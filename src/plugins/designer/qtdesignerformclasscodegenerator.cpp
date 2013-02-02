@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -201,9 +201,8 @@ bool QtDesignerFormClassCodeGenerator::generateCpp(const FormClassWizardParamete
     // Class declaration
     headerStr << '\n' << namespaceIndent << "class " << unqualifiedClassName
               << " : public " << formBaseClass;
-    if (generationParameters.embedding == Internal::InheritedUiClass) {
+    if (generationParameters.embedding == Internal::InheritedUiClass)
         headerStr << ", private " << uiClassName;
-    }
     headerStr << "\n{\n" << namespaceIndent << indent << "Q_OBJECT\n\n"
               << namespaceIndent << "public:\n"
               << namespaceIndent << indent << "explicit " << unqualifiedClassName << "(QWidget *parent = 0);\n";

@@ -1,6 +1,6 @@
 TEMPLATE = lib
 TARGET = CppEditor
-DEFINES += CPPEDITOR_LIBRARY QT_NO_CAST_FROM_ASCII
+DEFINES += CPPEDITOR_LIBRARY
 include(../../qtcreatorplugin.pri)
 include(cppeditor_dependencies.pri)
 HEADERS += cppplugin.h \
@@ -46,4 +46,9 @@ SOURCES += cppplugin.cpp \
 RESOURCES += cppeditor.qrc
 OTHER_FILES += CppEditor.mimetypes.xml
 
+equals(TEST, 1) {
+    SOURCES += \
+        cppquickfix_test.cpp
 
+    DEFINES += SRCDIR=\\\"$$PWD\\\"
+}

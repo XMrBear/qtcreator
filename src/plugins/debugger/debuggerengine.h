@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -186,6 +186,7 @@ public:
     virtual void reloadRegisters();
     virtual void reloadSourceFiles();
     virtual void reloadFullStack();
+    virtual void reloadDebuggingHelpers();
 
     virtual void setRegisterValue(int regnr, const QString &value);
     virtual void addOptionPages(QList<Core::IOptionsPage*> *) const;

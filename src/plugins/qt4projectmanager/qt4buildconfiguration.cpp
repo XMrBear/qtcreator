@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -503,11 +503,10 @@ FileName Qt4BuildConfiguration::extractSpecFromArguments(QString *args,
     // if it is the former we need to get the canonical form
     // for the other one we don't need to do anything
     if (parsedSpec.toFileInfo().isRelative()) {
-        if (QFileInfo(directory + QLatin1Char('/') + parsedSpec.toString()).exists()) {
+        if (QFileInfo(directory + QLatin1Char('/') + parsedSpec.toString()).exists())
             parsedSpec = FileName::fromUserInput(directory + QLatin1Char('/') + parsedSpec.toString());
-        } else {
+        else
             parsedSpec = FileName::fromUserInput(baseMkspecDir.toString() + QLatin1Char('/') + parsedSpec.toString());
-        }
     }
 
     QFileInfo f2 = parsedSpec.toFileInfo();
@@ -521,9 +520,8 @@ FileName Qt4BuildConfiguration::extractSpecFromArguments(QString *args,
     } else {
         FileName sourceMkSpecPath = FileName::fromString(version->sourcePath().toString()
                                                          + QLatin1String("/mkspecs"));
-        if (parsedSpec.isChildOf(sourceMkSpecPath)) {
+        if (parsedSpec.isChildOf(sourceMkSpecPath))
             parsedSpec = parsedSpec.relativeChildPath(sourceMkSpecPath);
-        }
     }
     return parsedSpec;
 }
@@ -609,7 +607,7 @@ BuildConfiguration *Qt4BuildConfigurationFactory::create(Target *parent, const C
 
     bool ok = true;
     QString buildConfigurationName = name;
-    if (buildConfigurationName.isEmpty())
+    if (buildConfigurationName.isNull())
         buildConfigurationName = QInputDialog::getText(0,
                                                        tr("New Configuration"),
                                                        tr("New configuration name:"),
@@ -620,16 +618,16 @@ BuildConfiguration *Qt4BuildConfigurationFactory::create(Target *parent, const C
         return 0;
 
     //: Debug build configuration. We recommend not translating it.
-    QString defaultFirstName = tr("%1 Debug").arg(version->displayName());
+    QString defaultFirstName = tr("%1 Debug").arg(version->displayName()).trimmed();
     QString customFirstName;
     if (buildConfigurationName != version->displayName())
-        customFirstName = tr("%1 Debug").arg(buildConfigurationName);
+        customFirstName = tr("%1 Debug").arg(buildConfigurationName).trimmed();
 
     //: Release build configuration. We recommend not translating it.
-    QString defaultSecondName = tr("%1 Release").arg(version->displayName());
+    QString defaultSecondName = tr("%1 Release").arg(version->displayName()).trimmed();
     QString customSecondName;
     if (buildConfigurationName != version->displayName())
-        customSecondName = tr("%1 Release").arg(buildConfigurationName);
+        customSecondName = tr("%1 Release").arg(buildConfigurationName).trimmed();
 
     BuildConfiguration *bc
             = Qt4BuildConfiguration::setup(parent, defaultFirstName, customFirstName,

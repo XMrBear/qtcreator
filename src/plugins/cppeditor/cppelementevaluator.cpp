@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -118,6 +118,8 @@ void CppElementEvaluator::execute()
 
         TypeOfExpression typeOfExpression;
         typeOfExpression.init(doc, snapshot);
+        // make possible to instantiate templates
+        typeOfExpression.setExpandTemplates(true);
         const QList<LookupItem> &lookupItems = typeOfExpression(expression.toUtf8(), scope);
         if (lookupItems.isEmpty())
             return;

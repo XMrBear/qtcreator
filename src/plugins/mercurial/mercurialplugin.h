@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Brian McGillion
+** Copyright (c) 2013 Brian McGillion
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -68,7 +68,7 @@ class MercurialPlugin : public VcsBase::VcsBasePlugin
 
 public:
     MercurialPlugin();
-    virtual ~MercurialPlugin();
+    ~MercurialPlugin();
     bool initialize(const QStringList &arguments, QString *errorMessage);
 
     static MercurialPlugin *instance() { return m_instance; }
@@ -103,6 +103,11 @@ private slots:
     void showCommitWidget(const QList<VcsBase::VcsBaseClient::StatusItem> &status);
     void commitFromEditor();
     void diffFromEditorSelected(const QStringList &files);
+#ifdef WITH_TESTS
+    void testDiffFileResolving_data();
+    void testDiffFileResolving();
+    void testLogResolving();
+#endif
 
     //TODO implement
    /* //repository management action slots
@@ -119,8 +124,8 @@ private slots:
     void serve();*/
 
 protected:
-    virtual void updateActions(VcsBase::VcsBasePlugin::ActionState);
-    virtual bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
+    void updateActions(VcsBase::VcsBasePlugin::ActionState);
+    bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
 
 private:
     void createMenu();

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -512,9 +512,8 @@ void TextEditorActionHandler::updateActions(UpdateMode um)
 
     m_unfoldAllAction->setEnabled((m_optionalActions & UnCollapseAll));
     m_visualizeWhitespaceAction->setChecked(m_currentEditor->displaySettings().m_visualizeWhitespace);
-    if (m_textWrappingAction) {
+    if (m_textWrappingAction)
         m_textWrappingAction->setChecked(m_currentEditor->displaySettings().m_textWrapping);
-    }
 
     updateRedoAction();
     updateUndoAction();
@@ -538,9 +537,8 @@ void TextEditorActionHandler::updateCopyAction()
     const bool hasCopyableText = m_currentEditor && m_currentEditor->textCursor().hasSelection();
     if (m_cutAction)
         m_cutAction->setEnabled(hasCopyableText && updateMode() == WriteMode);
-    if (m_copyAction) {
+    if (m_copyAction)
         m_copyAction->setEnabled(hasCopyableText);
-    }
 }
 
 void TextEditorActionHandler::gotoAction()

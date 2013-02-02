@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -123,9 +123,8 @@ int OverviewModel::rowCount(const QModelIndex &parent) const
                     parentSymbol = templateParentSymbol;
 
             if (Scope *parentScope = parentSymbol->asScope()) {
-                if (!parentScope->isFunction() && !parentScope->isObjCMethod()) {
+                if (!parentScope->isFunction() && !parentScope->isObjCMethod())
                     return parentScope->memberCount();
-                }
             }
             return 0;
         }

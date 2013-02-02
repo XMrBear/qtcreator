@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -68,15 +68,8 @@ void CustomExecutableRunConfiguration::ctor()
 {
     setDefaultDisplayName(defaultDisplayName());
 
-    connect(target(), SIGNAL(activeBuildConfigurationChanged(ProjectExplorer::BuildConfiguration*)),
-            this, SLOT(activeBuildConfigurationChanged()));
-
-    m_lastActiveBuildConfiguration = activeBuildConfiguration();
-
-    if (m_lastActiveBuildConfiguration) {
-        connect(m_lastActiveBuildConfiguration, SIGNAL(environmentChanged()),
-                this, SIGNAL(baseEnvironmentChanged()));
-    }
+    connect(target(), SIGNAL(environmentChanged()),
+            this, SIGNAL(baseEnvironmentChanged()));
 }
 
 CustomExecutableRunConfiguration::CustomExecutableRunConfiguration(ProjectExplorer::Target *parent) :
@@ -104,19 +97,6 @@ CustomExecutableRunConfiguration::CustomExecutableRunConfiguration(ProjectExplor
 // Note: Qt4Project deletes all empty customexecrunconfigs for which isConfigured() == false.
 CustomExecutableRunConfiguration::~CustomExecutableRunConfiguration()
 {
-}
-
-void CustomExecutableRunConfiguration::activeBuildConfigurationChanged()
-{
-    if (m_lastActiveBuildConfiguration) {
-        disconnect(m_lastActiveBuildConfiguration, SIGNAL(environmentChanged()),
-                   this, SIGNAL(baseEnvironmentChanged()));
-    }
-    m_lastActiveBuildConfiguration = activeBuildConfiguration();
-    if (m_lastActiveBuildConfiguration) {
-        connect(m_lastActiveBuildConfiguration, SIGNAL(environmentChanged()),
-                this, SIGNAL(baseEnvironmentChanged()));
-    }
 }
 
 // Dialog embedding the CustomExecutableConfigurationWidget
@@ -280,6 +260,8 @@ Utils::Environment CustomExecutableRunConfiguration::baseEnvironment() const
     } else  if (m_baseEnvironmentBase == CustomExecutableRunConfiguration::BuildEnvironmentBase) {
         if (activeBuildConfiguration())
             env = activeBuildConfiguration()->environment();
+        else
+            env = Utils::Environment::systemEnvironment(); // fall back
     }
     return env;
 }

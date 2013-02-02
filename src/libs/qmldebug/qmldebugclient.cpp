@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -203,11 +203,10 @@ void QmlDebugConnectionPrivate::readyRead()
 
             QHash<QString, QmlDebugClient *>::Iterator iter =
                     plugins.find(name);
-            if (iter == plugins.end()) {
+            if (iter == plugins.end())
                 qWarning() << "QML Debug Client: Message received for missing plugin" << name;
-            } else {
+            else
                 (*iter)->messageReceived(message);
-            }
         }
     }
 }

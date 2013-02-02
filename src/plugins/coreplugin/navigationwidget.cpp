@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -195,7 +195,7 @@ void NavigationWidget::setFactories(const QList<INavigationWidgetFactory *> fact
         d->m_shortcutMap.insert(shortcut, id);
 
         Command *cmd = ActionManager::registerShortcut(shortcut,
-            Id(QLatin1String("QtCreator.Sidebar.") + QLatin1String(id.name())), navicontext);
+            id.withPrefix("QtCreator.Sidebar."), navicontext);
         cmd->setDefaultKeySequence(factory->activationSequence());
         d->m_commandMap.insert(id, cmd);
 
@@ -339,7 +339,7 @@ void NavigationWidget::restoreSettings(QSettings *settings)
 
     int position = 0;
     foreach (const QString &id, viewIds) {
-        int index = factoryIndex(Id(id));
+        int index = factoryIndex(Id::fromString(id));
         if (index >= 0) {
             // Only add if the id was actually found!
             insertSubItem(position, index);
@@ -420,9 +420,8 @@ void NavigationWidget::setSuppressed(bool b)
 int NavigationWidget::factoryIndex(const Id &id)
 {
     for (int row = 0; row < d->m_factoryModel->rowCount(); ++row) {
-        if (d->m_factoryModel->data(d->m_factoryModel->index(row, 0), FactoryIdRole).value<Core::Id>() == id) {
+        if (d->m_factoryModel->data(d->m_factoryModel->index(row, 0), FactoryIdRole).value<Core::Id>() == id)
             return row;
-        }
     }
     return -1;
 }

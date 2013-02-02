@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -276,9 +276,8 @@ bool MaemoGlobal::callMaddeShellScript(QProcess &proc,
 QStringList MaemoGlobal::targetArgs(const QString &qmakePath, bool useTarget)
 {
     QStringList args;
-    if (useTarget) {
+    if (useTarget)
         args << QLatin1String("-t") << targetName(qmakePath);
-    }
     return args;
 }
 

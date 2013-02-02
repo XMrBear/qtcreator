@@ -121,8 +121,16 @@ def qdump__QModelIndex(d, value):
         return
     r = value["r"]
     c = value["c"]
-    p = value["p"]
+    try:
+        p = value["p"]
+    except:
+        p = value["i"]
     m = value["m"]
+    if isNull(m) or r < 0 or c < 0:
+        d.putValue("(invalid)")
+        d.putPlainChildren(value)
+        return
+
     mm = m.dereference()
     mm = mm.cast(mm.type.unqualified())
     try:
@@ -132,6 +140,7 @@ def qdump__QModelIndex(d, value):
         rowCount = int(parseAndEvaluate("%s.rowCount(%s)" % (mm_, mi_)))
         columnCount = int(parseAndEvaluate("%s.columnCount(%s)" % (mm_, mi_)))
     except:
+        d.putValue(" ")
         d.putPlainChildren(value)
         return
 
@@ -143,60 +152,63 @@ def qdump__QModelIndex(d, value):
     except:
         d.putValue("(invalid)")
 
-    if r >= 0 and c >= 0 and not isNull(m):
-        d.putNumChild(rowCount * columnCount)
-        if d.isExpanded():
-            with Children(d):
-                i = 0
-                for row in xrange(rowCount):
-                    for column in xrange(columnCount):
-                        with UnnamedSubItem(d, i):
-                            d.putName("[%s, %s]" % (row, column))
-                            mi2 = parseAndEvaluate("%s.index(%d,%d,%s)"
-                                % (mm_, row, column, mi_))
-                            d.putItem(mi2)
-                            i = i + 1
-                #d.putCallItem("parent", val, "parent")
-                #with SubItem(d, "model"):
-                #    d.putValue(m)
-                #    d.putType(d.ns + "QAbstractItemModel*")
-                #    d.putNumChild(1)
-    else:
-        d.putValue("(invalid)")
-        d.putNumChild(0)
-        if d.isExpanded():
-            with Children(d):
-                pass
+    d.putNumChild(rowCount * columnCount)
+    if d.isExpanded():
+        with Children(d):
+            i = 0
+            for row in xrange(rowCount):
+                for column in xrange(columnCount):
+                    with UnnamedSubItem(d, i):
+                        d.putName("[%s, %s]" % (row, column))
+                        mi2 = parseAndEvaluate("%s.index(%d,%d,%s)"
+                            % (mm_, row, column, mi_))
+                        d.putItem(mi2)
+                        i = i + 1
+            #d.putCallItem("parent", val, "parent")
+            #with SubItem(d, "model"):
+            #    d.putValue(m)
+            #    d.putType(d.ns + "QAbstractItemModel*")
+            #    d.putNumChild(1)
     #gdb.execute("call free($mi)")
 
 
 def qdump__QDate(d, value):
-    d.putValue(value["jd"], JulianDate)
-    d.putNumChild(1)
-    if d.isExpanded():
-        qt = d.ns + "Qt::"
-        # FIXME: This improperly uses complex return values.
-        with Children(d):
-            d.putCallItem("toString", value, "toString", qt + "TextDate")
-            d.putCallItem("(ISO)", value, "toString", qt + "ISODate")
-            d.putCallItem("(SystemLocale)", value, "toString",
-                qt + "SystemLocaleDate")
-            d.putCallItem("(Locale)", value, "toString", qt + "LocaleDate")
+    jd = value["jd"]
+    if int(jd):
+        d.putValue(jd, JulianDate)
+        d.putNumChild(1)
+        if d.isExpanded():
+            qt = d.ns + "Qt::"
+            # FIXME: This improperly uses complex return values.
+            with Children(d):
+                d.putCallItem("toString", value, "toString", qt + "TextDate")
+                d.putCallItem("(ISO)", value, "toString", qt + "ISODate")
+                d.putCallItem("(SystemLocale)", value, "toString",
+                    qt + "SystemLocaleDate")
+                d.putCallItem("(Locale)", value, "toString", qt + "LocaleDate")
+    else:
+        d.putValue("(invalid)")
+        d.putNumChild(0)
 
 
 def qdump__QTime(d, value):
-    d.putValue(value["mds"], MillisecondsSinceMidnight)
-    d.putNumChild(1)
-    if d.isExpanded():
-        qt = d.ns + "Qt::"
-        # FIXME: This improperly uses complex return values.
-        with Children(d):
-            d.putCallItem("toString", value, "toString", qt + "TextDate")
-            d.putCallItem("(ISO)", value, "toString", qt + "ISODate")
-            d.putCallItem("(SystemLocale)", value, "toString",
-                 qt + "SystemLocaleDate")
-            d.putCallItem("(Locale)", value, "toString", qt + "LocaleDate")
-            d.putCallItem("toUTC", value, "toTimeSpec", qt + "UTC")
+    mds = value["mds"]
+    if int(mds) >= 0:
+        d.putValue(value["mds"], MillisecondsSinceMidnight)
+        d.putNumChild(1)
+        if d.isExpanded():
+            qt = d.ns + "Qt::"
+            # FIXME: This improperly uses complex return values.
+            with Children(d):
+                d.putCallItem("toString", value, "toString", qt + "TextDate")
+                d.putCallItem("(ISO)", value, "toString", qt + "ISODate")
+                d.putCallItem("(SystemLocale)", value, "toString",
+                     qt + "SystemLocaleDate")
+                d.putCallItem("(Locale)", value, "toString", qt + "LocaleDate")
+                d.putCallItem("toUTC", value, "toTimeSpec", qt + "UTC")
+    else:
+        d.putValue("(invalid)")
+        d.putNumChild(0)
 
 
 def qdump__QDateTime(d, value):
@@ -206,20 +218,25 @@ def qdump__QDateTime(d, value):
     except:
         d.putPlainChildren(value)
         return
-    d.putValue("%s/%s" % (p["date"]["jd"], p["time"]["mds"]),
-        JulianDateAndMillisecondsSinceMidnight)
-    d.putNumChild(1)
-    if d.isExpanded():
-        # FIXME: This improperly uses complex return values.
-        with Children(d):
-            qt = d.ns + "Qt::"
-            d.putCallItem("toTime_t", value, "toTime_t")
-            d.putCallItem("toString", value, "toString", qt + "TextDate")
-            d.putCallItem("(ISO)", value, "toString", qt + "ISODate")
-            d.putCallItem("(SystemLocale)", value, "toString", qt + "SystemLocaleDate")
-            d.putCallItem("(Locale)", value, "toString", qt + "LocaleDate")
-            d.putCallItem("toUTC", value, "toTimeSpec", qt + "UTC")
-            d.putCallItem("toLocalTime", value, "toTimeSpec", qt + "LocalTime")
+    mds = p["time"]["mds"]
+    if int(mds) >= 0:
+        d.putValue("%s/%s" % (p["date"]["jd"], mds),
+            JulianDateAndMillisecondsSinceMidnight)
+        d.putNumChild(1)
+        if d.isExpanded():
+            # FIXME: This improperly uses complex return values.
+            with Children(d):
+                qt = d.ns + "Qt::"
+                d.putCallItem("toTime_t", value, "toTime_t")
+                d.putCallItem("toString", value, "toString", qt + "TextDate")
+                d.putCallItem("(ISO)", value, "toString", qt + "ISODate")
+                d.putCallItem("(SystemLocale)", value, "toString", qt + "SystemLocaleDate")
+                d.putCallItem("(Locale)", value, "toString", qt + "LocaleDate")
+                d.putCallItem("toUTC", value, "toTimeSpec", qt + "UTC")
+                d.putCallItem("toLocalTime", value, "toTimeSpec", qt + "LocalTime")
+    else:
+        d.putValue("(invalid)")
+        d.putNumChild(0)
 
 
 def qdump__QDir(d, value):
@@ -1823,7 +1840,8 @@ def qdump__QWeakPointer(d, value):
     d.putNumChild(3)
     if d.isExpanded():
         with Children(d):
-            d.putSubItem("data", val.dereference())
+            innerType = templateArgument(value.type, 0)
+            d.putSubItem("data", val.dereference().cast(innerType))
             d.putIntItem("weakref", weakref)
             d.putIntItem("strongref", strongref)
 

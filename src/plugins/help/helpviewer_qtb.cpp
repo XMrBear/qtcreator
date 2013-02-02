@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -168,8 +168,14 @@ void HelpViewer::setSource(const QUrl &url)
     }
 
     QTextBrowser::setSource(url);
-    setHtml(string == Help::Constants::AboutBlank ? AboutBlankPage
-        : PageNotFoundMessage.arg(url.toString()));
+    setHtml(string == Help::Constants::AboutBlank
+        ? HelpViewer::tr("<title>about:blank</title>")
+        : HelpViewer::tr("<html><head><meta http-equiv=\""
+            "content-type\" content=\"text/html; charset=UTF-8\"><title>Error 404...</title>"
+            "</head><body><div align=\"center\"><br><br><h1>The page could not be found</h1>"
+            "<br><h3>'%1'</h3></div></body>")
+          .arg(url.toString()));
+
     emit loadFinished(true);
 }
 

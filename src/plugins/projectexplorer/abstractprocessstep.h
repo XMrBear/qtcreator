@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -57,9 +57,6 @@ public:
 
     virtual bool init();
     virtual void run(QFutureInterface<bool> &);
-
-    virtual BuildStepConfigWidget *createConfigWidget() = 0;
-    virtual bool immutable() const = 0;
 
     ProcessParameters *processParameters() { return &m_param; }
 

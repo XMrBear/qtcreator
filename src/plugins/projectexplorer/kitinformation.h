@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -104,6 +104,7 @@ public:
 
     QList<Task> validate(const Kit *k) const;
     void fix(Kit *k);
+    void setup(Kit *k);
 
     KitConfigWidget *createConfigWidget(Kit *k) const;
 

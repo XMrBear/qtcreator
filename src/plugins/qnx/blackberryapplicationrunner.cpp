@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -93,6 +93,7 @@ BlackBerryApplicationRunner::BlackBerryApplicationRunner(bool debugMode, BlackBe
     , m_stopProcess(0)
     , m_tailProcess(0)
     , m_testSlog2Process(0)
+    , m_launchDateTimeProcess(0)
     , m_runningStateTimer(new QTimer(this))
     , m_runningStateProcess(0)
 {
@@ -147,7 +148,7 @@ void BlackBerryApplicationRunner::start()
 void BlackBerryApplicationRunner::checkSlog2Info()
 {
     if (m_slog2infoFound) {
-        tailApplicationLog();
+        readLaunchTime();
     } else if (!m_testSlog2Process) {
         m_testSlog2Process = new QSsh::SshRemoteProcessRunner(this);
         connect(m_testSlog2Process, SIGNAL(processClosed(int)),
@@ -232,11 +233,10 @@ void BlackBerryApplicationRunner::readStandardOutput()
         QString line = QString::fromLocal8Bit(process->readLine());
         emit output(line, Utils::StdOutFormat);
 
-        if (line.startsWith(QLatin1String("result::"))) {
+        if (line.startsWith(QLatin1String("result::")))
             m_pid = parsePid(line);
-        } else if (line.startsWith(QLatin1String("Info: Launching"))) {
+        else if (line.startsWith(QLatin1String("Info: Launching")))
             m_appId = parseAppId(line);
-        }
     }
 }
 
@@ -255,11 +255,10 @@ void BlackBerryApplicationRunner::killTailProcess()
     QSsh::SshRemoteProcessRunner *slayProcess = new QSsh::SshRemoteProcessRunner(this);
     connect(slayProcess, SIGNAL(processClosed(int)), this, SIGNAL(finished()));
 
-    if (m_slog2infoFound) {
+    if (m_slog2infoFound)
         slayProcess->run("slay slog2info", m_sshParams);
-    } else {
+    else
         slayProcess->run("slay tail", m_sshParams);
-    }
 
     // Not supported by OpenSSH server
     //m_tailProcess->sendSignalToProcess(Utils::SshRemoteProcess::KillSignal);
@@ -271,7 +270,11 @@ void BlackBerryApplicationRunner::killTailProcess()
 
 void BlackBerryApplicationRunner::tailApplicationLog()
 {
-    // TODO: Reading the log using qconn instead?
+    QSsh::SshRemoteProcessRunner *process = qobject_cast<QSsh::SshRemoteProcessRunner *>(sender());
+    QTC_ASSERT(process, return);
+
+    m_launchDateTime = QDateTime::fromString(QString::fromLatin1(process->readAllStandardOutput()).trimmed(),
+                                             QString::fromLatin1("dd HH:mm:ss"));
 
     if (m_stopping || (m_tailProcess && m_tailProcess->isProcessRunning()))
         return;
@@ -291,7 +294,7 @@ void BlackBerryApplicationRunner::tailApplicationLog()
 
     QString command;
     if (m_slog2infoFound) {
-        command = QString::fromLatin1("slog2info -w");
+        command = QString::fromLatin1("slog2info -w -b ") + m_appId;
     } else {
         command = QLatin1String("tail -c +1 -f /accounts/1000/appdata/") + m_appId
                 + QLatin1String("/logs/log");
@@ -309,6 +312,15 @@ void BlackBerryApplicationRunner::handleSlog2InfoFound()
     tailApplicationLog();
 }
 
+void BlackBerryApplicationRunner::readLaunchTime()
+{
+    m_launchDateTimeProcess = new QSsh::SshRemoteProcessRunner(this);
+    connect(m_launchDateTimeProcess, SIGNAL(processClosed(int)),
+            this, SLOT(tailApplicationLog()));
+
+    m_launchDateTimeProcess->run("date +\"%d %H:%M:%S\"", m_sshParams);
+}
+
 void BlackBerryApplicationRunner::handleTailOutput()
 {
     QSsh::SshRemoteProcessRunner *process = qobject_cast<QSsh::SshRemoteProcessRunner *>(sender());
@@ -318,7 +330,9 @@ void BlackBerryApplicationRunner::handleTailOutput()
     if (m_slog2infoFound) {
         const QStringList multiLine = message.split(QLatin1Char('\n'));
         Q_FOREACH (const QString &line, multiLine) {
-            if ( line.contains(m_appId) ) {
+            QDateTime dateTime = QDateTime::fromString(line.split(m_appId).first().mid(4).trimmed(),
+                                                       QString::fromLatin1("dd HH:mm:ss.zzz"));
+            if (dateTime >= m_launchDateTime) {
                 QStringList validLineBeginnings;
                 validLineBeginnings << QLatin1String("qt-msg      0  ")
                                     << QLatin1String("qt-msg*     0  ")

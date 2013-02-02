@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -28,13 +28,14 @@
 ****************************************************************************/
 
 #include "cdbparsehelpers.h"
+
 #include "breakpoint.h"
-#include "threadshandler.h"
-#include "registerhandler.h"
 #include "bytearrayinputstream.h"
-#include "gdb/gdbmi.h"
+#include "debuggerprotocol.h"
 #include "disassemblerlines.h"
+#include "registerhandler.h"
 #include "shared/hostutils.h"
+#include "threadshandler.h"
 
 #include <utils/qtcassert.h>
 
@@ -385,11 +386,10 @@ QString debugByteArray(const QByteArray &a)
             str << "\\r";
             break;
         default:
-            if (uc >=32 && uc < 128) {
+            if (uc >=32 && uc < 128)
                 str << a.at(i);
-            } else {
+            else
                 str << '<' << unsigned(uc) << '>';
-            }
             break;
         }
     }
@@ -614,9 +614,8 @@ DisassemblerLines parseCdbDisassembler(const QList<QByteArray> &a)
             }
             // Determine address of function from the first assembler line after a
             // function header line.
-            if (!functionAddress && disassemblyLine.address) {
+            if (!functionAddress && disassemblyLine.address)
                 functionAddress = disassemblyLine.address - functionOffset;
-            }
             if (functionAddress && disassemblyLine.address)
                 disassemblyLine.offset = disassemblyLine.address - functionAddress;
             disassemblyLine.function = currentFunction;

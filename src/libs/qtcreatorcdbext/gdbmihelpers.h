@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -165,7 +165,7 @@ std::wstring memoryToHexW(CIDebugDataSpaces *ds, ULONG64 address, ULONG length,
                           std::string *errorMessage = 0);
 // Stack helpers
 StackFrames getStackTrace(CIDebugControl *debugControl, CIDebugSymbols *debugSymbols,
-                                 unsigned maxFrames, std::string *errorMessage);
+                                 unsigned maxFrames, bool *incomplete, std::string *errorMessage);
 
 std::string gdbmiStack(CIDebugControl *debugControl, CIDebugSymbols *debugSymbols,
                        unsigned maxFrames, bool humanReadable,

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -70,11 +70,10 @@ FormEditorGraphicsView::FormEditorGraphicsView(QWidget *parent) :
 
 void FormEditorGraphicsView::wheelEvent(QWheelEvent *event)
 {
-    if (event->modifiers().testFlag(Qt::ControlModifier)) {
+    if (event->modifiers().testFlag(Qt::ControlModifier))
         event->ignore();
-    } else {
+    else
         QGraphicsView::wheelEvent(event);
-    }
 
 }
 

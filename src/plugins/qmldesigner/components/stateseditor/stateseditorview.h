@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -76,7 +76,7 @@ public:
 
     void instancesPreviewImageChanged(const QVector<ModelNode> &nodeList);
 
-    StatesEditorWidget *widget();
+    QWidget *widget();
 
 public slots:
     void synchonizeCurrentStateFromWidget();
@@ -84,6 +84,7 @@ public slots:
     void removeState(int nodeId);
 
 private:
+    StatesEditorWidget *statesEditorWidget() const;
     void resetModel();
     void addState();
     void duplicateCurrentState();

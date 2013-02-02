@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -506,11 +506,10 @@ void EditorManager::handleContextChange(Core::IContext *context)
     if (debugEditorManager)
         qDebug() << Q_FUNC_INFO;
     IEditor *editor = context ? qobject_cast<IEditor*>(context) : 0;
-    if (editor) {
+    if (editor)
         setCurrentEditor(editor);
-    } else {
+    else
         updateActions();
-    }
 }
 
 void EditorManager::setCurrentEditor(IEditor *editor, bool ignoreNavigationHistory)
@@ -645,9 +644,8 @@ void EditorManager::closeView(Core::Internal::EditorView *view)
         */
         if (!d->m_editorModel->isDuplicate(e)) {
             QList<IEditor *> duplicates = d->m_editorModel->duplicatesFor(e);
-            if (!duplicates.isEmpty()) {
+            if (!duplicates.isEmpty())
                 d->m_editorModel->makeOriginal(duplicates.first());
-            }
         }
     }
 
@@ -665,11 +663,10 @@ void EditorManager::closeView(Core::Internal::EditorView *view)
 
     SplitterOrView *newCurrent = splitter->findFirstView();
     if (newCurrent) {
-        if (IEditor *e = newCurrent->editor()) {
+        if (IEditor *e = newCurrent->editor())
             activateEditor(newCurrent->view(), e);
-        } else {
+        else
             setCurrentView(newCurrent);
-        }
     }
 }
 
@@ -680,9 +677,8 @@ QList<IEditor*>
     QSet<IEditor *> found;
     foreach (IDocument *document, documents) {
         foreach (IEditor *editor, editors) {
-            if (editor->document() == document && !found.contains(editor)) {
+            if (editor->document() == document && !found.contains(editor))
                     found << editor;
-            }
         }
     }
     return found.toList();
@@ -1045,9 +1041,8 @@ Core::IEditor *EditorManager::placeEditor(Core::Internal::EditorView *view, Core
                 view->addEditor(editor);
                 view->setCurrentEditor(editor);
                 if (!sourceView->editor()) {
-                    if (IEditor *replacement = pickUnusedEditor()) {
+                    if (IEditor *replacement = pickUnusedEditor())
                         sourceView->view()->addEditor(replacement);
-                    }
                 }
                 return editor;
             } else if (duplicateSupported) {
@@ -1085,9 +1080,8 @@ Core::IEditor *EditorManager::activateEditor(Core::Internal::EditorView *view, C
 
     if (!(flags & NoActivate)) {
         setCurrentEditor(editor, (flags & IgnoreNavigationHistory));
-        if (flags & ModeSwitch) {
+        if (flags & ModeSwitch)
             switchToPreferedMode();
-        }
         if (isVisible())
             editor->widget()->setFocus();
     }
@@ -1238,14 +1232,14 @@ Core::Id EditorManager::getOpenWithEditorId(const QString &fileName,
     //Unable to determine mime type of fileName. Falling back to text/plain",
     if (!mt)
         mt = ICore::mimeDatabase()->findByType(QLatin1String("text/plain"));
-    QStringList allEditorIds;
+    QList<Id> allEditorIds;
     QStringList allEditorDisplayNames;
     QList<Id> externalEditorIds;
     // Built-in
     const EditorFactoryList editors = editorFactories(mt, false);
     const int size = editors.size();
     for (int i = 0; i < size; i++) {
-        allEditorIds.push_back(editors.at(i)->id().toString());
+        allEditorIds.push_back(editors.at(i)->id());
         allEditorDisplayNames.push_back(editors.at(i)->displayName());
     }
     // External editors
@@ -1253,7 +1247,7 @@ Core::Id EditorManager::getOpenWithEditorId(const QString &fileName,
     const int esize = exEditors.size();
     for (int i = 0; i < esize; i++) {
         externalEditorIds.push_back(exEditors.at(i)->id());
-        allEditorIds.push_back(exEditors.at(i)->id().toString());
+        allEditorIds.push_back(exEditors.at(i)->id());
         allEditorDisplayNames.push_back(exEditors.at(i)->displayName());
     }
     if (allEditorIds.empty())
@@ -1265,7 +1259,7 @@ Core::Id EditorManager::getOpenWithEditorId(const QString &fileName,
     dialog.setCurrentEditor(0);
     if (dialog.exec() != QDialog::Accepted)
         return Id();
-    const Id selectedId = Id(allEditorIds.at(dialog.editor()));
+    const Id selectedId = allEditorIds.at(dialog.editor());
     if (isExternalEditor)
         *isExternalEditor = externalEditorIds.contains(selectedId);
     return selectedId;
@@ -1456,11 +1450,10 @@ IEditor *EditorManager::openEditorWithContents(const Id &editorId,
             QSet<QString> docnames;
             foreach (IEditor *editor, m_instance->openedEditors()) {
                 QString name = editor->document()->fileName();
-                if (name.isEmpty()) {
+                if (name.isEmpty())
                     name = editor->displayName();
-                } else {
+                else
                     name = QFileInfo(name).completeBaseName();
-                }
                 docnames << name;
             }
 
@@ -1547,9 +1540,8 @@ bool EditorManager::saveDocument(IDocument *documentParam)
         success = DocumentManager::saveDocument(document);
     }
 
-    if (success) {
+    if (success)
         addDocumentToRecentFiles(document);
-    }
 
     return success;
 }
@@ -1629,9 +1621,8 @@ bool EditorManager::saveDocumentAs(IDocument *documentParam)
     if (absoluteFilePath != document->fileName()) {
         // close existing editors for the new file name
         const QList<IEditor *> existList = editorsForFileName(absoluteFilePath);
-        if (!existList.isEmpty()) {
+        if (!existList.isEmpty())
             closeEditors(existList, false);
-        }
     }
 
     const bool success = DocumentManager::saveDocument(document, absoluteFilePath);
@@ -1720,9 +1711,8 @@ void EditorManager::updateWindowTitle()
 {
     QString windowTitle = tr("Qt Creator");
     const QString dashSep = QLatin1String(" - ");
-    if (!d->m_titleAddition.isEmpty()) {
+    if (!d->m_titleAddition.isEmpty())
         windowTitle.prepend(d->m_titleAddition + dashSep);
-    }
     IEditor *curEditor = currentEditor();
     if (curEditor) {
         QString editorName = curEditor->displayName();
@@ -1896,9 +1886,8 @@ QList<IEditor*> EditorManager::visibleEditors() const
             } while (view && view != firstView);
         }
     } else {
-        if (d->m_splitter->editor()) {
+        if (d->m_splitter->editor())
             editors.append(d->m_splitter->editor());
-        }
     }
     return editors;
 }
@@ -2029,11 +2018,10 @@ bool EditorManager::restoreState(const QByteArray &state)
             if (!fi.exists())
                 continue;
             QFileInfo rfi(autoSaveName(fileName));
-            if (rfi.exists() && fi.lastModified() < rfi.lastModified()) {
-                openEditor(fileName, Id(QString::fromUtf8(id)));
-            } else {
-                d->m_editorModel->addRestoredEditor(fileName, displayName, Id(QString::fromUtf8(id)));
-            }
+            if (rfi.exists() && fi.lastModified() < rfi.lastModified())
+                openEditor(fileName, Id::fromName(id));
+            else
+                d->m_editorModel->addRestoredEditor(fileName, displayName, Id::fromName(id));
         }
     }
 

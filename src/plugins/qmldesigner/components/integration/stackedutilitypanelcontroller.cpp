@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -29,7 +29,7 @@
 
 #include <QStackedWidget>
 
-#include "designdocumentcontroller.h"
+#include "designdocument.h"
 #include "stackedutilitypanelcontroller.h"
 
 namespace QmlDesigner {
@@ -43,12 +43,12 @@ StackedUtilityPanelController::StackedUtilityPanelController(QObject* parent):
     m_stackedWidget->setFrameStyle(QFrame::NoFrame);
 }
 
-void StackedUtilityPanelController::show(DesignDocumentController* designDocumentController)
+void StackedUtilityPanelController::show(DesignDocument* DesignDocument)
 {
-    if (!designDocumentController)
+    if (!DesignDocument)
         return;
 
-    QWidget* page = stackedPageWidget(designDocumentController);
+    QWidget* page = stackedPageWidget(DesignDocument);
 
     if (!m_stackedWidget->children().contains(page))
         m_stackedWidget->addWidget(page);
@@ -57,9 +57,9 @@ void StackedUtilityPanelController::show(DesignDocumentController* designDocumen
     page->show();
 }
 
-void StackedUtilityPanelController::close(DesignDocumentController* designDocumentController)
+void StackedUtilityPanelController::close(DesignDocument* DesignDocument)
 {
-    QWidget* page = stackedPageWidget(designDocumentController);
+    QWidget* page = stackedPageWidget(DesignDocument);
 
     if (m_stackedWidget->children().contains(page)) {
         page->hide();

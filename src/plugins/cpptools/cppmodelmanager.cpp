@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -196,13 +196,13 @@ static const char pp_configuration[] =
     "#define __forceinline inline\n";
 
 CppPreprocessor::CppPreprocessor(QPointer<CppModelManager> modelManager, bool dumpFileNameWhileParsing)
-    : snapshot(modelManager->snapshot()),
+    : m_snapshot(modelManager->snapshot()),
       m_modelManager(modelManager),
       m_dumpFileNameWhileParsing(dumpFileNameWhileParsing),
-      preprocess(this, &env),
+      m_preprocess(this, &m_env),
       m_revision(0)
 {
-    preprocess.setKeepComments(true);
+    m_preprocess.setKeepComments(true);
 }
 
 CppPreprocessor::~CppPreprocessor()
@@ -270,9 +270,8 @@ void CppPreprocessor::addFrameworkPath(const QString &frameworkPath)
         if (!framework.isDir())
             continue;
         const QFileInfo privateFrameworks(framework.absoluteFilePath(), QLatin1String("Frameworks"));
-        if (privateFrameworks.exists() && privateFrameworks.isDir()) {
+        if (privateFrameworks.exists() && privateFrameworks.isDir())
             addFrameworkPath(privateFrameworks.absoluteFilePath());
-        }
     }
 }
 
@@ -325,7 +324,7 @@ void CppPreprocessor::run(const QString &fileName)
 
 void CppPreprocessor::resetEnvironment()
 {
-    env.reset();
+    m_env.reset();
     m_processed.clear();
 }
 
@@ -374,13 +373,15 @@ QString CppPreprocessor::tryIncludeFile(QString &fileName, IncludeType type, uns
 
             return QString();
         }
+
+        const QString originalFileName = fileName;
+        const QString contents = tryIncludeFile_helper(fileName, type, revision);
+        m_fileNameCache.insert(originalFileName, fileName);
+        return contents;
     }
 
-    const QString originalFileName = fileName;
-    const QString contents = tryIncludeFile_helper(fileName, type, revision);
-    if (type == IncludeGlobal)
-        m_fileNameCache.insert(originalFileName, fileName);
-    return contents;
+    // IncludeLocal, IncludeNext
+    return tryIncludeFile_helper(fileName, type, revision);
 }
 
 QString CppPreprocessor::cleanPath(const QString &path)
@@ -498,6 +499,14 @@ void CppPreprocessor::stopExpandingMacro(unsigned, const Macro &)
     //qDebug() << "stop expanding:" << macro.name;
 }
 
+void CppPreprocessor::markAsIncludeGuard(const QByteArray &macroName)
+{
+    if (!m_currentDoc)
+        return;
+
+    m_currentDoc->setIncludeGuardMacroName(macroName);
+}
+
 void CppPreprocessor::mergeEnvironment(Document::Ptr doc)
 {
     if (! doc)
@@ -513,13 +522,13 @@ void CppPreprocessor::mergeEnvironment(Document::Ptr doc)
     foreach (const Document::Include &incl, doc->includes()) {
         QString includedFile = incl.fileName();
 
-        if (Document::Ptr includedDoc = snapshot.document(includedFile))
+        if (Document::Ptr includedDoc = m_snapshot.document(includedFile))
             mergeEnvironment(includedDoc);
         else
             run(includedFile);
     }
 
-    env.addMacros(doc->definedMacros());
+    m_env.addMacros(doc->definedMacros());
 }
 
 void CppPreprocessor::startSkippingBlocks(unsigned offset)
@@ -568,7 +577,7 @@ void CppPreprocessor::sourceNeeded(unsigned line, QString &fileName, IncludeType
                     ;
     }
 
-    Document::Ptr doc = snapshot.document(fileName);
+    Document::Ptr doc = m_snapshot.document(fileName);
     if (doc) {
         mergeEnvironment(doc);
         return;
@@ -584,7 +593,7 @@ void CppPreprocessor::sourceNeeded(unsigned line, QString &fileName, IncludeType
 
     Document::Ptr previousDoc = switchDocument(doc);
 
-    const QByteArray preprocessedCode = preprocess.run(fileName, contents);
+    const QByteArray preprocessedCode = m_preprocess.run(fileName, contents);
 
 //    { QByteArray b(preprocessedCode); b.replace("\n", "<<<\n"); qDebug("Preprocessed code for \"%s\": [[%s]]", fileName.toUtf8().constData(), b.constData()); }
 
@@ -592,10 +601,10 @@ void CppPreprocessor::sourceNeeded(unsigned line, QString &fileName, IncludeType
     doc->keepSourceAndAST();
     doc->tokenize();
 
-    snapshot.insert(doc);
+    m_snapshot.insert(doc);
     m_todo.remove(fileName);
 
-    Process process(m_modelManager, doc, snapshot, m_workingCopy);
+    Process process(m_modelManager, doc, m_snapshot, m_workingCopy);
 
     process();
 
@@ -645,9 +654,8 @@ CppModelManager *CppModelManager::instance()
     if (m_modelManagerInstance)
         return m_modelManagerInstance;
     QMutexLocker locker(&m_modelManagerMutex);
-    if (!m_modelManagerInstance) {
+    if (!m_modelManagerInstance)
         m_modelManagerInstance = new CppModelManager;
-    }
     return m_modelManagerInstance;
 }
 
@@ -1201,9 +1209,8 @@ void CppModelManager::onAboutToRemoveProject(ProjectExplorer::Project *project)
 
 void CppModelManager::onAboutToUnloadSession()
 {
-    if (Core::ProgressManager *pm = Core::ICore::progressManager()) {
+    if (Core::ProgressManager *pm = Core::ICore::progressManager())
         pm->cancelTasks(QLatin1String(CppTools::Constants::TASK_INDEX));
-    }
     do {
         QMutexLocker locker(&mutex);
         m_projects.clear();
@@ -1231,9 +1238,8 @@ void CppModelManager::GC()
 
         processed.insert(fn);
 
-        if (Document::Ptr doc = currentSnapshot.document(fn)) {
+        if (Document::Ptr doc = currentSnapshot.document(fn))
             todo += doc->includedFiles();
-        }
     }
 
     QStringList removedFiles;

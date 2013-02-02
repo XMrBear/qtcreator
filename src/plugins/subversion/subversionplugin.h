@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -98,8 +98,8 @@ public:
     bool vcsDelete(const QString &workingDir, const QString &fileName);
     bool vcsMove(const QString &workingDir, const QString &from, const QString &to);
     bool managesDirectory(const QString &directory, QString *topLevel = 0) const;
-    virtual bool vcsCheckout(const QString &directory, const QByteArray &url);
-    virtual QString vcsGetRepositoryURL(const QString &directory);
+    bool vcsCheckout(const QString &directory, const QByteArray &url);
+    QString vcsGetRepositoryURL(const QString &directory);
 
     static SubversionPlugin *instance();
 
@@ -136,10 +136,15 @@ private slots:
     void diffRepository();
     void statusRepository();
     void updateRepository();
+#ifdef WITH_TESTS
+    void testDiffFileResolving_data();
+    void testDiffFileResolving();
+    void testLogResolving();
+#endif
 
 protected:
-    virtual void updateActions(VcsBase::VcsBasePlugin::ActionState);
-    virtual bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
+    void updateActions(VcsBase::VcsBasePlugin::ActionState);
+    bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
 
 private:
     inline bool isCommitEditorOpen() const;

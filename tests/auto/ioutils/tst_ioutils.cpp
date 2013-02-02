@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -75,7 +75,7 @@ void tst_IoUtils::quoteArg()
     QFETCH(QString, in);
     QFETCH(QString, out);
 
-    QCOMPARE(ProFileEvaluatorInternal::IoUtils::shellQuote(in), out);
+    QCOMPARE(QMakeInternal::IoUtils::shellQuote(in), out);
 }
 
 QTEST_MAIN(tst_IoUtils)

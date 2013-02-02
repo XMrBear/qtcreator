@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -130,6 +130,11 @@ void AbstractView::removeModel()
 Model* AbstractView::model() const
 {
     return m_model.data();
+}
+
+bool AbstractView::isAttached() const
+{
+    return model();
 }
 
 /*!
@@ -338,20 +343,18 @@ QmlModelView *AbstractView::toQmlModelView()
 
 NodeInstanceView *AbstractView::nodeInstanceView() const
 {
-    if (model()) {
+    if (model())
         return model()->d->nodeInstanceView();
-    } else {
+    else
         return 0;
-    }
 }
 
 RewriterView *AbstractView::rewriterView() const
 {
-    if (model()) {
+    if (model())
         return model()->d->rewriterView();
-    } else {
+    else
         return 0;
-    }
 }
 
 void AbstractView::resetView()
@@ -364,7 +367,7 @@ void AbstractView::resetView()
     currentModel->attachView(this);
 }
 
-QList<ModelNode> AbstractView::allModelNodes()
+QList<ModelNode> AbstractView::allModelNodes() const
 {
    return toModelNodeList(model()->d->allNodes());
 }

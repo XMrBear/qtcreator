@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -91,7 +91,7 @@ public:
 
     static GitPlugin *instance();
 
-    virtual bool initialize(const QStringList &arguments, QString *errorMessage);
+    bool initialize(const QStringList &arguments, QString *errorMessage);
 
     GitVersionControl *gitVersionControl() const;
 
@@ -99,6 +99,9 @@ public:
     void setSettings(const GitSettings &s);
 
     GitClient *gitClient() const;
+
+public slots:
+    void startCommit();
 
 private slots:
     void diffCurrentFile();
@@ -113,6 +116,8 @@ private slots:
     void undoFileChanges(bool revertStaging = true);
     void undoUnstagedFileChanges();
     void resetRepository();
+    void startRevertCommit();
+    void startCherryPickCommit();
     void stageFile();
     void unstageFile();
     void gitkForCurrentFile();
@@ -124,7 +129,6 @@ private slots:
     void gitClientMemberFuncRepositoryAction();
 
     void showCommit();
-    void startCommit();
     void startAmendCommit();
     void stash();
     void stashSnapshot();
@@ -139,10 +143,13 @@ private slots:
 #ifdef WITH_TESTS
     void testStatusParsing_data();
     void testStatusParsing();
+    void testDiffFileResolving_data();
+    void testDiffFileResolving();
+    void testLogResolving();
 #endif
 protected:
-    virtual void updateActions(VcsBase::VcsBasePlugin::ActionState);
-    virtual bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
+    void updateActions(VcsBase::VcsBasePlugin::ActionState);
+    bool submitEditorAboutToClose(VcsBase::VcsBaseSubmitEditor *submitEditor);
 
 private:
     inline ParameterActionCommandPair

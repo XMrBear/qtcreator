@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -32,7 +32,6 @@
 
 #include <QByteArray>
 #include <QScopedPointer>
-#include <QSharedPointer>
 
 namespace Botan {
 class DH_PrivateKey;
@@ -71,7 +70,7 @@ private:
     QByteArray m_serverId;
     QByteArray m_clientKexInitPayload;
     QByteArray m_serverKexInitPayload;
-    QSharedPointer<Botan::DH_PrivateKey> m_dhKey;
+    QScopedPointer<Botan::DH_PrivateKey> m_dhKey;
     QByteArray m_k;
     QByteArray m_h;
     QByteArray m_serverHostKeyAlgo;

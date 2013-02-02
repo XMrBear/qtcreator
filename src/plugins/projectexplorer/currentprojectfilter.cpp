@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -41,12 +41,14 @@ using namespace ProjectExplorer::Internal;
 CurrentProjectFilter::CurrentProjectFilter(ProjectExplorerPlugin *pe)
   : BaseFileFilter(), m_projectExplorer(pe), m_project(0), m_filesUpToDate(false)
 {
-    m_projectExplorer = pe;
+    setId("Files in current project");
+    setDisplayName(tr("Files in Current Project"));
+    setPriority(Low);
+    setShortcutString(QString(QLatin1Char('p')));
+    setIncludedByDefault(false);
 
     connect(m_projectExplorer, SIGNAL(currentProjectChanged(ProjectExplorer::Project*)),
             this, SLOT(currentProjectChanged(ProjectExplorer::Project*)));
-    setShortcutString(QString(QLatin1Char('p')));
-    setIncludedByDefault(false);
 }
 
 void CurrentProjectFilter::markFilesAsOutOfDate()

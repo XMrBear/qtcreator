@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -70,27 +70,41 @@ using namespace QmlJSTools::Internal;
 
 static QStringList environmentImportPaths();
 
+static void mergeSuffixes(QStringList &l1, const QStringList &l2)
+{
+    if (!l2.isEmpty())
+        l1 = l2;
+}
+
 QmlJS::Document::Language QmlJSTools::languageOfFile(const QString &fileName)
 {
     QStringList jsSuffixes(QLatin1String("js"));
     QStringList qmlSuffixes(QLatin1String("qml"));
+    QStringList qmlProjectSuffixes(QLatin1String("qmlproject"));
     QStringList jsonSuffixes(QLatin1String("json"));
+    QStringList qbsSuffixes(QLatin1String("qbs"));
 
     if (Core::ICore::instance()) {
         Core::MimeDatabase *db = Core::ICore::mimeDatabase();
         Core::MimeType jsSourceTy = db->findByType(QLatin1String(Constants::JS_MIMETYPE));
-        jsSuffixes = jsSourceTy.suffixes();
+        mergeSuffixes(jsSuffixes, jsSourceTy.suffixes());
         Core::MimeType qmlSourceTy = db->findByType(QLatin1String(Constants::QML_MIMETYPE));
-        qmlSuffixes = qmlSourceTy.suffixes();
+        mergeSuffixes(qmlSuffixes, qmlSourceTy.suffixes());
+        Core::MimeType qbsSourceTy = db->findByType(QLatin1String(Constants::QBS_MIMETYPE));
+        mergeSuffixes(qbsSuffixes, qbsSourceTy.suffixes());
+        Core::MimeType qmlProjectSourceTy = db->findByType(QLatin1String(Constants::QMLPROJECT_MIMETYPE));
+        mergeSuffixes(qbsSuffixes, qmlProjectSourceTy.suffixes());
         Core::MimeType jsonSourceTy = db->findByType(QLatin1String(Constants::JSON_MIMETYPE));
-        jsonSuffixes = jsonSourceTy.suffixes();
+        mergeSuffixes(jsonSuffixes, jsonSourceTy.suffixes());
     }
 
     const QFileInfo info(fileName);
     const QString fileSuffix = info.suffix();
     if (jsSuffixes.contains(fileSuffix))
         return QmlJS::Document::JavaScriptLanguage;
-    if (qmlSuffixes.contains(fileSuffix))
+    if (qbsSuffixes.contains(fileSuffix))
+        return QmlJS::Document::QmlQbsLanguage;
+    if (qmlSuffixes.contains(fileSuffix) || qmlProjectSuffixes.contains(fileSuffix))
         return QmlJS::Document::QmlLanguage;
     if (jsonSuffixes.contains(fileSuffix))
         return QmlJS::Document::JsonLanguage;
@@ -213,9 +227,8 @@ ModelManagerInterface::WorkingCopy ModelManager::workingCopy() const
 
         if (TextEditor::ITextEditor *textEditor = qobject_cast<TextEditor::ITextEditor*>(editor)) {
             if (textEditor->context().contains(ProjectExplorer::Constants::LANG_QMLJS)) {
-                if (TextEditor::BaseTextEditorWidget *ed = qobject_cast<TextEditor::BaseTextEditorWidget *>(textEditor->widget())) {
+                if (TextEditor::BaseTextEditorWidget *ed = qobject_cast<TextEditor::BaseTextEditorWidget *>(textEditor->widget()))
                     workingCopy.insert(key, ed->toPlainText(), ed->document()->revision());
-                }
             }
         }
     }
@@ -244,9 +257,8 @@ void ModelManager::updateSourceFiles(const QStringList &files,
 QFuture<void> ModelManager::refreshSourceFiles(const QStringList &sourceFiles,
                                                bool emitDocumentOnDiskChanged)
 {
-    if (sourceFiles.isEmpty()) {
+    if (sourceFiles.isEmpty())
         return QFuture<void>();
-    }
 
     QFuture<void> result = QtConcurrent::run(&ModelManager::parse,
                                               workingCopy(), sourceFiles,

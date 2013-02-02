@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -117,7 +117,6 @@ public:
     // Adds and removes additional active contexts, these contexts are appended
     // to the currently active contexts.
     static void updateAdditionalContexts(const Context &remove, const Context &add);
-    static bool hasContext(int context);
     static void addContextObject(IContext *context);
     static void removeContextObject(IContext *context);
 

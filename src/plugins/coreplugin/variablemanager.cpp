@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -97,9 +97,8 @@ bool VariableManager::remove(const QByteArray &variable)
 QString VariableManager::value(const QByteArray &variable, bool *found)
 {
     emit variableUpdateRequested(variable);
-    if (found) {
+    if (found)
         *found = d->m_map.contains(variable);
-    }
     return d->m_map.value(variable);
 }
 

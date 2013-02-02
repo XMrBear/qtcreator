@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 BogDan Vatra <bog_dan_ro@yahoo.com>
+** Copyright (c) 2013 BogDan Vatra <bog_dan_ro@yahoo.com>
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -55,7 +55,7 @@ public:
     QVariantMap toMap() const;
     bool fromMap(const QVariantMap &data);
     QList<Utils::FileName> suggestedMkspecList() const;
-    QString makeCommand(const Utils::Environment &env) const;
+    QString makeCommand(const Utils::Environment &environment) const;
 
     void setQtVersionId(int);
     int qtVersionId() const;

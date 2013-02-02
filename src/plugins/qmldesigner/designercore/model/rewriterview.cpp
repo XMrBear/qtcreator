@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -155,9 +155,8 @@ void RewriterView::modelAttached(Model *model)
 
     ModelAmender differenceHandler(m_textToModelMerger.data());
     const QString qmlSource = m_textModifier->text();
-    if (m_textToModelMerger->load(qmlSource, differenceHandler)) {
+    if (m_textToModelMerger->load(qmlSource, differenceHandler))
         lastCorrectQmlSource = qmlSource;
-    }
 }
 
 void RewriterView::modelAboutToBeDetached(Model * /*model*/)
@@ -473,6 +472,16 @@ QString RewriterView::textModifierContent() const
     return QString();
 }
 
+void RewriterView::reactivateTextMofifierChangeSignals()
+{
+    textModifier()->reactivateChangeSignals();
+}
+
+void RewriterView::deactivateTextMofifierChangeSignals()
+{
+    textModifier()->deactivateChangeSignals();
+}
+
 void RewriterView::applyModificationGroupChanges()
 {
     Q_ASSERT(transactionLevel == 0);
@@ -497,9 +506,8 @@ void RewriterView::applyChanges()
 
     try {
         modelToTextMerger()->applyChanges();
-        if (!errors().isEmpty()) {
+        if (!errors().isEmpty())
             enterErrorState(errors().first().description());
-        }
     } catch (Exception &e) {
         const QString content = textModifierContent();
         qDebug() << "RewriterException:" << m_rewritingErrorMessage;
@@ -617,6 +625,31 @@ bool RewriterView::modificationGroupActive()
     return m_modificationGroupActive;
 }
 
+static bool isInNodeDefinition(int nodeTextOffset, int nodeTextLength, int cursorPosition)
+{
+    return (nodeTextOffset <= cursorPosition) && (nodeTextOffset + nodeTextLength > cursorPosition);
+}
+
+ModelNode RewriterView::nodeAtTextCursorPosition(int cursorPosition) const
+{
+    const QList<ModelNode> allNodes = allModelNodes();
+
+    ModelNode nearestNode;
+    int nearestNodeTextOffset = -1;
+
+    foreach (const ModelNode &currentNode, allNodes) {
+        const int nodeTextOffset = nodeOffset(currentNode);
+        const int nodeTextLength = nodeLength(currentNode);
+        if (isInNodeDefinition(nodeTextOffset, nodeTextLength, cursorPosition)
+            && (nodeTextOffset > nearestNodeTextOffset)) {
+            nearestNode = currentNode;
+            nearestNodeTextOffset = nodeTextOffset;
+        }
+    }
+
+    return nearestNode;
+}
+
 bool RewriterView::renameId(const QString& oldId, const QString& newId)
 {
     if (textModifier())
@@ -690,9 +723,8 @@ QString RewriterView::pathForImport(const Import &import)
         QmlJS::ImportInfo importInfo;
 
         foreach (QmlJS::Import qmljsImport, imports->all()) {
-            if (qmljsImport.info.name() == importStr) {
+            if (qmljsImport.info.name() == importStr)
                 importInfo = qmljsImport.info;
-            }
         }
         const QString importPath = importInfo.path();
         return importPath;
@@ -701,6 +733,10 @@ QString RewriterView::pathForImport(const Import &import)
     return QString();
 }
 
+QWidget *RewriterView::widget()
+{
+    return 0;
+}
 
 void RewriterView::qmlTextChanged()
 {
@@ -719,9 +755,8 @@ void RewriterView::qmlTextChanged()
         switch (m_differenceHandling) {
             case Validate: {
                 ModelValidator differenceHandler(m_textToModelMerger.data());
-                if (m_textToModelMerger->load(newQmlText.toUtf8(), differenceHandler)) {
+                if (m_textToModelMerger->load(newQmlText.toUtf8(), differenceHandler))
                     lastCorrectQmlSource = newQmlText;
-                }
                 break;
             }
 
@@ -729,9 +764,8 @@ void RewriterView::qmlTextChanged()
             default: {
                 emitCustomNotification(StartRewriterAmend);
                 ModelAmender differenceHandler(m_textToModelMerger.data());
-                if (m_textToModelMerger->load(newQmlText, differenceHandler)) {
+                if (m_textToModelMerger->load(newQmlText, differenceHandler))
                     lastCorrectQmlSource = newQmlText;
-                }
                 emitCustomNotification(EndRewriterAmend);
                 break;
             }

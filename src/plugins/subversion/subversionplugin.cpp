@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -76,6 +76,10 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <limits.h>
+
+#ifdef WITH_TESTS
+#include <QTest>
+#endif
 
 namespace Subversion {
 namespace Internal {
@@ -236,7 +240,8 @@ static const VcsBase::VcsBaseSubmitEditorParameters submitParameters = {
     Subversion::Constants::SUBVERSION_SUBMIT_MIMETYPE,
     Subversion::Constants::SUBVERSIONCOMMITEDITOR_ID,
     Subversion::Constants::SUBVERSIONCOMMITEDITOR_DISPLAY_NAME,
-    Subversion::Constants::SUBVERSIONCOMMITEDITOR
+    Subversion::Constants::SUBVERSIONCOMMITEDITOR,
+    VcsBase::VcsBaseSubmitEditorParameters::DiffFiles
 };
 
 bool SubversionPlugin::initialize(const QStringList & /*arguments */, QString *errorMessage)
@@ -268,9 +273,8 @@ bool SubversionPlugin::initialize(const QStringList & /*arguments */, QString *e
 
     addAutoReleasedObject(new CheckoutWizard);
 
-    const QString description = QLatin1String("Subversion");
     const QString prefix = QLatin1String("svn");
-    m_commandLocator = new Locator::CommandLocator(description, prefix, prefix);
+    m_commandLocator = new Locator::CommandLocator("Subversion", prefix, prefix);
     addAutoReleasedObject(m_commandLocator);
 
     //register actions
@@ -681,11 +685,10 @@ void SubversionPlugin::revertAll()
     const SubversionResponse revertResponse =
             runSvn(state.topLevel(), args, m_settings.timeOutMS(),
                    SshPasswordPrompt|ShowStdOutInLogWindow);
-    if (revertResponse.error) {
+    if (revertResponse.error)
         QMessageBox::warning(0, title, tr("Revert failed: %1").arg(revertResponse.message), QMessageBox::Ok);
-    } else {
+    else
         subVersionControl()->emitRepositoryChanged(state.topLevel());
-    }
 }
 
 void SubversionPlugin::revertCurrentFile()
@@ -718,9 +721,8 @@ void SubversionPlugin::revertCurrentFile()
             runSvn(state.currentFileTopLevel(), args, m_settings.timeOutMS(),
                    SshPasswordPrompt|ShowStdOutInLogWindow);
 
-    if (!revertResponse.error) {
+    if (!revertResponse.error)
         subVersionControl()->emitFilesChanged(QStringList(state.currentFile()));
-    }
 }
 
 void SubversionPlugin::diffProject()
@@ -1390,6 +1392,64 @@ SubversionControl *SubversionPlugin::subVersionControl() const
 {
     return static_cast<SubversionControl *>(versionControl());
 }
+
+#ifdef WITH_TESTS
+void SubversionPlugin::testDiffFileResolving_data()
+{
+    QTest::addColumn<QByteArray>("header");
+    QTest::addColumn<QByteArray>("fileName");
+
+    QTest::newRow("New") << QByteArray(
+            "Index: src/plugins/subversion/subversioneditor.cpp\n"
+            "===================================================================\n"
+            "--- src/plugins/subversion/subversioneditor.cpp\t(revision 0)\n"
+            "+++ src/plugins/subversion/subversioneditor.cpp\t(revision 0)\n"
+            "@@ -0,0 +125 @@\n\n")
+        << QByteArray("src/plugins/subversion/subversioneditor.cpp");
+    QTest::newRow("Deleted") << QByteArray(
+            "Index: src/plugins/subversion/subversioneditor.cpp\n"
+            "===================================================================\n"
+            "--- src/plugins/subversion/subversioneditor.cpp\t(revision 42)\n"
+            "+++ src/plugins/subversion/subversioneditor.cpp\t(working copy)\n"
+            "@@ -1,125 +0,0 @@\n\n")
+        << QByteArray("src/plugins/subversion/subversioneditor.cpp");
+    QTest::newRow("Normal") << QByteArray(
+            "Index: src/plugins/subversion/subversioneditor.cpp\n"
+            "===================================================================\n"
+            "--- src/plugins/subversion/subversioneditor.cpp\t(revision 42)\n"
+            "+++ src/plugins/subversion/subversioneditor.cpp\t(working copy)\n"
+            "@@ -120,7 +120,7 @@\n\n")
+        << QByteArray("src/plugins/subversion/subversioneditor.cpp");
+}
+
+void SubversionPlugin::testDiffFileResolving()
+{
+    SubversionEditor editor(editorParameters + 3, 0);
+    editor.testDiffFileResolving();
+}
+
+void SubversionPlugin::testLogResolving()
+{
+    QByteArray data(
+                "------------------------------------------------------------------------\n"
+                "r1439551 | philip | 2013-01-28 20:19:55 +0200 (Mon, 28 Jan 2013) | 4 lines\n"
+                "\n"
+                "* subversion/tests/cmdline/update_tests.py\n"
+                "  (update_moved_dir_file_move): Resolve conflict, adjust expectations,\n"
+                "   remove XFail.\n"
+                "\n"
+                "------------------------------------------------------------------------\n"
+                "r1439540 | philip | 2013-01-28 20:06:36 +0200 (Mon, 28 Jan 2013) | 4 lines\n"
+                "\n"
+                "* subversion/tests/cmdline/update_tests.py\n"
+                "  (update_moved_dir_edited_leaf_del): Do non-recursive resolution, adjust\n"
+                "   expectations, remove XFail.\n"
+                "\n"
+                );
+    SubversionEditor editor(editorParameters + 1, 0);
+    editor.testLogResolving(data, "r1439551", "r1439540");
+}
+#endif
 
 } // Internal
 } // Subversion

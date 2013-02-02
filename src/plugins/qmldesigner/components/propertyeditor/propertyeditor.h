@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -128,6 +128,7 @@ private slots:
 private: //functions
     QString qmlFileName(const NodeMetaInfo &nodeInfo) const;
     QUrl fileToUrl(const QString &filePath) const;
+    QString fileFromUrl(const QUrl &url) const;
     QUrl qmlForNode(const ModelNode &modelNode, QString &className) const;
     QString locateQmlFile(const NodeMetaInfo &info, const QString &relativePath) const;
     void select(const ModelNode& node);

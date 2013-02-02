@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -59,6 +59,9 @@ QmlJSEditorFactory::QmlJSEditorFactory(QObject *parent)
 {
     m_mimeTypes
             << QLatin1String(QmlJSTools::Constants::QML_MIMETYPE)
+            << QLatin1String(QmlJSTools::Constants::QMLPROJECT_MIMETYPE)
+            << QLatin1String(QmlJSTools::Constants::QBS_MIMETYPE)
+            << QLatin1String(QmlJSTools::Constants::QMLTYPES_MIMETYPE)
             << QLatin1String(QmlJSTools::Constants::JS_MIMETYPE)
             << QLatin1String(QmlJSTools::Constants::JSON_MIMETYPE)
             ;

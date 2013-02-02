@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Nicolas Arnaud-Cormos
+** Copyright (c) 2013 Nicolas Arnaud-Cormos
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -111,7 +111,7 @@ void MacroOptionsWidget::createTable()
             macroItem->setData(0, WRITE_ROLE, it.value()->isWritable());
 
             Core::Command *command =
-                    Core::ActionManager::command(Core::Id(QLatin1String(Constants::PREFIX_MACRO)
+                    Core::ActionManager::command(Core::Id::fromString(QLatin1String(Constants::PREFIX_MACRO)
                                                           + it.value()->displayName()));
             if (command && command->shortcut())
                 macroItem->setText(2, command->shortcut()->key().toString());

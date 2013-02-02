@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -61,7 +61,7 @@ class  FormEditorView : public QmlModelView
     Q_OBJECT
 
 public:
-    FormEditorView(QObject *parent);
+    FormEditorView(QObject *parent = 0);
     ~FormEditorView();
 
     // AbstractView
@@ -85,7 +85,8 @@ public:
     void propertiesRemoved(const QList<AbstractProperty> &propertyList);
 
     // FormEditorView
-    FormEditorWidget *widget() const;
+    QWidget *widget();
+    FormEditorWidget *formEditorWidget();
     AbstractFormEditorTool *currentTool() const;
     FormEditorScene *scene() const;
 
@@ -116,8 +117,6 @@ public:
     void deActivateItemCreator();
 
     void actualStateChanged(const ModelNode &node);
-
-    Utils::CrumblePath *crumblePath() const;
 
 protected:
     void reset();

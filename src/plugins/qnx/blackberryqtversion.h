@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -44,8 +44,9 @@ class BlackBerryQtVersion : public QnxAbstractQtVersion
 public:
     BlackBerryQtVersion();
     BlackBerryQtVersion(QnxArchitecture arch, const Utils::FileName &path,
-                 bool isAutoDetected = false,
-                 const QString &autoDetectionSource = QString());
+                        bool isAutoDetected = false,
+                        const QString &autoDetectionSource = QString(),
+                        const QString &sdkPath = QString());
     BlackBerryQtVersion *clone() const;
     ~BlackBerryQtVersion();
 
@@ -61,6 +62,7 @@ public:
 
 private:
     QMultiMap<QString, QString> environment() const;
+    void setDefaultSdkPath();
 };
 
 } // namespace Internal

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -119,9 +119,8 @@ void GenericProjectPlugin::editFiles()
     GenericProject *genericProject = static_cast<GenericProject *>(m_contextMenuProject);
     SelectableFilesDialog sfd(QFileInfo(genericProject->document()->fileName()).path(), genericProject->files(),
                               Core::ICore::mainWindow());
-    if (sfd.exec() == QDialog::Accepted) {
+    if (sfd.exec() == QDialog::Accepted)
         genericProject->setFiles(sfd.selectedFiles());
-    }
 }
 
 } // namespace Internal

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -35,6 +35,7 @@
 #include "qt4projectmanagerconstants.h"
 #include "qt4projectmanager.h"
 #include "qt4buildconfiguration.h"
+#include "qt4nodes.h"
 #include "ui_qt4projectconfigwidget.h"
 
 #include <coreplugin/icore.h>
@@ -54,7 +55,6 @@
 #include <utils/qtcprocess.h>
 #include <extensionsystem/pluginmanager.h>
 
-#include <QFileDialog>
 #include <QPushButton>
 #include <utils/detailswidget.h>
 
@@ -94,6 +94,7 @@ Qt4ProjectConfigWidget::Qt4ProjectConfigWidget(Qt4BuildConfiguration *bc)
     Qt4Project *project = static_cast<Qt4Project *>(bc->target()->project());
     connect(project, SIGNAL(environmentChanged()), this, SLOT(environmentChanged()));
     connect(project, SIGNAL(buildDirectoryInitialized()), this, SLOT(updateProblemLabel()));
+    connect(project, SIGNAL(proFilesEvaluated()), this, SLOT(updateProblemLabel()));
 
     connect(bc->target(), SIGNAL(kitChanged()), this, SLOT(updateProblemLabel()));
 
@@ -187,7 +188,7 @@ void Qt4ProjectConfigWidget::shadowBuildEdited()
 
 void Qt4ProjectConfigWidget::updateProblemLabel()
 {
-
+    m_ui->shadowBuildDirEdit->triggerChanged();
     ProjectExplorer::Kit *k = m_buildConfiguration->target()->kit();
     const QString proFileName = m_buildConfiguration->target()->project()->document()->fileName();
 
@@ -195,6 +196,12 @@ void Qt4ProjectConfigWidget::updateProblemLabel()
     QtSupport::BaseQtVersion *version = QtSupport::QtKitInformation::qtVersion(k);
     if (!version) {
         setProblemLabel(tr("This kit cannot build this project since it does not define a Qt version."));
+        return;
+    }
+
+    Qt4Project *p = static_cast<Qt4Project *>(m_buildConfiguration->target()->project());
+    if (p->rootQt4ProjectNode()->parseInProgress() || !p->rootQt4ProjectNode()->validParse()) {
+        setProblemLabel(QString());
         return;
     }
 
@@ -267,12 +274,12 @@ void Qt4ProjectConfigWidget::updateProblemLabel()
     } else if (targetMismatch) {
         setProblemLabel(shadowBuildWarning + tr("A build for a different project exists in %1, which will be overwritten.",
                                                 "%1 build directory")
-                        .arg(m_ui->shadowBuildDirEdit->path()));
+                        .arg(m_buildConfiguration->buildDirectory()));
         return;
     } else if (incompatibleBuild) {
         setProblemLabel(shadowBuildWarning +tr("An incompatible build exists in %1, which will be overwritten.",
                                                "%1 build directory")
-                        .arg(m_ui->shadowBuildDirEdit->path()));
+                        .arg(m_buildConfiguration->buildDirectory()));
         return;
     } else if (!shadowBuildWarning.isEmpty()) {
         setProblemLabel(shadowBuildWarning);

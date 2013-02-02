@@ -660,9 +660,7 @@ def call(value, func, *args):
     return call2(value, func, args)
 
 def makeValue(type, init):
-    type = stripClassTag(type)
-    if type.find(":") >= 0:
-        type = "'" + type + "'"
+    type = "::" + stripClassTag(str(type));
     # Avoid malloc symbol clash with QVector.
     gdb.execute("set $d = (%s*)calloc(sizeof(%s), 1)" % (type, type))
     gdb.execute("set *$d = {%s}" % init)
@@ -685,9 +683,7 @@ def makeStdString(init):
 
 
 def makeExpression(value):
-    type = stripClassTag(str(value.type))
-    if type.find(":") >= 0:
-        type = "'" + type + "'"
+    type = "::" + stripClassTag(str(value.type))
     #warn("  TYPE: %s" % type)
     #exp = "(*(%s*)(&%s))" % (type, value.address)
     exp = "(*(%s*)(%s))" % (type, value.address)
@@ -983,7 +979,7 @@ registerCommand("p2", p2)
 
 
 class Dumper:
-    def __init__(self, args):
+    def defaultInit(self):
         self.output = []
         self.currentIName = ""
         self.currentPrintsAddress = True
@@ -998,15 +994,18 @@ class Dumper:
         self.currentTypePriority = -100
         self.typeformats = {}
         self.formats = {}
-        self.expandedINames = ""
+        self.useDynamicType = True
+        self.expandedINames = {}
 
-        self.output.append('data=[')
+    def __init__(self, args):
+        self.defaultInit()
 
+        watchers = ""
+        resultVarName = ""
         options = []
         varList = []
-        watchers = ""
 
-        resultVarName = ""
+        self.output.append('data=[')
         for arg in args.split(' '):
             pos = arg.find(":") + 1
             if arg.startswith("options:"):
@@ -1372,7 +1371,9 @@ class Dumper:
         if not hasPlot():
             return
         if not isSimpleType(type):
-            self.putValue(self.currentValue + " (not plottable)")
+            #self.putValue(self.currentValue + " (not plottable)")
+            self.putValue(self.currentValue)
+            self.putField("plottable", "0")
             return
         global gnuplotPipe
         global gnuplotPid
@@ -1947,6 +1948,41 @@ def threadnames(arg):
 
 registerCommand("threadnames", threadnames)
 
+
+#######################################################################
+#
+# Import plain gdb pretty printers
+#
+#######################################################################
+
+class PlainDumper:
+    def __init__(self, printer):
+        self.printer = printer
+
+    def __call__(self, d, value):
+        printer = self.printer.invoke(value)
+        lister = getattr(printer, "children", None)
+        children = [] if lister is None else list(lister())
+        d.putType(self.printer.name)
+        d.putValue(printer.to_string())
+        d.putNumChild(len(children))
+        if d.isExpanded():
+            with Children(d):
+                for child in children:
+                    d.putSubItem(child[0], child[1])
+
+def importPlainDumper(printer):
+    name = printer.name.replace("::", "__")
+    qqDumpers[name] = PlainDumper(printer)
+    qqFormats[name] = ""
+
+def importPlainDumpers(args):
+    for obj in gdb.objfiles():
+        for printers in obj.pretty_printers + gdb.pretty_printers:
+            for printer in printers.subprinters:
+                importPlainDumper(printer)
+
+registerCommand("importPlainDumpers", importPlainDumpers)
 
 
 #######################################################################

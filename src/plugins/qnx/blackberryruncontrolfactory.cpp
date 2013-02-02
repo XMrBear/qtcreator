@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -120,13 +120,6 @@ QString BlackBerryRunControlFactory::displayName() const
     return tr("Run on BlackBerry Device");
 }
 
-ProjectExplorer::RunConfigWidget *BlackBerryRunControlFactory::createConfigurationWidget(
-        ProjectExplorer::RunConfiguration *runConfiguration)
-{
-    Q_UNUSED(runConfiguration);
-    return 0;
-}
-
 Debugger::DebuggerStartParameters BlackBerryRunControlFactory::startParameters(
         const BlackBerryRunConfiguration *runConfig)
 {
@@ -158,9 +151,8 @@ Debugger::DebuggerStartParameters BlackBerryRunControlFactory::startParameters(
 
     if (const ProjectExplorer::Project *project = runConfig->target()->project()) {
         params.projectSourceDirectory = project->projectDirectory();
-        if (const ProjectExplorer::BuildConfiguration *buildConfig = runConfig->target()->activeBuildConfiguration()) {
+        if (const ProjectExplorer::BuildConfiguration *buildConfig = runConfig->target()->activeBuildConfiguration())
             params.projectBuildDirectory = buildConfig->buildDirectory();
-        }
         params.projectSourceFiles = project->files(ProjectExplorer::Project::ExcludeGeneratedFiles);
     }
 

@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Nicolas Arnaud-Cormos
+** Copyright (c) 2013 Nicolas Arnaud-Cormos
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -43,6 +43,8 @@ using namespace Macros::Internal;
 MacroLocatorFilter::MacroLocatorFilter():
     m_icon(QPixmap(QLatin1String(":/macros/images/macro.png")))
 {
+    setId("Macros");
+    setDisplayName(tr("Macros"));
     setShortcutString(QLatin1String("rm"));
 }
 

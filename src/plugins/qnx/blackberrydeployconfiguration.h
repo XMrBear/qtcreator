@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (C) 2011 - 2012 Research In Motion
+** Copyright (C) 2011 - 2013 Research In Motion
 **
 ** Contact: Research In Motion (blackberry-qt@qnx.com)
 ** Contact: KDAB (info@kdab.com)
@@ -58,8 +58,12 @@ public:
 
     BlackBerryDeployInformation *deploymentInfo() const;
 
+    QVariantMap toMap() const;
+
 protected:
     BlackBerryDeployConfiguration(ProjectExplorer::Target *parent, BlackBerryDeployConfiguration *source);
+
+    bool fromMap(const QVariantMap &map);
 
 private slots:
     void setupBarDescriptor();

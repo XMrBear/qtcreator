@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -55,7 +55,7 @@ namespace ProjectExplorer {
 KitOptionsPage::KitOptionsPage() :
     m_model(0), m_selectionModel(0), m_currentWidget(0), m_toShow(0)
 {
-    setId(QLatin1String(Constants::KITS_SETTINGS_PAGE_ID));
+    setId(Constants::KITS_SETTINGS_PAGE_ID);
     setDisplayName(tr("Kits"));
     setCategory(Constants::PROJECTEXPLORER_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("ProjectExplorer",

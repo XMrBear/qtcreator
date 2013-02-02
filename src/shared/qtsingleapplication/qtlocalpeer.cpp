@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -62,7 +62,7 @@ QtLocalPeer::QtLocalPeer(QObject *parent, const QString &appId)
                  + QString::number(idNum, 16);
 #if defined(Q_OS_WIN)
     if (!pProcessIdToSessionId) {
-        QLibrary lib("kernel32");
+        QLibrary lib(QLatin1String("kernel32"));
         pProcessIdToSessionId = (PProcessIdToSessionId)lib.resolve("ProcessIdToSessionId");
     }
     if (pProcessIdToSessionId) {

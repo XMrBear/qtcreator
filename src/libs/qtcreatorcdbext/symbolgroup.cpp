@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -239,11 +239,10 @@ std::string SymbolGroup::debug(const std::string &iname,
     if (iname.empty()) {
         accept(*visitor);
     } else {
-        if (AbstractSymbolGroupNode *const node = find(iname)) {
+        if (AbstractSymbolGroupNode *const node = find(iname))
             node->accept(*visitor, SymbolGroupNodeVisitor::parentIname(iname), 0, 0);
-        } else {
+        else
             str << msgNotFound(iname);
-        }
     }
     return str.str();
 }

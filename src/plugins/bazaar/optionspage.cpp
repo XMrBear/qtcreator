@@ -1,6 +1,6 @@
 /**************************************************************************
 **
-** Copyright (c) 2012 Hugues Delorme
+** Copyright (c) 2013 Hugues Delorme
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -91,7 +91,7 @@ QString OptionsPageWidget::searchKeywords() const
 
 OptionsPage::OptionsPage()
 {
-    setId(QLatin1String(VcsBase::Constants::VCS_ID_BAZAAR));
+    setId(VcsBase::Constants::VCS_ID_BAZAAR);
     setDisplayName(tr("Bazaar"));
 }
 

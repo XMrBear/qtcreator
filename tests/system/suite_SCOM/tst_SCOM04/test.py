@@ -8,20 +8,20 @@ def main():
                                  "'SyntaxError' : undeclared identifier"]
     startApplication("qtcreator" + SettingsPath)
     # create qt quick application
-    createNewQtQuickApplication(tempDir(), "SampleApp")
+    checkedTargets, projectName = createNewQtQuickApplication(tempDir(), "SampleApp")
     # create syntax error in cpp file
-    doubleClickItem(":Qt Creator_Utils::NavigationTreeView", "SampleApp.Sources.main\\.cpp", 5, 5, 0, Qt.LeftButton)
+    openDocument("SampleApp.Sources.main\\.cpp")
     if not appendToLine(waitForObject(":Qt Creator_CppEditor::Internal::CPPEditorWidget"), "viewer.showExpanded();", "SyntaxError"):
         invokeMenuItem("File", "Exit")
         return
     # save all
     invokeMenuItem("File", "Save All")
     # build it - on all build configurations
-    availableConfigs = iterateBuildConfigs(1)
+    availableConfigs = iterateBuildConfigs(len(checkedTargets))
     if not availableConfigs:
         test.fatal("Haven't found a suitable Qt version - leaving without building.")
     for kit, config in availableConfigs:
-        selectBuildConfig(1, kit, config)
+        selectBuildConfig(len(checkedTargets), kit, config)
         # try to compile
         test.log("Testing build configuration: " + config)
         clickButton(waitForObject(":*Qt Creator.Build Project_Core::Internal::FancyToolButton"))

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -42,7 +42,7 @@ class SnippetsSettingsPage : public TextEditorOptionsPage
     Q_OBJECT
 
 public:
-    SnippetsSettingsPage(const QString &id, QObject *parent);
+    SnippetsSettingsPage(Core::Id id, QObject *parent);
     ~SnippetsSettingsPage();
 
     bool matches(const QString &s) const;

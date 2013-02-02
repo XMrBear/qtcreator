@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -81,11 +81,10 @@ void SshKeyCreationDialog::generateKeys()
         m_ui->comboBox->currentText().toUShort());
     QApplication::restoreOverrideCursor();
 
-    if (success) {
+    if (success)
         saveKeys();
-    } else {
+    else
         QMessageBox::critical(this, tr("Key Generation Failed"), m_keyGenerator->error());
-    }
 }
 
 void SshKeyCreationDialog::handleBrowseButtonClicked()

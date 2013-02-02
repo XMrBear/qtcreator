@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -268,12 +268,10 @@ Core::FeatureSet BaseQtVersion::availableFeatures() const
          features |= Core::FeatureSet(QtSupport::Constants::FEATURE_QT_QUICK);
          features |= Core::FeatureSet(QtSupport::Constants::FEATURE_QT_QUICK_1);
      }
-     if (qtVersion() >= QtSupport::QtVersionNumber(4, 7, 1)) {
+     if (qtVersion() >= QtSupport::QtVersionNumber(4, 7, 1))
          features |= Core::FeatureSet(QtSupport::Constants::FEATURE_QT_QUICK_1_1);
-     }
-     if (qtVersion() >= QtSupport::QtVersionNumber(5, 0, 0)) {
+     if (qtVersion() >= QtSupport::QtVersionNumber(5, 0, 0))
          features |= Core::FeatureSet(QtSupport::Constants::FEATURE_QT_QUICK_2);
-     }
 
      return features;
 }
@@ -323,6 +321,41 @@ QList<ProjectExplorer::Task> BaseQtVersion::validateKit(const ProjectExplorer::K
                                         Core::Id(ProjectExplorer::Constants::TASK_CATEGORY_BUILDSYSTEM));
     } // Abi mismatch
     return result;
+}
+
+FileName BaseQtVersion::headerPath() const
+{
+    return Utils::FileName::fromUserInput(qmakeProperty("QT_INSTALL_HEADERS"));
+}
+
+FileName BaseQtVersion::libraryPath() const
+{
+    return Utils::FileName::fromUserInput(qmakeProperty("QT_INSTALL_LIBS"));
+}
+
+FileName BaseQtVersion::binPath() const
+{
+    return Utils::FileName::fromUserInput(qmakeProperty("QT_HOST_BINS"));
+}
+
+Utils::FileName QtSupport::BaseQtVersion::mkspecsPath() const
+{
+    Utils::FileName result = Utils::FileName::fromUserInput(qmakeProperty("QT_HOST_DATA"));
+    if (result.isEmpty())
+        result = Utils::FileName::fromUserInput(qmakeProperty("QMAKE_MKSPECS"));
+    else
+        result.appendPath(QLatin1String("mkspecs"));
+    return result;
+}
+
+QString QtSupport::BaseQtVersion::qtNamespace() const
+{
+    return qmakeProperty("QT_NAMESPACE");
+}
+
+QString QtSupport::BaseQtVersion::qtLibInfix() const
+{
+    return qmakeProperty("QT_LIBINFIX");
 }
 
 void BaseQtVersion::setId(int id)

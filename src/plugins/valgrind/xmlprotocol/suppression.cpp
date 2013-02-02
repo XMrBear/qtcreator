@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 ** Author: Frank Osterfeld, KDAB (frank.osterfeld@kdab.com)
 **
@@ -105,11 +105,10 @@ void SuppressionFrame::setObject(const QString &obj)
 
 QString SuppressionFrame::toString() const
 {
-    if (!d->fun.isEmpty()) {
+    if (!d->fun.isEmpty())
         return QLatin1String("fun:") + d->fun;
-    } else {
+    else
         return QLatin1String("obj:") + d->obj;
-    }
 }
 
 class Suppression::Private : public QSharedData

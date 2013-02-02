@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -135,6 +135,8 @@ void DeviceManager::copy(const DeviceManager *source, DeviceManager *target, boo
 
 void DeviceManager::save()
 {
+    if (d->clonedInstance == this)
+        return;
     QVariantMap data;
     data.insert(QLatin1String(DeviceManagerKey), toMap());
     d->writer->save(data, Core::ICore::mainWindow());
@@ -341,7 +343,8 @@ DeviceManager::DeviceManager(bool isInstance) : d(new DeviceManagerPrivate)
 
 DeviceManager::~DeviceManager()
 {
-    delete d->writer;
+    if (d->clonedInstance != this)
+        delete d->writer;
     delete d;
 }
 
@@ -379,15 +382,13 @@ IDevice::ConstPtr DeviceManager::findInactiveAutoDetectedDevice(Core::Id type, C
 
 IDevice::ConstPtr DeviceManager::defaultDevice(Core::Id deviceType) const
 {
-    const Core::Id id = d->defaultDevices.value(deviceType, IDevice::invalidId());
-    if (id == IDevice::invalidId())
-        return IDevice::ConstPtr();
-    return find(id);
+    const Core::Id id = d->defaultDevices.value(deviceType);
+    return id.isValid() ? find(id) : IDevice::ConstPtr();
 }
 
 Core::Id DeviceManager::deviceId(const IDevice::ConstPtr &device) const
 {
-    return device ? device->id() : IDevice::invalidId();
+    return device ? device->id() : Core::Id();
 }
 
 void DeviceManager::ensureOneDefaultDevicePerType()

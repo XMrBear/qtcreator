@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -139,6 +139,15 @@ QmlJSToolsSettings::QmlJSToolsSettings(QObject *parent)
     // mimetypes to be handled
     textEditorSettings->registerMimeTypeForLanguageId(
                 QLatin1String(Constants::QML_MIMETYPE),
+                Constants::QML_JS_SETTINGS_ID);
+    textEditorSettings->registerMimeTypeForLanguageId(
+                QLatin1String(Constants::QBS_MIMETYPE),
+                Constants::QML_JS_SETTINGS_ID);
+    textEditorSettings->registerMimeTypeForLanguageId(
+                QLatin1String(Constants::QMLPROJECT_MIMETYPE),
+                Constants::QML_JS_SETTINGS_ID);
+    textEditorSettings->registerMimeTypeForLanguageId(
+                QLatin1String(Constants::QMLTYPES_MIMETYPE),
                 Constants::QML_JS_SETTINGS_ID);
     textEditorSettings->registerMimeTypeForLanguageId(
                 QLatin1String(Constants::JS_MIMETYPE),

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -138,9 +138,8 @@ static QByteArray gccPredefinedMacros(const FileName &gcc, const QStringList &ar
         const QByteArray blocksDefine("#define __BLOCKS__ 1");
         const QByteArray blocksUndefine("#undef __BLOCKS__");
         const int idx = predefinedMacros.indexOf(blocksDefine);
-        if (idx != -1) {
+        if (idx != -1)
             predefinedMacros.replace(idx, blocksDefine.length(), blocksUndefine);
-        }
 
         // Define __strong and __weak (used for Apple's GC extension of C) to be empty
         predefinedMacros.append("#define __strong\n");
@@ -337,9 +336,11 @@ QString GccToolChain::defaultDisplayName() const
 {
     if (!m_targetAbi.isValid())
         return typeDisplayName();
-    return QString::fromLatin1("%1 (%2 %3)").arg(typeDisplayName(),
-                                                 Abi::toString(m_targetAbi.architecture()),
-                                                 Abi::toString(m_targetAbi.wordWidth()));
+    return QCoreApplication::translate("ProjectExplorer::GccToolChain",
+                                       "%1 (%2 %3 in %4)").arg(typeDisplayName(),
+                                                               Abi::toString(m_targetAbi.architecture()),
+                                                               Abi::toString(m_targetAbi.wordWidth()),
+                                                               compilerCommand().parentDir().toUserOutput());
 }
 
 QString GccToolChain::type() const
@@ -380,7 +381,11 @@ QList<Abi> GccToolChain::supportedAbis() const
 
 bool GccToolChain::isValid() const
 {
-    return !m_compilerCommand.isNull();
+    if (m_compilerCommand.isNull())
+        return false;
+
+    QFileInfo fi = compilerCommand().toFileInfo();
+    return fi.isExecutable();
 }
 
 /**
@@ -424,7 +429,8 @@ QByteArray GccToolChain::predefinedMacros(const QStringList &cxxflags) const
 ToolChain::CompilerFlags GccToolChain::compilerFlags(const QStringList &cxxflags) const
 {
     if (cxxflags.contains(QLatin1String("-std=c++0x")) || cxxflags.contains(QLatin1String("-std=gnu++0x")) ||
-        cxxflags.contains(QLatin1String("-std=c++11")) || cxxflags.contains(QLatin1String("-std=gnu++11")))
+        cxxflags.contains(QLatin1String("-std=c++11")) || cxxflags.contains(QLatin1String("-std=gnu++11")) ||
+        cxxflags.contains(QLatin1String("-std=c++1y")) || cxxflags.contains(QLatin1String("-std=gnu++1y")))
         return STD_CXX11;
     return NO_FLAGS;
 }

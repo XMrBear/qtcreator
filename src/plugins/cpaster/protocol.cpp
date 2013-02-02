@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -96,6 +96,8 @@ Protocol::ContentType Protocol::contentType(const QString &mt)
         || mt == QLatin1String(CppTools::Constants::OBJECTIVE_CPP_SOURCE_MIMETYPE))
         return Cpp;
     if (mt == QLatin1String(QmlJSTools::Constants::QML_MIMETYPE)
+        || mt == QLatin1String(QmlJSTools::Constants::QMLPROJECT_MIMETYPE)
+        || mt == QLatin1String(QmlJSTools::Constants::QBS_MIMETYPE)
         || mt == QLatin1String(QmlJSTools::Constants::JS_MIMETYPE)
         || mt == QLatin1String(QmlJSTools::Constants::JSON_MIMETYPE))
         return JavaScript;
@@ -168,9 +170,8 @@ bool Protocol::showConfigurationError(const Protocol *p,
     mb.exec();
     bool rc = false;
     if (mb.clickedButton() == settingsButton)
-        rc = Core::ICore::showOptionsDialog(Core::Id(p->settingsPage()->category()),
-                                            Core::Id(p->settingsPage()->id()),
-                                                        parent);
+        rc = Core::ICore::showOptionsDialog(p->settingsPage()->category(),
+                                            p->settingsPage()->id(), parent);
     return rc;
 }
 

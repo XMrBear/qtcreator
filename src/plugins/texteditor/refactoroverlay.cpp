@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -53,9 +53,8 @@ void RefactorOverlay::paint(QPainter *painter, const QRect &clip)
         paintMarker(m_markers.at(i), painter, clip);
     }
 
-    if (BaseTextDocumentLayout *documentLayout = qobject_cast<BaseTextDocumentLayout*>(m_editor->document()->documentLayout())) {
+    if (BaseTextDocumentLayout *documentLayout = qobject_cast<BaseTextDocumentLayout*>(m_editor->document()->documentLayout()))
         documentLayout->setRequiredWidth(m_maxWidth);
-    }
 
 }
 

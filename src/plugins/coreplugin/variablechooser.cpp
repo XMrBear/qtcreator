@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -87,7 +87,8 @@ void VariableChooser::updateDescription(const QString &variable)
 
 void VariableChooser::updateCurrentEditor(QWidget *old, QWidget *widget)
 {
-    Q_UNUSED(old)
+    if (old)
+        old->removeEventFilter(this);
     if (!widget) // we might loose focus, but then keep the previous state
         return;
     // prevent children of the chooser itself, and limit to children of chooser's parent
@@ -104,6 +105,7 @@ void VariableChooser::updateCurrentEditor(QWidget *old, QWidget *widget)
     }
     if (!handle)
         return;
+    widget->installEventFilter(this); // for intercepting escape key presses
     QLineEdit *previousLineEdit = m_lineEdit;
     m_lineEdit = 0;
     m_textEdit = 0;
@@ -111,13 +113,12 @@ void VariableChooser::updateCurrentEditor(QWidget *old, QWidget *widget)
     QVariant variablesSupportProperty = widget->property(Constants::VARIABLE_SUPPORT_PROPERTY);
     bool supportsVariables = (variablesSupportProperty.isValid()
                               ? variablesSupportProperty.toBool() : false);
-    if (QLineEdit *lineEdit = qobject_cast<QLineEdit *>(widget)) {
+    if (QLineEdit *lineEdit = qobject_cast<QLineEdit *>(widget))
         m_lineEdit = (supportsVariables ? lineEdit : 0);
-    } else if (QTextEdit *textEdit = qobject_cast<QTextEdit *>(widget)) {
+    else if (QTextEdit *textEdit = qobject_cast<QTextEdit *>(widget))
         m_textEdit = (supportsVariables ? textEdit : 0);
-    } else if (QPlainTextEdit *plainTextEdit = qobject_cast<QPlainTextEdit *>(widget)) {
+    else if (QPlainTextEdit *plainTextEdit = qobject_cast<QPlainTextEdit *>(widget))
         m_plainTextEdit = (supportsVariables ? plainTextEdit : 0);
-    }
     if (!(m_lineEdit || m_textEdit || m_plainTextEdit))
         hide();
     if (m_lineEdit != previousLineEdit) {
@@ -183,10 +184,26 @@ void VariableChooser::insertVariable(const QString &variable)
     }
 }
 
-void VariableChooser::keyPressEvent(QKeyEvent *ke)
+static bool handleEscapePressed(QKeyEvent *ke, QWidget *widget)
 {
     if (ke->key() == Qt::Key_Escape && !ke->modifiers()) {
         ke->accept();
-        QTimer::singleShot(0, this, SLOT(close()));
+        QTimer::singleShot(0, widget, SLOT(close()));
+        return true;
     }
+    return false;
+}
+
+void VariableChooser::keyPressEvent(QKeyEvent *ke)
+{
+    handleEscapePressed(ke, this);
+}
+
+bool VariableChooser::eventFilter(QObject *, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress && isVisible()) {
+        QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+        return handleEscapePressed(ke, this);
+    }
+    return false;
 }

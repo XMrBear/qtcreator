@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -199,6 +199,11 @@ DebuggerKitInformation::DebuggerItem DebuggerKitInformation::autoDetectItem(cons
     return result;
 }
 
+void DebuggerKitInformation::setup(Kit *k)
+{
+    setDebuggerItem(k, autoDetectItem(k));
+}
+
 // Check the configuration errors and return a flag mask. Provide a quick check and
 // a verbose one with a list of errors.
 
@@ -217,11 +222,10 @@ static unsigned debuggerConfigurationErrors(const ProjectExplorer::Kit *k)
         return NoDebugger;
 
     const QFileInfo fi = item.binary.toFileInfo();
-    if (!fi.exists() || fi.isDir()) {
+    if (!fi.exists() || fi.isDir())
         result |= DebuggerNotFound;
-    } else if (!fi.isExecutable()) {
+    else if (!fi.isExecutable())
         result |= DebuggerNotExecutable;
-    }
 
     if (!fi.exists() || fi.isDir())
         // We need an absolute path to be able to locate Python on Windows.
@@ -266,7 +270,7 @@ QList<ProjectExplorer::Task> DebuggerKitInformation::validateDebugger(const Proj
 
 KitConfigWidget *DebuggerKitInformation::createConfigWidget(Kit *k) const
 {
-    return new Internal::DebuggerKitConfigWidget(k, this);
+    return new Internal::DebuggerKitConfigWidget(k);
 }
 
 QString DebuggerKitInformation::userOutput(const DebuggerItem &item)

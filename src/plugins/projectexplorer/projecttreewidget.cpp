@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -40,6 +40,7 @@
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/icore.h>
 #include <coreplugin/editormanager/editormanager.h>
+#include <coreplugin/editormanager/ieditor.h>
 #include <coreplugin/icontext.h>
 
 #include <utils/qtcassert.h>
@@ -49,6 +50,7 @@
 #include <QSettings>
 
 #include <QHeaderView>
+#include <QStyledItemDelegate>
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QToolButton>
@@ -57,11 +59,28 @@
 #include <QPalette>
 #include <QMenu>
 
+using namespace Core;
 using namespace ProjectExplorer;
 using namespace ProjectExplorer::Internal;
 
 namespace {
-    bool debug = false;
+
+class ProjectTreeItemDelegate : public QStyledItemDelegate
+{
+public:
+    ProjectTreeItemDelegate(QObject *parent) : QStyledItemDelegate(parent)
+    { }
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        QStyleOptionViewItem opt = option;
+        if (!index.data(ProjectExplorer::Project::EnabledRole).toBool())
+            opt.state &= ~QStyle::State_Enabled;
+        QStyledItemDelegate::paint(painter, opt, index);
+    }
+};
+
+bool debug = false;
 }
 
 class ProjectTreeView : public Utils::NavigationTreeView
@@ -71,20 +90,19 @@ public:
     {
         setEditTriggers(QAbstractItemView::EditKeyPressed);
         setContextMenuPolicy(Qt::CustomContextMenu);
-//        setExpandsOnDoubleClick(false);
-        m_context = new Core::IContext(this);
-        m_context->setContext(Core::Context(Constants::C_PROJECT_TREE));
+        m_context = new IContext(this);
+        m_context->setContext(Context(ProjectExplorer::Constants::C_PROJECT_TREE));
         m_context->setWidget(this);
-        Core::ICore::addContextObject(m_context);
+        ICore::addContextObject(m_context);
     }
     ~ProjectTreeView()
     {
-        Core::ICore::removeContextObject(m_context);
+        ICore::removeContextObject(m_context);
         delete m_context;
     }
 
 private:
-    Core::IContext *m_context;
+    IContext *m_context;
 };
 
 /*!
@@ -115,6 +133,7 @@ ProjectTreeWidget::ProjectTreeWidget(QWidget *parent)
 
     m_view = new ProjectTreeView;
     m_view->setModel(m_model);
+    m_view->setItemDelegate(new ProjectTreeItemDelegate(this));
     setFocusProxy(m_view);
     initView();
 
@@ -226,9 +245,8 @@ void ProjectTreeWidget::foldersAboutToBeRemoved(FolderNode *, const QList<Folder
 void ProjectTreeWidget::filesAboutToBeRemoved(FolderNode *, const QList<FileNode*> &list)
 {
     if (FileNode *fileNode = qobject_cast<FileNode *>(m_explorer->currentNode())) {
-        if (list.contains(fileNode)) {
+        if (list.contains(fileNode))
             m_explorer->setCurrentNode(fileNode->projectNode());
-        }
     }
 }
 
@@ -285,9 +303,8 @@ void ProjectTreeWidget::setCurrentItem(Node *node, Project *project)
         qDebug() << "ProjectTreeWidget::setCurrentItem(" << (project ? project->displayName() : QLatin1String("0"))
                  << ", " <<  (node ? node->path() : QLatin1String("0")) << ")";
 
-    if (!project) {
+    if (!project)
         return;
-    }
 
     const QModelIndex mainIndex = m_model->indexForNode(node);
 
@@ -358,8 +375,11 @@ void ProjectTreeWidget::initView()
 void ProjectTreeWidget::openItem(const QModelIndex &mainIndex)
 {
     Node *node = m_model->nodeForIndex(mainIndex);
-    if (node->nodeType() == FileNodeType)
-        Core::EditorManager::openEditor(node->path(), Core::Id(), Core::EditorManager::ModeSwitch);
+    if (node->nodeType() != FileNodeType)
+        return;
+    IEditor *editor = EditorManager::openEditor(node->path(), Id(), EditorManager::ModeSwitch);
+    if (node->line() >= 0)
+        editor->gotoLine(node->line());
 }
 
 void ProjectTreeWidget::setProjectFilter(bool filter)
@@ -403,19 +423,19 @@ int ProjectTreeWidgetFactory::priority() const
     return 100;
 }
 
-Core::Id ProjectTreeWidgetFactory::id() const
+Id ProjectTreeWidgetFactory::id() const
 {
-    return Core::Id("Projects");
+    return Id("Projects");
 }
 
 QKeySequence ProjectTreeWidgetFactory::activationSequence() const
 {
-    return QKeySequence(Core::UseMacShortcuts ? tr("Meta+X") : tr("Alt+X"));
+    return QKeySequence(UseMacShortcuts ? tr("Meta+X") : tr("Alt+X"));
 }
 
-Core::NavigationView ProjectTreeWidgetFactory::createWidget()
+NavigationView ProjectTreeWidgetFactory::createWidget()
 {
-    Core::NavigationView n;
+    NavigationView n;
     ProjectTreeWidget *ptw = new ProjectTreeWidget;
     n.widget = ptw;
 
@@ -437,7 +457,7 @@ void ProjectTreeWidgetFactory::saveSettings(int position, QWidget *widget)
 {
     ProjectTreeWidget *ptw = qobject_cast<ProjectTreeWidget *>(widget);
     Q_ASSERT(ptw);
-    QSettings *settings = Core::ICore::settings();
+    QSettings *settings = ICore::settings();
     const QString baseKey = QLatin1String("ProjectTreeWidget.") + QString::number(position);
     settings->setValue(baseKey + QLatin1String(".ProjectFilter"), ptw->projectFilter());
     settings->setValue(baseKey + QLatin1String(".GeneratedFilter"), ptw->generatedFilesFilter());
@@ -448,7 +468,7 @@ void ProjectTreeWidgetFactory::restoreSettings(int position, QWidget *widget)
 {
     ProjectTreeWidget *ptw = qobject_cast<ProjectTreeWidget *>(widget);
     Q_ASSERT(ptw);
-    QSettings *settings = Core::ICore::settings();
+    QSettings *settings = ICore::settings();
     const QString baseKey = QLatin1String("ProjectTreeWidget.") + QString::number(position);
     ptw->setProjectFilter(settings->value(baseKey + QLatin1String(".ProjectFilter"), false).toBool());
     ptw->setGeneratedFilesFilter(settings->value(baseKey + QLatin1String(".GeneratedFilter"), true).toBool());

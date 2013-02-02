@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of Qt Creator.
@@ -56,9 +56,8 @@ QList<QmlFileFilterItem*> QmlProjectItemPrivate::qmlFileFilters() const
     for (int i = 0; i < content.size(); ++i) {
         QmlProjectContentItem *contentElement = content.at(i);
         QmlFileFilterItem *qmlFileFilter = qobject_cast<QmlFileFilterItem*>(contentElement);
-        if (qmlFileFilter) {
+        if (qmlFileFilter)
             qmlFilters << qmlFileFilter;
-        }
     }
     return qmlFilters;
 }
