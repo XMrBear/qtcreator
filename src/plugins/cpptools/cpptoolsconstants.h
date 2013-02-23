@@ -51,7 +51,7 @@ const char CPP_HEADER_MIMETYPE[] = "text/x-c++hdr";
 // QSettings keys for use by the "New Class" wizards.
 const char CPPTOOLS_SETTINGSGROUP[] = "CppTools";
 const char LOWERCASE_CPPFILES_KEY[] = "LowerCaseFiles";
-enum { lowerCaseFilesDefault = 1 };
+enum { lowerCaseFilesDefault = 0 };
 const char CPPTOOLS_MODEL_MANAGER_SUPPORTERS_KEY[] = "ModelManagerSupporters";
 const char CPPTOOLS_MODEL_MANAGER_PCH_USAGE[] = "PCHUsage";
 
