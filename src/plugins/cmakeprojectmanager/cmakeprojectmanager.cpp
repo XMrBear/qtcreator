@@ -365,7 +365,7 @@ bool CMakeSettingsPage::preferNinja() const
 {
     QSettings *settings = Core::ICore::settings();
     settings->beginGroup(QLatin1String("CMakeSettings"));
-    const bool r = settings->value(QLatin1String("preferNinja"), false).toBool();
+    const bool r = settings->value(QLatin1String("preferNinja"), true).toBool();
     settings->endGroup();
     return r;
 }

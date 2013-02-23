@@ -174,7 +174,7 @@ bool CdbSymbolPathListEditor::promptToAddSymbolServer(const QString &settingsGro
         return false;
     // Prompt to use Symbol server unless the user checked "No nagging".
     const QString nagSymbolServerKey = settingsGroup + QLatin1String("/NoPromptSymbolServer");
-    bool noFurtherNagging = Core::ICore::settings()->value(nagSymbolServerKey, false).toBool();
+    bool noFurtherNagging = Core::ICore::settings()->value(nagSymbolServerKey, true).toBool();
     if (noFurtherNagging)
         return false;
 

@@ -49,7 +49,7 @@ const char CPP_HEADER_MIMETYPE[] = "text/x-c++hdr";
 // QSettings keys for use by the "New Class" wizards.
 const char CPPTOOLS_SETTINGSGROUP[] = "CppTools";
 const char LOWERCASE_CPPFILES_KEY[] = "LowerCaseFiles";
-enum { lowerCaseFilesDefault = 1 };
+enum { lowerCaseFilesDefault = 0 };
 
 const char CPP_CODE_STYLE_SETTINGS_ID[] = "A.Code Style";
 const char CPP_CODE_STYLE_SETTINGS_NAME[] = QT_TRANSLATE_NOOP("CppTools", "Code Style");
