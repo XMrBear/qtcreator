@@ -338,7 +338,6 @@ CustomWizard *CustomWizard::createWizard(const CustomProjectWizard::CustomWizard
         rc = factory->create();
 
     if (!rc) {
-        qWarning("Unable to create custom wizard for class %s.", qPrintable(p->klass));
         return 0;
     }
 
@@ -406,8 +405,6 @@ QList<CustomWizard*> CustomWizard::createWizards()
                 parameters->directory = dir.absolutePath();
                 if (CustomWizard *w = createWizard(parameters))
                     rc.push_back(w);
-                else
-                    qWarning("Custom wizard factory function failed for %s", qPrintable(parameters->id));
                 break;
             case CustomWizardParameters::ParseDisabled:
                 if (CustomWizardPrivate::verbose)
