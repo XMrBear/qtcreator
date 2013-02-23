@@ -42,7 +42,7 @@ static const char spaceAfterFunctionNameKey[] = "SpaceAfterFunctionName";
 using namespace TextEditor;
 
 CompletionSettings::CompletionSettings()
-    : m_caseSensitivity(CaseInsensitive)
+    : m_caseSensitivity(FirstLetterCaseSensitive)
     , m_completionTrigger(AutomaticCompletion)
     , m_autoInsertBrackets(true)
     , m_surroundingAutoBrackets(true)

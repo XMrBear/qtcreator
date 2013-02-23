@@ -289,8 +289,7 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
 
     addAutoReleasedObject(new GitSubmitEditorFactory(&submitParameters));
 
-    const QString prefix = QLatin1String("git");
-    m_commandLocator = new Locator::CommandLocator("Git", prefix, prefix);
+    m_commandLocator = new Locator::CommandLocator("Git", QLatin1String("git"), QLatin1String("g"));
     addAutoReleasedObject(m_commandLocator);
 
     //register actions
