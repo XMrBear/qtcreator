@@ -1,4 +1,4 @@
-<plugin name=\"ClangCodeModel\" version=\"$$QTCREATOR_VERSION\" compatVersion=\"$$QTCREATOR_VERSION\" experimental=\"true\">
+<plugin name=\"ClangCodeModel\" version=\"$$QTCREATOR_VERSION\" compatVersion=\"$$QTCREATOR_VERSION\">
     <vendor>Digia Plc</vendor>
     <copyright>(C) 2014 Digia Plc</copyright>
     <license>

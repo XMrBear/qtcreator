@@ -180,7 +180,11 @@ void AndroidConfig::load(const QSettings &settings)
     // user settings
     m_partitionSize = settings.value(PartitionSizeKey, 1024).toInt();
     m_sdkLocation = FileName::fromString(settings.value(SDKLocationKey).toString());
+    if (m_sdkLocation.isEmpty())
+        m_sdkLocation = FileName::fromString(QLatin1String("/opt/android-sdk"));
     m_ndkLocation = FileName::fromString(settings.value(NDKLocationKey).toString());
+    if (m_ndkLocation.isEmpty())
+        m_ndkLocation = FileName::fromString(QLatin1String("/opt/android-ndk"));
     m_antLocation = FileName::fromString(settings.value(AntLocationKey).toString());
     m_openJDKLocation = FileName::fromString(settings.value(OpenJDKLocationKey).toString());
     m_keystoreLocation = FileName::fromString(settings.value(KeystoreLocationKey).toString());

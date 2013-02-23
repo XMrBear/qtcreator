@@ -167,7 +167,7 @@ bool TextEditorPlugin::initialize(const QStringList &arguments, QString *errorMe
     // Add shortcut for invoking automatic completion
     QAction *completionAction = new QAction(tr("Trigger Completion"), this);
     Core::Command *command = Core::ActionManager::registerAction(completionAction, Constants::COMPLETE_THIS, context);
-    command->setDefaultKeySequence(QKeySequence(Core::UseMacShortcuts ? tr("Meta+Space") : tr("Ctrl+Space")));
+    command->setDefaultKeySequence(QKeySequence(Core::UseMacShortcuts ? tr("Meta+Space") : tr("Shift+Space")));
     connect(completionAction, SIGNAL(triggered()), this, SLOT(invokeCompletion()));
 
     // Add shortcut for invoking quick fix options

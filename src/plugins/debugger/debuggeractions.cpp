@@ -427,7 +427,7 @@ DebuggerSettings::DebuggerSettings()
     item = new SavedAction(this);
     item->setSettingsKey(debugModeGroup, QLatin1String("SwitchModeOnExit"));
     item->setCheckable(true);
-    item->setDefaultValue(false);
+    item->setDefaultValue(true);
     insertItem(SwitchModeOnExit, item);
 
     item = new SavedAction(this);
@@ -490,7 +490,7 @@ DebuggerSettings::DebuggerSettings()
     item->setToolTip(tr("Checking this will enable tooltips in the locals "
         "view during debugging."));
     item->setCheckable(true);
-    item->setDefaultValue(false);
+    item->setDefaultValue(true);
     insertItem(UseToolTipsInLocalsView, item);
 
     item = new SavedAction(this);
