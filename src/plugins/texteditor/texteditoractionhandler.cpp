@@ -143,7 +143,7 @@ void TextEditorActionHandler::createActions()
             SLOT(copyLine()), false, tr("Copy &Line"),
             QKeySequence(tr("Ctrl+Ins")));
     m_deleteLineAction = registerAction(DELETE_LINE,
-            SLOT(deleteLine()), true, tr("Delete &Line"));
+            SLOT(deleteLine()), true, tr("Delete &Line"), QKeySequence(tr("Ctrl+D")));
     m_deleteEndOfWordAction = registerAction(DELETE_END_OF_WORD,
             SLOT(deleteEndOfWord()), true, tr("Delete Word from Cursor On"));
     m_deleteEndOfWordCamelCaseAction = registerAction(DELETE_END_OF_WORD_CAMEL_CASE,
@@ -166,10 +166,10 @@ void TextEditorActionHandler::createActions()
             QKeySequence(tr("Ctrl+Shift+Down")));
     m_copyLineUpAction = registerAction(COPY_LINE_UP,
             SLOT(copyLineUp()), true, tr("Copy Line Up"),
-            QKeySequence(tr("Ctrl+Alt+Up")));
+            QKeySequence(tr("Ctrl+Up")));
     m_copyLineDownAction = registerAction(COPY_LINE_DOWN,
             SLOT(copyLineDown()), true, tr("Copy Line Down"),
-            QKeySequence(tr("Ctrl+Alt+Down")));
+            QKeySequence(tr("Ctrl+Down")));
     m_joinLinesAction = registerAction(JOIN_LINES,
             SLOT(joinLines()), true, tr("Join Lines"),
             QKeySequence(tr("Ctrl+J")));
@@ -284,9 +284,9 @@ void TextEditorActionHandler::createActions()
 
     // register GOTO Actions
     registerAction(GOTO_LINE_START,
-            SLOT(gotoLineStart()), true, tr("Go to Line Start"));
+            SLOT(gotoLineStart()), true, tr("Go to Line Start"), QKeySequence(tr("Ctrl+Alt+Return")));
     registerAction(GOTO_LINE_END,
-            SLOT(gotoLineEnd()), true, tr("Go to Line End"));
+            SLOT(gotoLineEnd()), true, tr("Go to Line End"), QKeySequence(tr("Shift+Return")));
     registerAction(GOTO_NEXT_LINE,
             SLOT(gotoNextLine()), true, tr("Go to Next Line"));
     registerAction(GOTO_PREVIOUS_LINE,

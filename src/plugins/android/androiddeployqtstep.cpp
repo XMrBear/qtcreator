@@ -154,7 +154,7 @@ void AndroidDeployQtStep::ctor()
 {
     //: AndroidDeployQtStep default display name
     setDefaultDisplayName(tr("Deploy to Android device"));
-    m_deployAction = BundleLibrariesDeployment;
+    m_deployAction = DebugDeployment;
     m_signPackage = false;
     m_openPackageLocation = false;
     m_verbose = false;

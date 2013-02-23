@@ -116,7 +116,7 @@ QWidget *GeneralSettingsPage::widget()
         connect(m_ui->exportButton, SIGNAL(clicked()), this, SLOT(exportBookmarks()));
 
         m_returnOnClose = HelpManager::customValue(QLatin1String("ReturnOnClose"),
-                                                   false).toBool();
+                                                   true).toBool();
         m_ui->m_returnOnClose->setChecked(m_returnOnClose);
     }
     return m_widget;
