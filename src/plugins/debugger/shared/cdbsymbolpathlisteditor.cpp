@@ -220,7 +220,7 @@ bool CdbSymbolPathListEditor::promptToAddSymbolPaths(QStringList *symbolPaths)
         return false;
 
     const QString nagSymbolServerKey = QLatin1String("CDB2/NoPromptSymbolCache");
-    bool noFurtherNagging = Core::ICore::settings()->value(nagSymbolServerKey, false).toBool();
+    bool noFurtherNagging = Core::ICore::settings()->value(nagSymbolServerKey, true).toBool();
     if (noFurtherNagging)
         return false;
 

@@ -237,7 +237,7 @@ void OpenPagesManager::closeCurrentPage()
         return;
 
     const bool closeOnReturn = HelpManager::customValue(QLatin1String("ReturnOnClose"),
-        false).toBool();
+        true).toBool();
 
     if (m_model->rowCount() == 1 && closeOnReturn) {
         ModeManager::activateMode(Core::Constants::MODE_EDIT);

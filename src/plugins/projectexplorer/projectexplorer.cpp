@@ -910,7 +910,7 @@ bool ProjectExplorerPlugin::initialize(const QStringList &arguments, QString *er
     d->m_projectExplorerSettings.deployBeforeRun =
             s->value(QLatin1String("ProjectExplorer/Settings/DeployBeforeRun"), true).toBool();
     d->m_projectExplorerSettings.saveBeforeBuild =
-            s->value(QLatin1String("ProjectExplorer/Settings/SaveBeforeBuild"), false).toBool();
+            s->value(QLatin1String("ProjectExplorer/Settings/SaveBeforeBuild"), true).toBool();
     d->m_projectExplorerSettings.showCompilerOutput =
             s->value(QLatin1String("ProjectExplorer/Settings/ShowCompilerOutput"), false).toBool();
     d->m_projectExplorerSettings.showRunOutput =
