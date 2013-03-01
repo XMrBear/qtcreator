@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wizard version="1" kind="project" firstpage="10" id="S.Plain C++" category="I.Projects" platformIndependent="true">
+    <icon>console.png</icon>
+    <description>Creates a plain C++ project using CMake, not using the Qt library.</description>
+    <displayname>Plain C++ Project</displayname>;
+    <displaycategory>Console Project</displaycategory>
+    <files>
+        <file source="main.cpp" openeditor="true"/>
+        <file source="CMakeLists.txt" openproject="true"/>
+    </files>
+</wizard>

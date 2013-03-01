@@ -1,10 +1,5 @@
 TEMPLATE = subdirs
 
-SUBDIRS = qtpromaker \
-     qmlpuppet \
-     ../plugins/cpaster/frontend \
-     sdktool
-
 win32 {
     SUBDIRS += qtcdebugger
     # win64interrupt only make sense for 64bit builds
@@ -37,3 +32,4 @@ greaterThan(QT_MAJOR_VERSION, 4) {
         SUBDIRS += qml2puppet
     }
 }
+

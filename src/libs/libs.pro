@@ -9,18 +9,7 @@ SUBDIRS   = \
     utils/process_stub.pro \
     languageutils \
     cplusplus \
-    qmljs \
-    qmldebug \
-    glsl \
-    qmleditorwidgets \
-    qtcomponents/styleitem \
-    ssh \
-    zeroconf
-
-exists(../shared/qbs/qbs.pro):SUBDIRS += \
-    ../shared/qbs/src/lib \
-    ../shared/qbs/src/plugins \
-    ../shared/qbs/static.pro
+    ssh
 
 win32:SUBDIRS += utils/process_ctrlc_stub.pro
 

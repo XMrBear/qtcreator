@@ -24,21 +24,12 @@ isEmpty(vcproj) {
 }
 
 DATA_DIRS = \
-    welcomescreen \
-    examplebrowser \
     snippets \
-    templates \
-    designer \
+    wizards \
     schemes \
     styles \
-    rss \
     dumper \
-    qmldesigner \
-    qmlicons \
-    qml \
-    qml-type-descriptions \
-    generic-highlighter \
-    glsl
+    generic-highlighter
 macx: DATA_DIRS += scripts
 
 for(data_dir, DATA_DIRS) {
@@ -92,11 +83,10 @@ defineReplace(stripSrcResourceDir) {
 DATA_DIRS = \
     externaltools
 DATA_FILES_SRC = \
+    externaltools/astyle.xml \
     externaltools/lrelease.xml \
     externaltools/lupdate.xml \
-    externaltools/sort.xml \
-    externaltools/qmlviewer.xml \
-    externaltools/qmlscene.xml
+    externaltools/sort.xml
 unix {
     macx:DATA_FILES_SRC += externaltools/vi_mac.xml
     else:DATA_FILES_SRC += externaltools/vi.xml
