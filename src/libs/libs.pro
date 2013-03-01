@@ -6,12 +6,7 @@ SUBDIRS   = \
     utils \
     languageutils \
     cplusplus \
-    qmljs \
-    qmldebug \
-    qmleditorwidgets \
-    glsl \
-    ssh \
-    zeroconf
+    ssh
 
 for(l, SUBDIRS) {
     QTC_LIB_DEPENDS =
@@ -21,13 +16,7 @@ for(l, SUBDIRS) {
 }
 
 SUBDIRS += \
-    utils/process_stub.pro \
-    qtcomponents/styleitem
-
-QBS_DIRS = \
-    ../shared/qbs/src/lib \
-    ../shared/qbs/src/plugins \
-    ../shared/qbs/static.pro
+    utils/process_stub.pro
 
 exists(../shared/qbs/qbs.pro): SUBDIRS += $$QBS_DIRS
 TR_EXCLUDE = $$QBS_DIRS

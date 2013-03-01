@@ -222,6 +222,7 @@ MainWindow::MainWindow() :
 
     statusBar()->setProperty("p_styled", true);
     setAcceptDrops(true);
+    setMinimumSize(320, 180);
 
 #if defined(Q_OS_MAC)
     MacFullScreen::addFullScreen(this);
