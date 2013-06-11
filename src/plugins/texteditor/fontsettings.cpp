@@ -355,8 +355,8 @@ static QString defaultFontFamily()
     if (Utils::HostOsInfo::isMacHost())
         return QLatin1String("Monaco");
     if (Utils::HostOsInfo::isAnyUnixHost())
-        return QLatin1String("Monospace");
-    return QLatin1String("Courier");
+        return QLatin1String("Monaco");
+    return QLatin1String("Consolas");
 }
 
 QString FontSettings::defaultFixedFontFamily()
@@ -375,8 +375,8 @@ int FontSettings::defaultFontSize()
     if (Utils::HostOsInfo::isMacHost())
         return 12;
     if (Utils::HostOsInfo::isAnyUnixHost())
-        return 9;
-    return 10;
+        return 11;
+    return 11;
 }
 
 /**
