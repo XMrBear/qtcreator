@@ -8,5 +8,4 @@ QTC_PLUGIN_DEPENDS += \
     analyzerbase \
     coreplugin \
     projectexplorer \
-    texteditor \
-    remotelinux
+    texteditor
