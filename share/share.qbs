@@ -9,19 +9,12 @@ Product {
         qbs.installDir: project.ide_data_path
         prefix: "qtcreator/"
         files: [
-            "debugger",
-            "designer",
             "generic-highlighter",
-            "glsl",
-            "qml",
-            "qmldesigner",
-            "qmlicons",
             "qml-type-descriptions",
             "schemes",
             "snippets",
             "styles",
             "templates",
-            "welcomescreen"
         ]
     }
 
@@ -34,8 +27,6 @@ Product {
             var list = [
                 "lrelease.xml",
                 "lupdate.xml",
-                "qmlscene.xml",
-                "qmlviewer.xml",
                 "sort.xml",
             ]
             if (qbs.targetOS.contains("windows"))
