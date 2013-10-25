@@ -28,7 +28,6 @@ DATA_DIRS = \
     examplebrowser \
     snippets \
     templates \
-    designer \
     schemes \
     styles \
     rss \
@@ -37,8 +36,7 @@ DATA_DIRS = \
     qmlicons \
     qml \
     qml-type-descriptions \
-    generic-highlighter \
-    glsl
+    generic-highlighter
 macx: DATA_DIRS += scripts
 
 for(data_dir, DATA_DIRS) {
@@ -96,10 +94,10 @@ defineReplace(stripSrcResourceDir) {
 DATA_DIRS = \
     externaltools
 DATA_FILES_SRC = \
+    externaltools/astyle.xml \
     externaltools/lrelease.xml \
     externaltools/lupdate.xml \
     externaltools/sort.xml \
-    externaltools/qmlviewer.xml \
     externaltools/qmlscene.xml
 unix {
     macx:DATA_FILES_SRC += externaltools/vi_mac.xml
