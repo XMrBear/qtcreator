@@ -55,9 +55,6 @@ class ActionManager;
 class ActionContainer;
 }
 namespace Utils { class ParameterAction; }
-namespace Gerrit {
-namespace Internal { class GerritPlugin; }
-}
 namespace Git {
 namespace Internal {
 
@@ -93,7 +90,6 @@ public:
     void setSettings(const GitSettings &s);
 
     GitClient *gitClient() const;
-    Gerrit::Internal::GerritPlugin *gerritPlugin() const;
 
 public slots:
     void startCommit();
@@ -224,7 +220,6 @@ private:
     QVector<Utils::ParameterAction *> m_projectActions;
     QVector<QAction *> m_repositoryActions;
     Utils::ParameterAction *m_applyCurrentFilePatchAction;
-    Gerrit::Internal::GerritPlugin *m_gerritPlugin;
 
     GitClient                   *m_gitClient;
     QPointer<StashDialog>       m_stashDialog;
