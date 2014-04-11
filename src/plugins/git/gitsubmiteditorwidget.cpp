@@ -114,7 +114,6 @@ void GitSubmitEditorWidget::initialize(CommitType commitType,
         QMenu *menu = new QMenu(this);
         menu->addAction(tr("&Commit only"), this, SLOT(commitOnlySlot()));
         menu->addAction(tr("Commit and &Push"), this, SLOT(commitAndPushSlot()));
-        menu->addAction(tr("Commit and Push to &Gerrit"), this, SLOT(commitAndPushToGerritSlot()));
         addSubmitButtonMenu(menu);
     }
 }
