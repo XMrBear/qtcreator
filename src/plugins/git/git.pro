@@ -63,4 +63,3 @@ FORMS += changeselectiondialog.ui \
 RESOURCES += \
     git.qrc
 
-include(gerrit/gerrit.pri)
