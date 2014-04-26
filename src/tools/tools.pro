@@ -2,9 +2,7 @@ TEMPLATE = subdirs
 
 SUBDIRS = qtpromaker \
      qmlpuppet \
-     ../plugins/cpaster/frontend \
      sdktool \
-     valgrindfake \
      3rdparty \
      buildoutputparser
 
