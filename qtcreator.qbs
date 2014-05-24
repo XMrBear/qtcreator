@@ -14,9 +14,20 @@ Project {
     property path ide_source_tree: path
     property string ide_app_path: qbs.targetOS.contains("osx") ? "" : "bin"
     property string ide_app_target: qbs.targetOS.contains("osx") ? "Qt Creator" : "qtcreator"
-    property pathList additionalPlugins: []
+    property bool androidSupport: qbs.targetOS.contains("linux") ? false : false
+    property pathList additionalPlugins: androidSupport ? [
+        "analyzerbase/analyzerbase.qbs",
+        "android/android.qbs",
+        "debugger/debugger.qbs",
+        "qmakeprojectmanager/qmakeprojectmanager.qbs",
+        "resourceeditor/resourceeditor.qbs",
+    ] : []
     property pathList additionalLibs: []
-    property pathList additionalTools: []
+    property pathList additionalTools: androidSupport ? [
+        "buildoutputparser/buildoutputparser.qbs",
+        "qtcdebugger/qtcdebugger.qbs",
+        "qtpromaker/qtpromaker.qbs",
+    ] : []
     property string libDirName: "lib"
     property string ide_library_path: {
         if (qbs.targetOS.contains("osx"))
