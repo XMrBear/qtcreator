@@ -57,7 +57,7 @@ Project {
     property string ide_bin_path: qbs.targetOS.contains("osx")
             ? ide_app_target + ".app/Contents/MacOS"
             : ide_app_path
-    property bool testsEnabled: qbs.getEnv("TEST") || qbs.buildVariant === "debug"
+    property bool testsEnabled: qbs.getEnv("TEST")
     property stringList generalDefines: [
         "QT_CREATOR",
         'IDE_LIBRARY_BASENAME="' + libDirName + '"',
@@ -70,7 +70,5 @@ Project {
     references: [
         "src/src.qbs",
         "share/share.qbs",
-        "share/qtcreator/translations/translations.qbs",
-        "tests/tests.qbs"
     ]
 }
