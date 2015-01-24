@@ -12,7 +12,6 @@ QtcPlugin {
     Depends { name: "AnalyzerBase" }
     Depends { name: "ProjectExplorer" }
     Depends { name: "TextEditor" }
-    Depends { name: "RemoteLinux" }
 
     Group {
         name: "General"

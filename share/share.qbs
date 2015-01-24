@@ -10,9 +10,7 @@ Product {
         prefix: "qtcreator/"
         files: [
             "debugger",
-            "designer",
             "generic-highlighter",
-            "glsl",
             "qml",
             "qmldesigner",
             "qmlicons",
@@ -36,7 +34,6 @@ Product {
                 "lrelease.xml",
                 "lupdate.xml",
                 "qmlscene.xml",
-                "qmlviewer.xml",
                 "sort.xml",
             ]
             if (qbs.targetOS.contains("windows"))

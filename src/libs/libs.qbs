@@ -6,7 +6,6 @@ Project {
         "aggregation/aggregation.qbs",
         "cplusplus/cplusplus.qbs",
         "extensionsystem/extensionsystem.qbs",
-        "glsl/glsl.qbs",
         "languageutils/languageutils.qbs",
         "qmleditorwidgets/qmleditorwidgets.qbs",
         "qmljs/qmljs.qbs",
