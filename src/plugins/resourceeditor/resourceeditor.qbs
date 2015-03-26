@@ -2,6 +2,7 @@ import qbs 1.0
 
 QtcPlugin {
     name: "ResourceEditor"
+    condition: project.fullBuilds
 
     Depends { name: "Qt"; submodules: ["widgets", "xml"] }
     Depends { name: "Aggregation" }
