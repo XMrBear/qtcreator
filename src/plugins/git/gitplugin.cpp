@@ -45,8 +45,6 @@
 #include "mergetool.h"
 #include "gitutils.h"
 
-#include "gerrit/gerritplugin.h"
-
 #include <coreplugin/icore.h>
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/documentmanager.h>
@@ -651,13 +649,7 @@ bool GitPlugin::initialize(const QStringList &arguments, QString *errorMessage)
 
     Utils::MimeDatabase::addMimeTypes(QLatin1String(RC_GIT_MIME_XML));
 
-    /* "Gerrit" */
-    m_gerritPlugin = new Gerrit::Internal::GerritPlugin(this);
-    const bool ok = m_gerritPlugin->initialize(remoteRepositoryMenu);
-    m_gerritPlugin->updateActions(currentState().hasTopLevel());
-    m_gerritPlugin->addToLocator(m_commandLocator);
-
-    return ok;
+    return true;
 }
 
 GitVersionControl *GitPlugin::gitVersionControl() const
@@ -1360,8 +1352,6 @@ void GitPlugin::updateActions(VcsBasePlugin::ActionState as)
 
     updateContinueAndAbortCommands();
     updateRepositoryBrowserAction();
-
-    m_gerritPlugin->updateActions(repositoryEnabled);
 }
 
 void GitPlugin::updateContinueAndAbortCommands()
@@ -1396,7 +1386,6 @@ void GitPlugin::updateContinueAndAbortCommands()
 
 void GitPlugin::delayedPushToGerrit()
 {
-    m_gerritPlugin->push(m_submitRepository);
 }
 
 void GitPlugin::updateBranches(const QString &repository)
@@ -1416,11 +1405,6 @@ void GitPlugin::updateRepositoryBrowserAction()
 GitClient *GitPlugin::client() const
 {
     return m_gitClient;
-}
-
-Gerrit::Internal::GerritPlugin *GitPlugin::gerritPlugin() const
-{
-    return m_gerritPlugin;
 }
 
 #ifdef WITH_TESTS
