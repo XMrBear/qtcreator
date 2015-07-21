@@ -123,8 +123,6 @@ void GitSubmitEditorWidget::initialize(CommitType commitType,
                 this, &GitSubmitEditorWidget::commitOnlySlot);
         connect(menu->addAction(tr("Commit and &Push")), &QAction::triggered,
                 this, &GitSubmitEditorWidget::commitAndPushSlot);
-        connect(menu->addAction(tr("Commit and Push to &Gerrit")), &QAction::triggered,
-                this, &GitSubmitEditorWidget::commitAndPushToGerritSlot);
         addSubmitButtonMenu(menu);
     }
 }
