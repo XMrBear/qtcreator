@@ -5,6 +5,10 @@ include(../../shared/clang/clang_installation.pri)
 DEFINES += CLANG_VERSION=\\\"$${LLVM_VERSION}\\\"
 DEFINES += "\"CLANG_RESOURCE_DIR=\\\"$${LLVM_LIBDIR}/clang/$${LLVM_VERSION}/include\\\"\""
 
+unix {
+    !disable_external_rpath: QMAKE_LFLAGS += -Wl,-rpath,\'$$LLVM_LIBDIR\'
+}
+
 SOURCES += \
     clangactivationsequencecontextprocessor.cpp \
     clangactivationsequenceprocessor.cpp \
