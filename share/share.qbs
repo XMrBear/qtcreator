@@ -12,9 +12,7 @@ Product {
         files: [
             "cplusplus/**/*",
             "debugger/**/*",
-            "designer/**/*",
             "generic-highlighter/**/*",
-            "glsl/**/*",
             "modeleditor/**/*",
             "qml/**/*",
             "qmldesigner/**/*",
@@ -39,7 +37,6 @@ Product {
                 "lrelease.xml",
                 "lupdate.xml",
                 "qmlscene.xml",
-                "qmlviewer.xml",
                 "sort.xml",
             ]
             if (qbs.targetOS.contains("windows"))

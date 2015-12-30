@@ -3,6 +3,7 @@ import qbs 1.0
 Project {
     name: "Qt Creator"
     minimumQbsVersion: "1.4.3"
+    property bool fullBuilds: false
     property bool withAutotests: qbs.buildVariant === "debug"
     property string ide_version_major: '3'
     property string ide_version_minor: '6'
@@ -15,7 +16,10 @@ Project {
     property path ide_source_tree: path
     property string ide_app_path: qbs.targetOS.contains("osx") ? "" : "bin"
     property string ide_app_target: qbs.targetOS.contains("osx") ? "Qt Creator" : "qtcreator"
-    property pathList additionalPlugins: []
+    property pathList additionalPlugins: qbs.targetOS.contains("linux") ? [
+        "android/android.qbs",
+        "valgrind/valgrind.qbs",
+    ] : []
     property pathList additionalLibs: []
     property pathList additionalTools: []
     property pathList additionalAutotests: []
@@ -50,7 +54,7 @@ Project {
     property string ide_bin_path: qbs.targetOS.contains("osx")
             ? ide_app_target + ".app/Contents/MacOS"
             : ide_app_path
-    property bool testsEnabled: qbs.getEnv("TEST") || qbs.buildVariant === "debug"
+    property bool testsEnabled: qbs.getEnv("TEST")
     property stringList generalDefines: [
         "QT_CREATOR",
         'IDE_LIBRARY_BASENAME="' + libDirName + '"',
@@ -62,8 +66,6 @@ Project {
     references: [
         "src/src.qbs",
         "share/share.qbs",
-        "share/qtcreator/translations/translations.qbs",
-        "tests/tests.qbs"
     ]
 
     AutotestRunner {}
