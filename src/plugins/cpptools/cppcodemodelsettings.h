@@ -75,7 +75,7 @@ signals:
 
 private:
     bool m_isClangCodeModelAvailable = false;
-    bool m_useClangCodeModel = false;
+    bool m_useClangCodeModel = true;
     QStringList m_extraClangOptions;
     PCHUsage m_pchUsage = PchUse_None;
 };

@@ -7,7 +7,6 @@ Project {
         "clangbackendipc/clangbackendipc.qbs",
         "cplusplus/cplusplus.qbs",
         "extensionsystem/extensionsystem.qbs",
-        "glsl/glsl.qbs",
         "languageutils/languageutils.qbs",
         "modelinglib/modelinglib.qbs",
         "qmleditorwidgets/qmleditorwidgets.qbs",
